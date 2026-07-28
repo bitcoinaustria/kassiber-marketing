@@ -337,8 +337,8 @@ import { RELEASES_URL } from "../lib/releases";
             <div class="dim">✓ Cloned kassiber into ./kassiber</div>
             <div><span class="prompt">$</span> cd kassiber &amp;&amp; ./scripts/bootstrap-dev-env.sh</div>
             <div class="dim">✓ deps ready · quality gate: ./scripts/quality-gate.sh</div>
-            <div><span class="prompt">$</span> ./scripts/quality-gate.sh</div>
-            <div class="dim">✓ compile · tests · types · lint · <span class="accent">one script</span></div>
+            <div><span class="prompt">$</span> ./scripts/integration-harness.sh demo-up</div>
+            <div class="dim">✓ regtest up · 13 wallets · <span class="accent">demo books seeded</span></div>
             <div class="cursor"><span class="prompt">$</span><span class="caret"></span></div>
           </div>
         </div>
@@ -423,6 +423,19 @@ import { RELEASES_URL } from "../lib/releases";
       </div>
 
       <div class="faq-list">
+        <details class="faq-item">
+          <summary>Can I try it without connecting my own wallets?</summary>
+          <p>
+            Yes, if you have Docker. One script spins up a throwaway regtest
+            network and seeds a complete set of demo books: thirteen wallets
+            across every address type, Lightning channels, Liquid, a BTCPay
+            store, loans, coin consolidations, and years of monthly business
+            activity to reconcile. One command brings it up, another adds fresh
+            activity, and a third tears it down and deletes every trace. None of
+            it touches mainnet and none of it is your data.
+          </p>
+        </details>
+
         <details class="faq-item">
           <summary>Do I need to run my own node?</summary>
           <p>
