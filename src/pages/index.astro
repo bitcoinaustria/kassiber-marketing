@@ -46,9 +46,10 @@ const mobileEndorsementRows = [
       </h1>
 
       <p class="hero-sub">
-        Many wallets, several layers, years of decisions — Kassiber gives you one
-        bird's-eye view, on your machine. A desktop app for macOS, Windows, and
-        Linux, plus a CLI. No server. No account. No honeypot.
+        Many wallets, several layers, years of decisions. Kassiber gives you one
+        bird's-eye view of all of it, on your machine: a desktop app for macOS,
+        Windows, and Linux, plus a CLI. We don't run a server, so there is
+        nothing to breach.
       </p>
 
       <div class="hero-actions">
@@ -179,11 +180,11 @@ const mobileEndorsementRows = [
         <div class="eyebrow">Local-first</div>
         <h2>You decide what you reveal. And to whom.</h2>
         <p>
-          Kassiber syncs from the sources you choose — your own Bitcoin Core,
-          Electrum, or Esplora, your BTCPay — and keeps the books in one local
-          file. No account, no background sync, no automatic reporting. When
-          someone needs numbers, you export exactly those: a tax report for
-          the tax office, a spreadsheet for your accountant. Everyone else
+          Kassiber syncs from the sources you pick: your own Bitcoin Core,
+          Electrum, or Esplora, your BTCPay. The books live in one local file.
+          It never syncs behind your back and it reports to nobody.
+          When someone needs numbers, you export exactly those: a tax report
+          for the tax office, a spreadsheet for your accountant. Everyone else
           gets nothing, because there is nothing to get.
         </p>
       </div>
@@ -195,7 +196,7 @@ const mobileEndorsementRows = [
         </div>
         <div class="tile sov-tile">
           <h3>Watch-only by design</h3>
-          <p>There are no spending keys in Kassiber — nothing to leak, nothing to coerce out of you.</p>
+          <p>Kassiber holds no spending keys, so there is nothing to leak and nothing anyone can coerce out of you.</p>
         </div>
         <div class="tile sov-tile">
           <h3>Encrypted at rest</h3>
@@ -203,7 +204,7 @@ const mobileEndorsementRows = [
         </div>
         <div class="tile sov-tile">
           <h3>Nothing to subpoena</h3>
-          <p>There is no server behind the app. A request to us turns up nothing, because we hold nothing.</p>
+          <p>There is no server behind the app. Send us a subpoena and all we can hand over is a shrug.</p>
         </div>
       </div>
     </div>
@@ -216,11 +217,11 @@ const mobileEndorsementRows = [
         <div class="eyebrow">Agents welcome</div>
         <h2>Built by AI agents. Made for them too.</h2>
         <p>
-          Kassiber was written by AI agents working alongside Bitcoin people —
+          Kassiber was written by AI agents working alongside Bitcoin people,
           and it's built to be driven by yours. Point whichever assistant you
-          already use at it and keep the final say. For the AI itself: local
-          models or encrypted inference — you didn't keep your books off the
-          cloud just to paste them into a chatbot.
+          already use at it and keep the final say. Run the model locally, or
+          use encrypted inference if you want a bigger brain. You didn't keep
+          your books off the cloud just to paste them into a chatbot.
         </p>
       </div>
 
@@ -266,14 +267,15 @@ const mobileEndorsementRows = [
         <div class="cli-copy">
           <ul class="checklist">
             <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg> <span>Imports, reconciles, and drafts reports while you do something better</span></li>
-            <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg> <span>Kassiber gives it clear, predictable answers — the same ones every time</span></li>
-            <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg> <span>Big changes are previewed first — nothing lands in your books unchecked</span></li>
+            <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg> <span>Kassiber answers it the same way every time, so nothing drifts between runs</span></li>
+            <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg> <span>Big changes get previewed first, so nothing lands in your books unchecked</span></li>
           </ul>
 
           <div class="skill-block">
             <p class="skill-note">
-              Don't explain Kassiber to your agent — hand it the skill. One line,
-              and it knows the commands, the rules, and where the sharp edges are.
+              Don't explain Kassiber to your agent. Hand it the skill instead:
+              one line, and it knows the commands, the rules, and where the
+              sharp edges are.
             </p>
             <CopyCommand command="npx skills add bitcoinaustria/kassiber-skill" />
             <a class="open-source-link skill-link" href={SKILL_REPOSITORY_URL} target="_blank" rel="noopener noreferrer">
@@ -294,7 +296,7 @@ const mobileEndorsementRows = [
           <div><span class="prompt">$</span> kassiber --machine next-actions</div>
           <div class="dim">&#123;"kind": <span class="accent">"next-actions"</span>, "schema_version": 1, "data": …&#125;</div>
           <div><span class="prompt">$</span> kassiber transfers bulk-pair --dry-run</div>
-          <div class="dim">✓ preview only — nothing hits your books without review</div>
+          <div class="dim">✓ preview only, nothing hits your books without review</div>
           <div class="cursor"><span class="prompt">$</span><span class="caret"></span></div>
           </div>
         </div>
@@ -348,15 +350,15 @@ const mobileEndorsementRows = [
           <h2>A move stays a move.</h2>
           <p>
             A peg-in isn't a sale. A submarine swap isn't a disposal. Opening a
-            channel isn't either. Every hop between your own wallets looks like
-            a transaction, and naive tools book it as one — inventing gains
-            that never happened. Kassiber pairs both sides across layers.
+            channel isn't either. Every hop between your own wallets still
+            looks like a transaction, and naive tools book it as one, inventing
+            gains that never happened. Kassiber pairs both sides across layers.
           </p>
           <ul class="checklist" style="margin-top:24px">
             <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg> Reviewed pairing for Lightning, Liquid, and submarine swaps</li>
-            <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg> Paste any address or txid — Kassiber tells you whether it's yours</li>
+            <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg> Paste any address or txid and Kassiber tells you whether it's yours</li>
             <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg> Lost and stolen coins classified, not booked as sales</li>
-            <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg> Survives years of wallet migrations — old addresses still resolve as yours</li>
+            <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg> Survives years of wallet migrations, so old addresses still resolve as yours</li>
           </ul>
         </div>
       </div>
@@ -371,21 +373,21 @@ const mobileEndorsementRows = [
         <h2>Don't trust. Verify your tax report.</h2>
         <p>
           The math runs locally through <a href="https://github.com/eprbell/rp2" target="_blank" rel="noopener noreferrer">RP2</a>,
-          eprbell's open-source crypto tax engine — Kassiber maintains its own
-          Bitcoin-focused fork. Pick the accounting standard your jurisdiction
-          expects: FIFO, LIFO, HIFO, LOFO, or moving average. Every report
-          exports to a spreadsheet with live formulas, so you can recompute
-          each balance, price, and gain yourself.
+          the open-source crypto tax engine eprbell wrote. Kassiber keeps its
+          own Bitcoin-focused fork of it. Pick the accounting standard your
+          jurisdiction expects: FIFO, LIFO, HIFO, LOFO, or moving average.
+          Every report exports to a spreadsheet with live formulas, so you can
+          recompute each balance, price, and gain yourself.
         </p>
       </div>
 
       <ul class="checklist tax-grid">
         <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg> <span>Austria first-class: § 27b EStG, with E 1kv exports as PDF, XLSX, or CSV</span></li>
-        <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg> <span>Generic books work anywhere — country-specific reports ship on request</span></li>
+        <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg> <span>Generic books work anywhere, and country-specific reports ship on request</span></li>
         <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg> <span>Leaving the country? The exit-tax report prices the deemed disposal for you</span></li>
-        <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg> <span>Privacy Mirror grades your on-chain privacy from A+ to F — computed locally, shown only to you</span></li>
+        <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg> <span>Privacy Mirror grades your on-chain privacy from A+ to F, computed locally and shown only to you</span></li>
         <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg> <span>Summary, balance sheet, capital gains, portfolio, and balance history</span></li>
-        <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg> <span>Attach receipts and invoices to any transaction — with notes, tags, and BIP329 labels</span></li>
+        <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg> <span>Attach receipts and invoices to any transaction, with notes, tags, and BIP329 labels</span></li>
       </ul>
     </div>
   </section>
@@ -424,11 +426,11 @@ const mobileEndorsementRows = [
               </li>
               <li>
                 <span class="open-pitch-mark" aria-hidden="true"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>
-                <span><strong>Extend it.</strong> Missing your exchange? Importers ship on request — or send a patch.</span>
+                <span><strong>Extend it.</strong> Missing your exchange? Importers ship on request, or send a patch.</span>
               </li>
               <li>
                 <span class="open-pitch-mark" aria-hidden="true"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>
-                <span><strong>Outlive it.</strong> Backups restore with stock age, tar, and sqlcipher — even if Kassiber disappears.</span>
+                <span><strong>Outlive it.</strong> Backups restore with stock age, tar, and sqlcipher, even if Kassiber disappears.</span>
               </li>
             </ul>
           </div>
@@ -461,9 +463,9 @@ const mobileEndorsementRows = [
         Your Bitcoin deserves better than a SaaS that could sell you out.
       </h2>
       <p class="cta-sub">
-        Kassiber is free, open source, and honestly pre-alpha — rough edges
-        and all, we'd rather tell you than pretend. Install it, point it at
-        your own nodes, and nothing leaves your machine unless you send it.
+        Kassiber is free, open source, and honestly pre-alpha. Rough edges and
+        all, we'd rather tell you than pretend. Install it, point it at your
+        own nodes, and nothing leaves your machine unless you send it.
       </p>
       <div class="cta-actions">
         <a id="cta-download-btn" class="btn btn-primary btn-lg" href={RELEASES_URL}>
@@ -781,7 +783,7 @@ const mobileEndorsementRows = [
       height: 44px;
     }
 
-    /* Three stacked on the left, two on the right — keeps the center CTA clear. */
+    /* Three stacked on the left, two on the right, keeping the center CTA clear. */
     .hero-float-mark.hf-bitcoin {
       top: 44px;
       left: 10px;
