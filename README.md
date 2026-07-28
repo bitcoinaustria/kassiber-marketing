@@ -1,7 +1,6 @@
-# T3 Code marketing site
+# Kassiber marketing site
 
-Standalone Astro source for the T3 Code marketing site, extracted from
-[`pingdotgg/t3code`](https://github.com/pingdotgg/t3code).
+Standalone Astro source for the Kassiber marketing site.
 
 The site is licensed under the original MIT license in [LICENSE](LICENSE).
 The source has intentionally been reduced to the marketing app: it excludes
@@ -13,13 +12,13 @@ does not publish the upstream `t3.json` editor-schema endpoint.
 Requires Node.js 24 or newer.
 
 ```sh
-npm install
-npm run dev
+pnpm install
+pnpm run dev
 ```
 
 ## Verification
 
 ```sh
-npm run typecheck
-npm run build
+pnpm run typecheck
+pnpm run build
 ```
