@@ -177,11 +177,11 @@ const mobileEndorsementRows = [
       <div class="section-head">
         <h2>Built by AI agents. Made for them too.</h2>
         <p>
-          Kassiber was written by AI agents working alongside Bitcoin people — and
-          it's built to be driven by yours. Point Claude Code, Codex, or OpenCode
-          at your books. For the AI itself, keep it local or use encrypted
-          inference — you didn't keep your books off the cloud just to paste
-          them into a chatbot.
+          Kassiber was written by AI agents working alongside Bitcoin people.
+          The assistant in the app runs on local models out of the box — keep
+          it there, or pick encrypted inference if you need a bigger brain.
+          You didn't keep your books off the cloud just to paste them into a
+          chatbot.
         </p>
       </div>
 
@@ -239,16 +239,16 @@ const mobileEndorsementRows = [
           <div class="eyebrow">Agents welcome</div>
           <h2>Let your agent do the books.</h2>
           <p>
-            You weren't going to do it by hand anyway. Point Claude Code — or
-            whichever assistant you already use — at Kassiber and it can pull
-            in statements, match the transfers between your wallets, and
-            draft your reports. You keep the final say.
+            You weren't going to do it by hand anyway. Point whichever
+            assistant you already use at Kassiber and it can pull in
+            statements, match the transfers between your wallets, and draft
+            your reports. You keep the final say.
           </p>
           <ul class="checklist" style="margin-top:24px">
             <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg> <span>Imports, reconciles, and drafts reports while you do something better</span></li>
             <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg> <span>Kassiber gives it clear, predictable answers — the same ones every time</span></li>
             <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg> <span>Big changes are previewed first — nothing lands in your books unchecked</span></li>
-            <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg> <span>Runs on your machine like everything else — no cloud in between</span></li>
+            <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg> <span>A ready-made Claude Code skill ships alongside — your agent starts out knowing the ropes</span></li>
           </ul>
         </div>
       </div>
@@ -325,10 +325,37 @@ const mobileEndorsementRows = [
             <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg> Reviewed pairing for Lightning, Liquid, and submarine swaps</li>
             <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg> Paste any address or txid — Kassiber tells you whether it's yours</li>
             <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg> Lost and stolen coins classified, not booked as sales</li>
-            <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg> Tax math runs locally on RP2 — verify every number in XLSX</li>
+            <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg> Survives years of wallet migrations — old addresses still resolve as yours</li>
           </ul>
         </div>
       </div>
+    </div>
+  </section>
+
+  <!-- ── Tax & reports ─────────────────────────────────────────── -->
+  <section id="tax" class="sec-tax">
+    <div class="container">
+      <div class="section-head">
+        <div class="eyebrow">Tax &amp; reports</div>
+        <h2>Don't trust. Verify your tax report.</h2>
+        <p>
+          The math runs locally through <a href="https://github.com/eprbell/rp2" target="_blank" rel="noopener noreferrer">RP2</a>,
+          eprbell's open-source crypto tax engine — Kassiber maintains its own
+          Bitcoin-focused fork. Pick the accounting standard your jurisdiction
+          expects: FIFO, LIFO, HIFO, LOFO, or moving average. Every report
+          exports to a spreadsheet with live formulas, so you can recompute
+          each balance, price, and gain yourself.
+        </p>
+      </div>
+
+      <ul class="checklist tax-grid">
+        <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg> <span>Austria first-class: § 27b EStG, with E 1kv exports as PDF, XLSX, or CSV</span></li>
+        <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg> <span>Generic books work anywhere — country-specific reports ship on request</span></li>
+        <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg> <span>Leaving the country? The exit-tax report prices the deemed disposal for you</span></li>
+        <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg> <span>Privacy Mirror grades your on-chain privacy from A+ to F — computed locally, shown only to you</span></li>
+        <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg> <span>Summary, balance sheet, capital gains, portfolio, and balance history</span></li>
+        <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg> <span>Source-of-funds cases with attached evidence, exportable as an audit package</span></li>
+      </ul>
     </div>
   </section>
 
@@ -1117,6 +1144,39 @@ const mobileEndorsementRows = [
     padding: 2px 6px; border-radius: 4px;
   }
 
+  /* ── Tax & reports ────────────────────────────────────── */
+  .sec-tax .section-head p a {
+    color: var(--fg);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    text-decoration-color: var(--fg-dim);
+    transition: text-decoration-color 0.18s ease;
+  }
+
+  .sec-tax .section-head p a:hover {
+    text-decoration-color: var(--fg);
+  }
+
+  .tax-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px 48px;
+    max-width: 1020px;
+  }
+
+  .tax-grid li {
+    align-items: flex-start;
+  }
+
+  .tax-grid li svg {
+    margin-top: 3px;
+  }
+
+  .tax-grid li span {
+    flex: 1;
+    line-height: 1.5;
+  }
+
   /* ── Open source ──────────────────────────────────────── */
   .open-head {
     text-align: center;
@@ -1311,6 +1371,7 @@ const mobileEndorsementRows = [
     }
     .cli-inner { grid-template-columns: 1fr; gap: 40px; }
     .git-inner { grid-template-columns: 1fr; gap: 40px; }
+    .tax-grid { grid-template-columns: 1fr; }
     .open-grid { grid-template-columns: 1fr; }
   }
 
