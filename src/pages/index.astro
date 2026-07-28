@@ -208,17 +208,18 @@ const mobileEndorsementRows = [
     </div>
   </section>
 
-  <!-- ── Harnesses ─────────────────────────────────────────────── -->
-  <section id="harnesses" class="sec-harness">
+  <!-- ── Agents ────────────────────────────────────────────────── -->
+  <section id="agents" class="sec-harness">
     <div class="container">
       <div class="section-head">
+        <div class="eyebrow">Agents welcome</div>
         <h2>Built by AI agents. Made for them too.</h2>
         <p>
-          Kassiber was written by AI agents working alongside Bitcoin people.
-          The assistant in the app runs on local models out of the box — keep
-          it there, or pick encrypted inference if you need a bigger brain.
-          You didn't keep your books off the cloud just to paste them into a
-          chatbot.
+          Kassiber was written by AI agents working alongside Bitcoin people —
+          and it's built to be driven by yours. Point whichever assistant you
+          already use at it and keep the final say. For the AI itself: local
+          models or encrypted inference — you didn't keep your books off the
+          cloud just to paste them into a chatbot.
         </p>
       </div>
 
@@ -260,37 +261,17 @@ const mobileEndorsementRows = [
         </div>
       </div>
 
-      <div class="harness-footer">
-        <div class="harness-footer-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg> Local AI by default — Ollama and oMLX presets ship in the box.</div>
-        <div class="harness-footer-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg> Off-device providers require explicit consent.</div>
-        <div class="harness-footer-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg> Mutating tools always ask first.</div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ── Agent-ready CLI ───────────────────────────────────────── -->
-  <section id="cli" class="sec-cli">
-    <div class="container cli-inner">
-      <div class="cli-copy">
-        <div class="section-head" style="margin-bottom:0">
-          <div class="eyebrow">Agents welcome</div>
-          <h2>Let your agent do the books.</h2>
-          <p>
-            You weren't going to do it by hand anyway. Point whichever
-            assistant you already use at Kassiber and it can pull in
-            statements, match the transfers between your wallets, and draft
-            your reports. You keep the final say.
-          </p>
-          <ul class="checklist" style="margin-top:24px">
+      <div class="agents-detail cli-inner">
+        <div class="cli-copy">
+          <ul class="checklist">
             <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg> <span>Imports, reconciles, and drafts reports while you do something better</span></li>
             <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg> <span>Kassiber gives it clear, predictable answers — the same ones every time</span></li>
             <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg> <span>Big changes are previewed first — nothing lands in your books unchecked</span></li>
             <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg> <span>A ready-made Claude Code skill ships alongside — your agent starts out knowing the ropes</span></li>
           </ul>
         </div>
-      </div>
 
-      <div class="tile open-term cli-term">
+        <div class="tile open-term cli-term">
         <div class="open-term-head">
           <span></span><span></span><span></span>
           <span class="open-term-title">agent · ~/books</span>
@@ -303,13 +284,14 @@ const mobileEndorsementRows = [
           <div><span class="prompt">$</span> kassiber transfers bulk-pair --dry-run</div>
           <div class="dim">✓ preview only — nothing hits your books without review</div>
           <div class="cursor"><span class="prompt">$</span><span class="caret"></span></div>
+          </div>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- ── Git ──────────────────────────────────────────────────── -->
-  <section id="git" class="sec-git">
+  <!-- ── Pairing ───────────────────────────────────────────────── -->
+  <section id="pairing" class="sec-git">
     <div class="container git-inner">
       <div class="git-visual">
         <div class="pr-card tile">
@@ -946,17 +928,9 @@ const mobileEndorsementRows = [
     font-size: 11px; color: var(--fg-dim);
   }
 
-  .harness-footer {
-    display: flex; gap: 24px; flex-wrap: wrap;
-    margin-top: 28px; padding-top: 24px;
-    border-top: 1px dashed var(--border);
-    font-size: 13px; color: var(--fg-muted);
+  .agents-detail {
+    margin-top: 56px;
   }
-  .harness-footer-item {
-    display: inline-flex; gap: 8px; align-items: center;
-    color: var(--fg-muted);
-  }
-  .harness-footer-item svg { color: var(--ok); }
 
   /* ── Endorsements ─────────────────────────────────────── */
   .sec-endorsements {
