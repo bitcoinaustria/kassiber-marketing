@@ -1,0 +1,105 @@
+---
+interface Props {
+  command: string;
+  label?: string;
+}
+
+const { command, label } = Astro.props;
+---
+
+<div class="copy-cmd">
+  {label && <div class="copy-cmd-label">{label}</div>}
+  <div class="copy-cmd-row">
+    <code>{command}</code>
+    <button
+      type="button"
+      class="copy-cmd-btn"
+      data-copy={command}
+      aria-label={`Copy command: ${command}`}
+    >
+      <svg class="copy-cmd-icon copy-cmd-icon--copy" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <rect x="9" y="9" width="12" height="12" rx="2" />
+        <path d="M5 15V5a2 2 0 012-2h8" />
+      </svg>
+      <svg class="copy-cmd-icon copy-cmd-icon--done" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M4 12l5 5L20 6" />
+      </svg>
+    </button>
+  </div>
+</div>
+
+<style>
+  .copy-cmd-label {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--fg-dim);
+    margin-bottom: 7px;
+  }
+
+  .copy-cmd-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 10px 10px 14px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.02);
+    transition: border-color 0.18s ease;
+  }
+
+  .copy-cmd-row:hover {
+    border-color: var(--border-strong);
+  }
+
+  .copy-cmd-row code {
+    flex: 1;
+    min-width: 0;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--fg);
+    white-space: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .copy-cmd-row code::-webkit-scrollbar {
+    display: none;
+  }
+
+  .copy-cmd-btn {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 7px;
+    color: var(--fg-muted);
+    background: rgba(255, 255, 255, 0.04);
+    transition: color 0.18s ease, background 0.18s ease;
+  }
+
+  .copy-cmd-btn:hover {
+    color: var(--fg);
+    background: rgba(255, 255, 255, 0.08);
+  }
+
+  .copy-cmd-icon {
+    grid-area: 1 / 1;
+  }
+
+  .copy-cmd-icon--done,
+  .copy-cmd-btn.is-copied .copy-cmd-icon--copy {
+    display: none;
+  }
+
+  .copy-cmd-btn.is-copied .copy-cmd-icon--done {
+    display: block;
+    color: var(--ok);
+  }
+
+  .copy-cmd-btn.is-copied {
+    color: var(--ok);
+  }
+</style>
