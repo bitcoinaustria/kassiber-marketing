@@ -3,18 +3,6 @@ import Layout from "../layouts/Layout.astro";
 import CopyCommand from "../components/CopyCommand.astro";
 import { GITHUB_REPOSITORY_URL, SKILL_REPOSITORY_URL } from "../lib/site";
 import { RELEASES_URL } from "../lib/releases";
-import { tweets } from "../lib/tweets";
-
-const desktopEndorsementRows = [
-  tweets.filter((_, index) => index % 2 === 0),
-  tweets.filter((_, index) => index % 2 === 1),
-];
-
-const mobileEndorsementRows = [
-  tweets.filter((_, index) => index % 3 === 0),
-  tweets.filter((_, index) => index % 3 === 1),
-  tweets.filter((_, index) => index % 3 === 2),
-];
 ---
 
 <Layout>
@@ -42,13 +30,13 @@ const mobileEndorsementRows = [
 
     <div class="container hero-inner">
       <h1 class="hero-title display">
-        Private Bitcoin<br />accounting, agent-ready.
+        Many wallets, several layers,<br />one set of books.
       </h1>
 
       <p class="hero-sub">
-        Many wallets, several layers, years of decisions. Kassiber gives you one
-        bird's-eye view of all of it, on your machine and with your own node
-        backend: a desktop app for macOS, Windows, and Linux, plus a CLI.
+        Private, local-first Bitcoin accounting: one bird's-eye view of every
+        wallet across on-chain, Lightning, and Liquid, computed on your machine
+        against your own node. Desktop app and CLI for macOS, Windows, and Linux.
       </p>
 
       <div class="hero-actions">
@@ -73,6 +61,7 @@ const mobileEndorsementRows = [
 
       <div class="hero-preview">
         <figure class="hero-screenshot-frame">
+          <!-- PLACEHOLDER: not Kassiber yet. Replace with the Bird's-eye screen. -->
           <img
             src="/updated-screenshot.webp"
             alt="Kassiber desktop app"
@@ -86,89 +75,26 @@ const mobileEndorsementRows = [
     </div>
   </section>
 
-  <!-- ── Endorsements ─────────────────────────────────────────── -->
-  <section id="endorsements" class="sec-endorsements" aria-labelledby="endorsements-title">
-    <div class="container">
-      <div class="endorsements-head">
-        <h2 id="endorsements-title">Tolerated by an <span class="endorsements-count">unknown</span> number of users and their agents.</h2>
-        <p>Kassiber is engineered so it can't know and can't be evil. So tell us about it on 𝕏 or Nostr.</p>
+  <!-- ── Spec strip ────────────────────────────────────────────── -->
+  <!-- Deliberately headless: a quiet facts bar between two heavy sections. -->
+  <section id="covers" class="sec-spec" aria-label="What Kassiber covers">
+    <div class="container spec-strip">
+      <div class="spec-group">
+        <div class="spec-key">Sources</div>
+        <div class="spec-val">Bitcoin Core · Electrum · Esplora · BTCPay Server</div>
       </div>
-    </div>
-
-    <div class="endorsement-carousel endorsement-carousel--desktop" aria-label="Developer endorsements">
-        {
-          desktopEndorsementRows.map((row, rowIndex) => (
-            <div class:list={["endorsement-row", rowIndex === 1 && "is-reverse"]}>
-              <div class="endorsement-track">
-                {[0, 1].map((groupIndex) => (
-                  <div class="endorsement-track-group" aria-hidden={groupIndex === 1 ? "true" : undefined}>
-                    {row.map((tweet) => (
-                      <a
-                        class="endorsement-card"
-                        href={tweet.link}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        aria-label={`Read ${tweet.handle}'s post on X`}
-                        tabindex={groupIndex === 1 ? "-1" : undefined}
-                      >
-                        <div class="endorsement-author">
-                          <img
-                            src={`/pfps/${tweet.handle}.webp`}
-                            alt=""
-                            width="28"
-                            height="28"
-                            loading="lazy"
-                            decoding="async"
-                          />
-                          <div class="endorsement-handle">@{tweet.handle}</div>
-                        </div>
-                        <p>{tweet.excerpt ?? tweet.content}</p>
-                      </a>
-                    ))}
-                  </div>
-                ))}
-              </div>
-            </div>
-          ))
-        }
-    </div>
-
-    <div class="endorsement-carousel endorsement-carousel--mobile" aria-label="Developer endorsements">
-        {
-          mobileEndorsementRows.map((row, rowIndex) => (
-            <div class:list={["endorsement-row", rowIndex === 1 && "is-reverse"]}>
-              <div class="endorsement-track">
-                {[0, 1].map((groupIndex) => (
-                  <div class="endorsement-track-group" aria-hidden={groupIndex === 1 ? "true" : undefined}>
-                    {row.map((tweet) => (
-                      <a
-                        class="endorsement-card"
-                        href={tweet.link}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        aria-label={`Read ${tweet.handle}'s post on X`}
-                        tabindex={groupIndex === 1 ? "-1" : undefined}
-                      >
-                        <div class="endorsement-author">
-                          <img
-                            src={`/pfps/${tweet.handle}.webp`}
-                            alt=""
-                            width="28"
-                            height="28"
-                            loading="lazy"
-                            decoding="async"
-                          />
-                          <div class="endorsement-handle">@{tweet.handle}</div>
-                        </div>
-                        <p>{tweet.excerpt ?? tweet.content}</p>
-                      </a>
-                    ))}
-                  </div>
-                ))}
-              </div>
-            </div>
-          ))
-        }
+      <div class="spec-group">
+        <div class="spec-key">Layers</div>
+        <div class="spec-val">On-chain · Lightning · Liquid · Submarine swaps</div>
+      </div>
+      <div class="spec-group">
+        <div class="spec-key">Accounting</div>
+        <div class="spec-val">FIFO · LIFO · HIFO · LOFO · Moving average</div>
+      </div>
+      <div class="spec-group">
+        <div class="spec-key">Exports</div>
+        <div class="spec-val">PDF · XLSX · CSV · Live spreadsheet formulas</div>
+      </div>
     </div>
   </section>
 
@@ -179,20 +105,13 @@ const mobileEndorsementRows = [
         <div class="eyebrow">Local-first</div>
         <h2>You decide what you reveal. And to whom.</h2>
         <p>
-          Kassiber syncs from the sources you pick: your own Bitcoin Core,
-          Electrum, or Esplora, your BTCPay. The books live in one local file.
-          It never syncs behind your back and it reports to nobody.
-          When someone needs numbers, you export exactly those: a tax report
-          for the tax office, a spreadsheet for your accountant. Everyone else
-          gets nothing, because there is nothing to get.
+          It syncs only from the sources you pick, never behind your back, and
+          keeps the books in one local file. It reports to nobody, so anyone who
+          wants your numbers has to get them from you.
         </p>
       </div>
 
       <div class="sov-grid">
-        <div class="tile sov-tile">
-          <h3>Your own nodes</h3>
-          <p>Point it at the infrastructure you already run. Your wallets and queries stay between you and your node.</p>
-        </div>
         <div class="tile sov-tile">
           <h3>Watch-only by design</h3>
           <p>Kassiber holds no spending keys, so there is nothing to leak and nothing anyone can coerce out of you.</p>
@@ -217,9 +136,8 @@ const mobileEndorsementRows = [
         <h2>Built by AI agents. Made for them too.</h2>
         <p>
           Kassiber was written by AI agents working alongside Bitcoin people,
-          and it's built to be driven by yours. Point whichever assistant you
-          already use at it and keep the final say. Run the model locally, or
-          use encrypted inference if you want a bigger brain. You didn't keep
+          and it's built to be driven by yours. Run the model locally, or use
+          encrypted inference if you want a bigger brain. You didn't keep
           your books off the cloud just to paste them into a chatbot.
         </p>
       </div>
@@ -227,59 +145,41 @@ const mobileEndorsementRows = [
       <div class="harness-grid">
         <div class="harness">
           <div class="harness-mark"><img src="/harnesses/opencode-dark.svg" alt="" /></div>
-          <div class="harness-meta">
-            <div class="harness-name">OpenCode</div>
-            <div class="harness-tag">drives the CLI</div>
-          </div>
-        </div>
-        <div class="harness">
-          <div class="harness-mark harness-mark-text" aria-hidden="true">oM</div>
-          <div class="harness-meta">
-            <div class="harness-name">oMLX</div>
-            <div class="harness-tag">local model runtime</div>
-          </div>
-        </div>
-        <div class="harness">
-          <div class="harness-mark harness-mark-text" aria-hidden="true">O</div>
-          <div class="harness-meta">
-            <div class="harness-name">Ollama</div>
-            <div class="harness-tag">local model runtime</div>
-          </div>
+          <div class="harness-name">OpenCode</div>
         </div>
         <div class="harness">
           <div class="harness-mark"><img src="/harnesses/claude-ai-icon.svg" alt="" /></div>
-          <div class="harness-meta">
-            <div class="harness-name">Claude Code</div>
-            <div class="harness-tag">kassiber --machine</div>
-          </div>
+          <div class="harness-name">Claude Code</div>
         </div>
         <div class="harness">
           <div class="harness-mark"><img src="/harnesses/openai_dark.svg" alt="" /></div>
-          <div class="harness-meta">
-            <div class="harness-name">Codex CLI</div>
-            <div class="harness-tag">deterministic JSON</div>
-          </div>
+          <div class="harness-name">Codex CLI</div>
+        </div>
+        <div class="harness">
+          <div class="harness-mark"><img src="/harnesses/ollama.svg" alt="" /></div>
+          <div class="harness-name">Ollama</div>
+        </div>
+        <div class="harness">
+          <div class="harness-mark harness-mark-text" aria-hidden="true">oM</div>
+          <div class="harness-name">oMLX</div>
         </div>
       </div>
 
       <div class="agents-detail cli-inner">
         <div class="cli-copy">
-          <ul class="checklist">
-            <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg> <span>Imports, reconciles, and drafts reports while you do something better</span></li>
-            <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg> <span>Kassiber answers it the same way every time, so nothing drifts between runs</span></li>
-            <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg> <span>Big changes get previewed first, so nothing lands in your books unchecked</span></li>
-          </ul>
+          <p class="cli-lead">
+            It imports, reconciles, and drafts reports while you do something
+            better. Every command answers in the same shape every time, so
+            nothing drifts between runs, and anything big gets previewed before
+            it lands.
+          </p>
 
           <div class="skill-block">
             <p class="skill-note">
-              Don't explain Kassiber to your agent. Hand it the skill instead:
+              Don't explain Kassiber to your agent. Hand it <a href={SKILL_REPOSITORY_URL} target="_blank" rel="noopener noreferrer">the skill</a> instead:
               one line, and it knows the commands, the rules, and where the
               sharp edges are.
             </p>
-            <a class="open-source-link skill-link" href={SKILL_REPOSITORY_URL} target="_blank" rel="noopener noreferrer">
-              Read the skill
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17L17 7M8 7h9v9"/></svg>
-            </a>
           </div>
         </div>
 
@@ -301,6 +201,8 @@ const mobileEndorsementRows = [
           <div class="dim">✓ Kassiber skill ready</div>
           <div><span class="prompt">›</span> Use the Kassiber skill to prepare my 2026 tax report.</div>
           <div class="dim">✓ Preparing your 2026 tax report</div>
+          <div><span class="prompt">›</span> kassiber --machine reports summary</div>
+          <div class="dim">&#123;"kind": <span class="accent">"reports.summary"</span>, "schema_version": 1, "data": …&#125;</div>
           <div class="cursor"><span class="prompt">$</span><span class="caret"></span></div>
           </div>
         </div>
@@ -312,41 +214,17 @@ const mobileEndorsementRows = [
   <section id="pairing" class="sec-git">
     <div class="container git-inner">
       <div class="git-visual">
-        <div class="pr-card tile">
-          <div class="pr-head">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="2.2"/><circle cx="6" cy="18" r="2.2"/><circle cx="18" cy="6" r="2.2"/><path d="M6 8v8M18 8v5a3 3 0 01-3 3h-3M13 13l-2 3 2 3"/></svg>
-            <span class="pr-title">Pair both sides of a Liquid peg-in</span>
-            <span class="pr-status">Reviewed</span>
-          </div>
-          <div class="pr-meta">
-            <span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="2.2"/><circle cx="6" cy="18" r="2.2"/><circle cx="18" cy="6" r="2.2"/><path d="M6 8v8M6 12a6 6 0 006-6h6"/></svg> on-chain → liquid</span>
-            <span>0 gains invented</span>
-            <span>2 legs · 1 fee</span>
-          </div>
-          <div class="pr-files">
-            <div><code>peg-in · 0.50 BTC → L-BTC</code> <span>self-transfer</span></div>
-            <div><code>channel open · 2,000,000 sats</code> <span>self-transfer</span></div>
-            <div><code>submarine swap · LN → on-chain</code> <span>self-transfer</span></div>
-          </div>
-          <div class="pr-foot">
-            <button class="btn btn-ghost" style="font-size:12px;padding:6px 10px">View evidence</button>
-            <button class="btn btn-primary" style="font-size:12px;padding:6px 12px">
-              Confirm pairing
-            </button>
-          </div>
-        </div>
-        <div class="pr-trail">
-          <div class="pr-trail-dot"></div>
-          <div class="pr-trail-line"></div>
-          <div class="pr-trail-dot"></div>
-        </div>
-        <div class="pr-button-shell">
-          <button class="pr-button">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="2.2"/><circle cx="6" cy="18" r="2.2"/><circle cx="18" cy="6" r="2.2"/><path d="M6 8v8M18 8v5a3 3 0 01-3 3h-3M13 13l-2 3 2 3"/></svg>
-            Pair &amp; book
-            <span id="pr-button-kbd" class="pr-button-kbd">⌘⏎</span>
-          </button>
-        </div>
+        <figure class="shot-frame">
+          <!-- PLACEHOLDER: replace with the real Swap matching screen. -->
+          <img
+            src="/placeholder-top.webp"
+            alt=""
+            width="2508"
+            height="841"
+            loading="lazy"
+            decoding="async"
+          />
+        </figure>
       </div>
 
       <div class="git-copy">
@@ -354,12 +232,12 @@ const mobileEndorsementRows = [
           <h2>A move stays a move.</h2>
           <p>
             A peg-in isn't a sale. A submarine swap isn't a disposal. Opening a
-            channel isn't either. Every hop between your own wallets still
-            looks like a transaction, and naive tools book it as one, inventing
-            gains that never happened. Kassiber pairs both sides across layers.
+            channel isn't either. Every hop between your own wallets still looks
+            like a transaction, and naive tools book it as one: a 0.5 BTC peg-in
+            becomes a 0.5 BTC disposal, and you owe tax on a gain you never
+            made. Kassiber pairs both sides across layers.
           </p>
           <ul class="checklist" style="margin-top:24px">
-            <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg> Reviewed pairing for Lightning, Liquid, and submarine swaps</li>
             <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg> Paste any address or txid and Kassiber tells you whether it's yours</li>
             <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg> Lost and stolen coins classified, not booked as sales</li>
             <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg> Survives years of wallet migrations, so old addresses still resolve as yours</li>
@@ -377,22 +255,66 @@ const mobileEndorsementRows = [
         <h2>Don't trust. Verify your tax report.</h2>
         <p>
           The math runs locally through <a href="https://github.com/eprbell/rp2" target="_blank" rel="noopener noreferrer">RP2</a>,
-          the open-source crypto tax engine eprbell wrote. Kassiber keeps its
-          own Bitcoin-focused fork of it. Pick the accounting standard your
-          jurisdiction expects: FIFO, LIFO, HIFO, LOFO, or moving average.
-          Every report exports to a spreadsheet with live formulas, so you can
-          recompute each balance, price, and gain yourself.
+          the open-source crypto tax engine eprbell wrote, in a Bitcoin-focused
+          fork Kassiber maintains. Pick the standard your jurisdiction expects:
+          FIFO, LIFO, HIFO, LOFO, or moving average. Every report exports to a
+          spreadsheet with live formulas, so you can recompute each balance,
+          price, and gain yourself.
         </p>
       </div>
 
-      <ul class="checklist tax-grid">
-        <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg> <span>Austria first-class: § 27b EStG, with E 1kv exports as PDF, XLSX, or CSV</span></li>
-        <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg> <span>Generic books work anywhere, and country-specific reports ship on request</span></li>
-        <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg> <span>Leaving the country? The exit-tax report prices the deemed disposal for you</span></li>
-        <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg> <span>Privacy Mirror grades your on-chain privacy from A+ to F, computed locally and shown only to you</span></li>
-        <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg> <span>Summary, balance sheet, capital gains, portfolio, and balance history</span></li>
-        <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg> <span>Attach receipts and invoices to any transaction, with notes, tags, and BIP329 labels</span></li>
-      </ul>
+      <dl class="report-rows">
+        <div class="report-row">
+          <dt>Capital gains</dt>
+          <dd>§ 27b EStG for Austria with E 1kv, generic books everywhere else. Country-specific reports ship on request.</dd>
+        </div>
+        <div class="report-row">
+          <dt>Exit tax</dt>
+          <dd>Leaving the country prices the deemed disposal for you, at the rates that applied on the day.</dd>
+        </div>
+        <div class="report-row">
+          <dt>Portfolio</dt>
+          <dd>Summary, balance sheet, portfolio, and balance history, at any date you pick.</dd>
+        </div>
+        <div class="report-row">
+          <dt>Evidence</dt>
+          <dd>Receipts and invoices attached to the transaction they belong to, with notes, tags, and BIP329 labels.</dd>
+        </div>
+      </dl>
+    </div>
+  </section>
+
+  <!-- ── Privacy Mirror ────────────────────────────────────────── -->
+  <section id="privacy-mirror" class="sec-mirror">
+    <div class="container mirror-inner">
+      <div class="mirror-copy">
+        <div class="section-head" style="margin-bottom:0">
+          <div class="eyebrow">Privacy Mirror</div>
+          <h2>See yourself the way an analyst would.</h2>
+          <p>
+            Kassiber scores your books from 0 to 100, A+ down to F, on the
+            linkage it can already see in your own data: common-input edges,
+            change that ties two wallets together, reused addresses. It answers
+            what is linkable, who could plausibly infer it, and which local
+            evidence says so. No chain lookups, no signing, no writes to your
+            books.
+          </p>
+        </div>
+      </div>
+
+      <div class="mirror-visual">
+        <figure class="shot-frame">
+          <!-- PLACEHOLDER: replace with the real Privacy Mirror screen. -->
+          <img
+            src="/placeholder-bottom.webp"
+            alt=""
+            width="2508"
+            height="841"
+            loading="lazy"
+            decoding="async"
+          />
+        </figure>
+      </div>
     </div>
   </section>
 
@@ -415,8 +337,8 @@ const mobileEndorsementRows = [
             <div class="dim">✓ Cloned kassiber into ./kassiber</div>
             <div><span class="prompt">$</span> cd kassiber &amp;&amp; ./scripts/bootstrap-dev-env.sh</div>
             <div class="dim">✓ deps ready · quality gate: ./scripts/quality-gate.sh</div>
-            <div><span class="prompt">$</span> kassiber --machine reports summary</div>
-            <div class="dim">&#123;"kind": <span class="accent">"reports.summary"</span>, "schema_version": 1, "data": …&#125;</div>
+            <div><span class="prompt">$</span> ./scripts/quality-gate.sh</div>
+            <div class="dim">✓ compile · tests · types · lint · <span class="accent">one script</span></div>
             <div class="cursor"><span class="prompt">$</span><span class="caret"></span></div>
           </div>
         </div>
@@ -467,9 +389,8 @@ const mobileEndorsementRows = [
         Your Bitcoin deserves better than a SaaS that could sell you out.
       </h2>
       <p class="cta-sub">
-        Kassiber is free, open source, and honestly pre-alpha. Rough edges and
-        all, we'd rather tell you than pretend. Install it, point it at your
-        own nodes, and nothing leaves your machine unless you send it.
+        Honestly pre-alpha, rough edges and all. We'd rather tell you than
+        pretend.
       </p>
       <div class="cta-actions">
         <a id="cta-download-btn" class="btn btn-primary btn-lg" href={RELEASES_URL}>
@@ -488,6 +409,79 @@ const mobileEndorsementRows = [
           <CopyCommand label="Desktop app + CLI" command="brew install --cask bitcoinaustria/kassiber/kassiber" />
           <CopyCommand label="CLI only, no GUI, no JavaScript" command="brew install bitcoinaustria/kassiber/kassiber-cli" />
         </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── FAQ ───────────────────────────────────────────────────── -->
+  <!-- Native <details>: no JS, no dependency, animated via ::details-content. -->
+  <section id="faq" class="sec-faq">
+    <div class="container">
+      <div class="section-head faq-head">
+        <div class="eyebrow">FAQ</div>
+        <h2>Before you ask.</h2>
+      </div>
+
+      <div class="faq-list">
+        <details class="faq-item">
+          <summary>Do I need to run my own node?</summary>
+          <p>
+            No. Kassiber ships with default backends and syncs the moment you
+            install it. But any backend you don't run yourself learns which
+            addresses you ask about and when, so when that matters, point it at
+            your own Bitcoin Core, Electrum, or Esplora. Each backend can also
+            be routed through a Tor proxy you provide.
+          </p>
+        </details>
+
+        <details class="faq-item">
+          <summary>Does Kassiber replace my tax advisor?</summary>
+          <p>
+            No, and it is not built to. It computes the numbers and shows its
+            work, so you or your advisor can check every figure instead of
+            trusting ours. What you file stays your responsibility, Kassiber is
+            pre-alpha software provided without warranty, and nothing it outputs
+            is tax or legal advice. If your situation is unusual, pay a
+            professional and hand them the export.
+          </p>
+        </details>
+
+        <details class="faq-item">
+          <summary>What happens if I lose my passphrase?</summary>
+          <p>
+            Your books stay encrypted and nobody opens them again, including us.
+            The passphrase is the whole perimeter and there is no recovery path.
+            Keep it wherever you keep your seed backups.
+          </p>
+        </details>
+
+        <details class="faq-item">
+          <summary>Can Kassiber spend my coins?</summary>
+          <p>
+            No. It never holds spending keys and only ever reads descriptors and
+            watch-only addresses. The worst case is a wrong number in a report,
+            not a missing coin.
+          </p>
+        </details>
+
+        <details class="faq-item">
+          <summary>Do I have to use AI agents?</summary>
+          <p>
+            No. The desktop app and the CLI do the whole job on their own. The
+            agent side is optional, and it drives the same commands you can run
+            yourself.
+          </p>
+        </details>
+
+        <details class="faq-item">
+          <summary>I'm not in Austria. Is it still useful?</summary>
+          <p>
+            Yes, with one caveat. The books, the accounting standards, and the
+            exports work anywhere. The ready-made filing reports are Austrian
+            for now; everywhere else gets the generic reports, and
+            country-specific ones ship on request.
+          </p>
+        </details>
       </div>
     </div>
   </section>
@@ -528,14 +522,12 @@ const mobileEndorsementRows = [
     const label = document.getElementById("download-label");
     const ctaBtn = document.getElementById("cta-download-btn") as HTMLAnchorElement | null;
     const ctaLabel = document.getElementById("cta-download-label");
-    const kbd = document.getElementById("pr-button-kbd");
 
     const platform = detectPlatform();
     if (!platform) return;
     document.documentElement.dataset.platform = platform.os;
     if (label) label.textContent = platform.label;
     if (ctaLabel) ctaLabel.textContent = platform.label;
-    if (kbd && platform.os !== "mac") kbd.textContent = "Ctrl ⏎";
 
     try {
       const release = await fetchLatestRelease();
@@ -765,14 +757,23 @@ const mobileEndorsementRows = [
       margin-top: 14px;
     }
 
+    /* The preview is hidden at this width, so no room needs reserving for it. */
     .hero-actions {
-      margin-bottom: 96px;
+      margin-bottom: 40px;
     }
 
     .hero-float {
       position: absolute;
       inset: 0;
       display: block;
+    }
+
+    /* Only the two marks above the headline survive here. The lower three sat
+       behind the title and the CTA once the copy wrapped. */
+    .hero-float-mark.hf-ollama,
+    .hero-float-mark.hf-opencode,
+    .hero-float-mark.hf-liquid {
+      display: none;
     }
 
     .hero-float-mark {
@@ -794,64 +795,10 @@ const mobileEndorsementRows = [
       transform: rotate(-10deg);
     }
 
-    .hero-float-mark.hf-ollama {
-      top: 240px;
-      left: 4px;
-      right: auto;
-      transform: rotate(-4deg);
-    }
-
-    .hero-float-mark.hf-opencode {
-      top: 474px;
-      left: 4px;
-      right: auto;
-      transform: rotate(-6deg);
-    }
-
     .hero-float-mark.hf-lightning {
       top: 44px;
       right: 10px;
       transform: rotate(8deg);
-    }
-
-    .hero-float-mark.hf-liquid {
-      top: 474px;
-      right: 4px;
-      left: auto;
-      transform: rotate(7deg);
-    }
-  }
-
-  @media (max-width: 340px) {
-    .hero-float-mark.hf-ollama {
-      top: 220px;
-      left: 0;
-      width: 52px;
-      height: 52px;
-      border-radius: 14px;
-    }
-
-    .hero-float-mark.hf-opencode,
-    .hero-float-mark.hf-liquid {
-      top: 580px;
-      width: 52px;
-      height: 52px;
-      border-radius: 14px;
-    }
-
-    .hero-float-mark.hf-opencode {
-      left: 0;
-    }
-
-    .hero-float-mark.hf-liquid {
-      right: 0;
-    }
-
-    .hero-float-mark.hf-ollama img,
-    .hero-float-mark.hf-opencode img,
-    .hero-float-mark.hf-liquid img {
-      width: 30px;
-      height: 30px;
     }
   }
 
@@ -875,12 +822,6 @@ const mobileEndorsementRows = [
     box-shadow: 0 28px 64px -28px rgba(0, 0, 0, 0.75);
   }
 
-  .hero-screenshot-frame picture {
-    display: block;
-    width: 100%;
-    height: 100%;
-  }
-
   .hero-screenshot-frame img {
     width: calc(100% + 4px);
     height: calc(100% + 4px);
@@ -892,7 +833,7 @@ const mobileEndorsementRows = [
   /* ── Local-first ──────────────────────────────────────── */
   .sov-grid {
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 16px;
   }
 
@@ -915,7 +856,7 @@ const mobileEndorsementRows = [
   }
 
   /* ── Harnesses ─────────────────────────────────────────── */
-  .sec-harness { background: #09090b; }
+  .sec-harness { background: var(--bg-band); }
 
   .harness-grid {
     display: grid;
@@ -927,7 +868,7 @@ const mobileEndorsementRows = [
   }
 
   .harness {
-    padding: 22px 20px;
+    padding: 18px 20px;
     display: flex; align-items: center; gap: 14px;
     border-right: 1px solid var(--border);
     background: linear-gradient(180deg, rgba(255, 255, 255, 0.015), transparent);
@@ -944,14 +885,10 @@ const mobileEndorsementRows = [
   .harness-mark img { width: 22px; height: 22px; object-fit: contain; }
   .harness-mark-text { font-family: var(--font-mono); font-size: 14px; font-weight: 600; }
 
-  .harness-meta { flex: 1; min-width: 0; }
   .harness-name {
+    flex: 1; min-width: 0;
     font-size: 14px; font-weight: 500;
-    letter-spacing: -0.01em; margin-bottom: 2px;
-  }
-  .harness-tag {
-    font-family: var(--font-mono);
-    font-size: 11px; color: var(--fg-dim);
+    letter-spacing: -0.01em;
   }
 
   .agents-detail {
@@ -971,156 +908,64 @@ const mobileEndorsementRows = [
     margin-bottom: 16px;
   }
 
-  .skill-link {
-    margin-top: 14px;
+  /* ── Spec strip ───────────────────────────────────────── */
+  /* Facts bar, not a card grid: one band, no chrome, a third the height. */
+  .sec-spec {
+    padding: 0;
+    background: var(--bg-band);
   }
 
-  /* ── Endorsements ─────────────────────────────────────── */
-  .sec-endorsements {
-    overflow: hidden;
+  .spec-strip {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    padding-top: 30px;
+    padding-bottom: 30px;
   }
 
-  .endorsements-head {
-    max-width: 720px;
-    margin-bottom: 56px;
+  .spec-group {
+    padding: 0 28px;
+    border-left: 1px solid var(--border);
   }
 
-  .endorsements-head h2 {
-    font-size: clamp(32px, 4vw, 48px);
+  .spec-group:first-child {
+    padding-left: 0;
+    border-left: 0;
+  }
+
+  .spec-key {
+    font-family: var(--font-mono);
+    font-size: 10px;
     font-weight: 500;
-    letter-spacing: -0.035em;
-    line-height: 1.05;
-    margin-bottom: 18px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--fg-faint);
+    margin-bottom: 9px;
   }
 
-  .endorsements-count {
-    margin-right: 0.12em;
-    font-weight: 600;
-    font-family: cursive;
-    font-style: italic;
-  }
-
-  .endorsements-head p {
-    color: var(--fg-muted);
-    font-size: 18px;
-    max-width: 620px;
-    letter-spacing: -0.005em;
-  }
-
-  .endorsement-carousel {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-  }
-
-  .endorsement-carousel--mobile {
-    display: none;
-  }
-
-  .endorsement-carousel::before,
-  .endorsement-carousel::after {
-    content: "";
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    z-index: 2;
-    width: max(48px, calc((100vw - 1240px) / 2 + 56px));
-    pointer-events: none;
-  }
-
-  .endorsement-carousel::before {
-    left: 0;
-    background: linear-gradient(90deg, var(--bg), transparent);
-  }
-
-  .endorsement-carousel::after {
-    right: 0;
-    background: linear-gradient(270deg, var(--bg), transparent);
-  }
-
-  .endorsement-row {
-    overflow: hidden;
-  }
-
-  .endorsement-track {
-    width: max-content;
-    display: flex;
-    animation: endorsementMarquee 76s linear infinite;
-    will-change: transform;
-  }
-
-  .endorsement-track-group {
-    display: flex;
-    gap: 12px;
-    padding-right: 12px;
-  }
-
-  .endorsement-row.is-reverse .endorsement-track {
-    animation-direction: reverse;
-    animation-duration: 84s;
-  }
-
-  .endorsement-carousel:hover .endorsement-track,
-  .endorsement-carousel:focus-within .endorsement-track {
-    animation-play-state: paused;
-  }
-
-  .endorsement-card {
-    position: relative;
-    width: clamp(264px, 22vw, 308px);
-    height: 132px;
-    padding: 14px 16px;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    background: rgba(255, 255, 255, 0.012);
-    transition:
-      border-color 0.18s ease,
-      background 0.18s ease;
-  }
-
-  .endorsement-card:hover {
-    border-color: var(--border-strong);
-    background: rgba(255, 255, 255, 0.03);
-  }
-
-  .endorsement-author {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    min-width: 0;
-  }
-
-  .endorsement-author img {
-    width: 28px;
-    height: 28px;
-    border-radius: 50%;
-    object-fit: cover;
-    flex-shrink: 0;
-  }
-
-  .endorsement-handle {
-    color: var(--fg-muted);
-    font-size: 13px;
-    font-weight: 500;
-    letter-spacing: -0.005em;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  .endorsement-card p {
-    color: var(--fg);
+  .spec-val {
     font-size: 13.5px;
-    line-height: 1.4;
-    letter-spacing: -0.003em;
-    display: -webkit-box;
+    line-height: 1.5;
+    color: var(--fg-muted);
+    letter-spacing: -0.005em;
+  }
+
+  /* ── Screenshot slots ─────────────────────────────────── */
+  /* Fixed slot so swapping in a real screenshot of any aspect keeps the
+     two-column layout stable. */
+  .shot-frame {
     overflow: hidden;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 3;
+    aspect-ratio: 16 / 10;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: #0a0a0c;
+    box-shadow: 0 24px 56px -28px rgba(0, 0, 0, 0.75);
+  }
+
+  .shot-frame img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: left top;
   }
 
   /* ── Agent-ready CLI ──────────────────────────────────── */
@@ -1135,17 +980,11 @@ const mobileEndorsementRows = [
     min-width: 0;
   }
 
-  .cli-copy .checklist li {
-    align-items: flex-start;
-  }
-
-  .cli-copy .checklist li svg {
-    margin-top: 3px;
-  }
-
-  .cli-copy .checklist li span {
-    flex: 1;
-    line-height: 1.5;
+  .cli-lead {
+    color: var(--fg-muted);
+    font-size: 15px;
+    line-height: 1.6;
+    letter-spacing: -0.005em;
   }
 
   /* ── Git ──────────────────────────────────────────────── */
@@ -1161,70 +1000,11 @@ const mobileEndorsementRows = [
     align-items: stretch; gap: 20px;
   }
 
-  .pr-card { padding: 20px; }
-  .pr-head {
-    display: flex; align-items: center; gap: 10px;
-    margin-bottom: 12px;
-  }
-  .pr-head svg { color: var(--ok); }
-  .pr-title { font-weight: 500; font-size: 15px; flex: 1; }
-  .pr-status {
-    font-family: var(--font-mono); font-size: 10px;
-    color: var(--ok); padding: 2px 8px;
-    border: 1px solid var(--ok); border-radius: 999px;
-    letter-spacing: 0.08em; text-transform: uppercase;
-  }
-  .pr-meta {
-    display: flex; gap: 14px;
-    font-family: var(--font-mono); font-size: 11px;
-    color: var(--fg-dim); margin-bottom: 14px; flex-wrap: wrap;
-  }
-  .pr-meta span { display: inline-flex; align-items: center; gap: 5px; }
-  .pr-files {
-    border: 1px solid var(--border); border-radius: 8px;
-    overflow: hidden; margin-bottom: 16px;
-  }
-  .pr-files > div {
-    display: flex; justify-content: space-between;
-    padding: 8px 12px; font-family: var(--font-mono);
-    font-size: 11px; border-top: 1px solid var(--border);
-    color: var(--fg-muted);
-  }
-  .pr-files > div:first-child { border-top: 0; }
-  .pr-files span { color: var(--fg-dim); }
-  .pr-foot { display: flex; justify-content: flex-end; gap: 8px; }
-
-  .pr-trail {
-    display: flex; flex-direction: column;
-    align-items: center; justify-content: center;
-    gap: 0; margin: -4px 0;
-  }
-  .pr-trail-dot {
-    width: 8px; height: 8px; border-radius: 999px;
-    background: var(--border-strong);
-  }
-  .pr-trail-line {
-    width: 1px; height: 28px;
-    background: linear-gradient(180deg, var(--border-strong), var(--accent));
-  }
-
-  .pr-button-shell { display: flex; justify-content: center; }
-  .pr-button {
-    display: inline-flex; align-items: center; gap: 10px;
-    padding: 12px 20px;
-    background: var(--fg); color: #09090b;
-    font-weight: 600; font-size: 13px;
-    border-radius: 10px;
-    box-shadow: 0 8px 24px -8px rgba(255, 255, 255, 0.2);
-  }
-  .pr-button-kbd {
-    font-family: var(--font-mono); font-size: 10px;
-    background: rgba(0, 0, 0, 0.1);
-    padding: 2px 6px; border-radius: 4px;
-  }
+  .sec-tax, .sec-open { background: var(--bg-band); }
 
   /* ── Tax & reports ────────────────────────────────────── */
-  .sec-tax .section-head p a {
+  .sec-tax .section-head p a,
+  .skill-note a {
     color: var(--fg);
     text-decoration: underline;
     text-underline-offset: 3px;
@@ -1232,28 +1012,55 @@ const mobileEndorsementRows = [
     transition: text-decoration-color 0.18s ease;
   }
 
-  .sec-tax .section-head p a:hover {
+  .sec-tax .section-head p a:hover,
+  .skill-note a:hover {
     text-decoration-color: var(--fg);
   }
 
-  .tax-grid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 14px 48px;
+  .report-rows {
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
     max-width: 1020px;
   }
 
-  .tax-grid li {
-    align-items: flex-start;
+  .report-row {
+    display: grid;
+    grid-template-columns: 168px 1fr;
+    gap: 24px;
+    align-items: baseline;
+    padding: 18px 22px;
+    border-top: 1px solid var(--border);
   }
 
-  .tax-grid li svg {
-    margin-top: 3px;
+  .report-row:first-child {
+    border-top: 0;
   }
 
-  .tax-grid li span {
-    flex: 1;
-    line-height: 1.5;
+  .report-row dt {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.02em;
+    color: var(--fg);
+  }
+
+  .report-row dd {
+    color: var(--fg-muted);
+    font-size: 15px;
+    line-height: 1.55;
+    letter-spacing: -0.005em;
+  }
+
+  /* ── Privacy Mirror ───────────────────────────────────── */
+  .mirror-inner {
+    display: grid;
+    grid-template-columns: 1fr 1.1fr;
+    gap: 64px;
+    align-items: center;
+  }
+
+  .mirror-visual {
+    min-width: 0;
   }
 
   /* ── Open source ──────────────────────────────────────── */
@@ -1450,15 +1257,6 @@ const mobileEndorsementRows = [
     gap: 14px;
   }
 
-  @keyframes endorsementMarquee {
-    from {
-      transform: translateX(0);
-    }
-    to {
-      transform: translateX(-50%);
-    }
-  }
-
   /* ── Responsive ────────────────────────────────────────── */
   @media (max-width: 960px) {
     .hero-preview {
@@ -1476,10 +1274,11 @@ const mobileEndorsementRows = [
       grid-column: 1 / -1;
       border-right: 0;
     }
-    .sov-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .mirror-inner { grid-template-columns: 1fr; gap: 40px; }
     .cli-inner { grid-template-columns: 1fr; gap: 40px; }
     .git-inner { grid-template-columns: 1fr; gap: 40px; }
-    .tax-grid { grid-template-columns: 1fr; }
+    .spec-strip { grid-template-columns: 1fr 1fr; row-gap: 26px; }
+    .spec-group:nth-child(odd) { border-left: 0; padding-left: 0; }
     .open-grid { grid-template-columns: 1fr; }
   }
 
@@ -1488,36 +1287,95 @@ const mobileEndorsementRows = [
     .sec-cta { padding: 96px 0; }
     .container { padding-left: 20px; padding-right: 20px; }
     .hero-preview { display: none; }
-    .endorsements-head {
-      margin-bottom: 40px;
-    }
-    .endorsement-carousel--desktop {
-      display: none;
-    }
-    .endorsement-carousel--mobile {
-      display: flex;
-    }
-    .endorsement-carousel::before,
-    .endorsement-carousel::after {
-      width: 28px;
-    }
-    .endorsement-track {
-      animation-duration: 68s;
-    }
-    .endorsement-row.is-reverse .endorsement-track {
-      animation-duration: 76s;
-    }
-    .endorsement-card {
-      width: 268px;
-      height: 132px;
-      padding: 14px;
-    }
-    .endorsement-card p {
-      font-size: 13px;
-    }
+    .report-row { grid-template-columns: 1fr; gap: 6px; }
+    .sov-grid { grid-template-columns: 1fr; }
   }
 
   @media (max-width: 520px) {
-    .sov-grid { grid-template-columns: 1fr; }
+    .spec-strip { grid-template-columns: 1fr; row-gap: 22px; }
+    .spec-group { border-left: 0; padding-left: 0; }
+  }
+
+  /* ── FAQ ──────────────────────────────────────────────── */
+  .sec-faq { background: var(--bg-band); }
+
+  .faq-head {
+    text-align: center;
+    margin: 0 auto 44px;
+  }
+
+  .faq-list {
+    max-width: 820px;
+    margin: 0 auto;
+  }
+
+  .faq-item {
+    border-top: 1px solid var(--border);
+  }
+
+  .faq-item:last-child {
+    border-bottom: 1px solid var(--border);
+  }
+
+  .faq-item summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 20px 4px;
+    cursor: pointer;
+    list-style: none;
+    font-size: 16px;
+    font-weight: 500;
+    letter-spacing: -0.015em;
+    transition: color 0.18s ease;
+  }
+
+  .faq-item summary::-webkit-details-marker { display: none; }
+
+  .faq-item summary:hover { color: #fff; }
+
+  /* A plus that rotates into a cross. Cheaper than an icon and it animates. */
+  .faq-item summary::after {
+    content: "+";
+    flex: none;
+    font-family: var(--font-mono);
+    font-size: 18px;
+    line-height: 1;
+    color: var(--fg-dim);
+    transition: transform 0.3s ease, color 0.18s ease;
+  }
+
+  .faq-item[open] summary::after {
+    transform: rotate(135deg);
+    color: var(--fg);
+  }
+
+  .faq-item p {
+    padding: 0 4px 22px;
+    max-width: 68ch;
+    color: var(--fg-muted);
+    font-size: 15px;
+    line-height: 1.6;
+    letter-spacing: -0.005em;
+  }
+
+  /* Needs interpolate-size on :root to animate to height auto. Browsers
+     without ::details-content just open instantly. */
+  .faq-item::details-content {
+    height: 0;
+    overflow: hidden;
+    transition: height 0.3s ease, content-visibility 0.3s allow-discrete;
+  }
+
+  .faq-item[open]::details-content {
+    height: auto;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .faq-item::details-content,
+    .faq-item summary::after {
+      transition: none;
+    }
   }
 </style>
