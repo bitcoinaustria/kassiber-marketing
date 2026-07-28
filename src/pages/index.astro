@@ -178,9 +178,8 @@ const mobileEndorsementRows = [
         <h2>Built by AI agents. Made for them too.</h2>
         <p>
           Kassiber was written by AI agents working alongside Bitcoin people — and
-          it's built to be driven by yours. Skip the GUI if you want: the CLI speaks
-          deterministic JSON, headless, no browser, no cloud. The built-in assistant
-          defaults to local models.
+          it's built to be driven by yours. Point Claude Code, Codex, or OpenCode
+          at your books; the assistant inside defaults to local models.
         </p>
       </div>
 
@@ -226,6 +225,48 @@ const mobileEndorsementRows = [
         <div class="harness-footer-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg> Local AI by default — Ollama and oMLX presets ship in the box.</div>
         <div class="harness-footer-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg> Off-device providers require explicit consent.</div>
         <div class="harness-footer-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg> Mutating tools always ask first.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Agent-ready CLI ───────────────────────────────────────── -->
+  <section id="cli" class="sec-cli">
+    <div class="container cli-inner">
+      <div class="cli-copy">
+        <div class="section-head" style="margin-bottom:0">
+          <div class="eyebrow">Agent-ready CLI</div>
+          <h2>Deterministic JSON. No vibes.</h2>
+          <p>
+            Agents don't click buttons. <code>--machine</code> means
+            non-interactive: one JSON envelope per command on stdout, and
+            <code>interaction_required</code> instead of a hung prompt. Your
+            agent discovers the live command contract at runtime — no
+            help-text scraping, no browser, no cloud. Headless boxes and cron
+            jobs get the same contract.
+          </p>
+          <ul class="checklist" style="margin-top:24px">
+            <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg> <span>Structured errors with a code, a hint, and a retryable flag</span></li>
+            <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg> <span><code>commands describe</code> exposes every command and argument as data</span></li>
+            <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg> <span><code>health</code> and <code>next-actions</code> tell your agent where the books stand</span></li>
+            <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg> <span>High-impact bulk reviews take <code>--dry-run</code> — preview before anything is booked</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="tile open-term cli-term">
+        <div class="open-term-head">
+          <span></span><span></span><span></span>
+          <span class="open-term-title">agent · ~/books</span>
+        </div>
+        <div class="open-term-body">
+          <div><span class="prompt">$</span> kassiber --machine commands describe wallets sync</div>
+          <div class="dim">&#123;"kind": <span class="accent">"commands.describe"</span>, "schema_version": 1, "data": …&#125;</div>
+          <div><span class="prompt">$</span> kassiber --machine next-actions</div>
+          <div class="dim">&#123;"kind": <span class="accent">"next-actions"</span>, "schema_version": 1, "data": …&#125;</div>
+          <div><span class="prompt">$</span> kassiber transfers bulk-pair --dry-run</div>
+          <div class="dim">✓ preview only — nothing hits your books without review</div>
+          <div class="cursor"><span class="prompt">$</span><span class="caret"></span></div>
+        </div>
       </div>
     </div>
   </section>
@@ -311,7 +352,7 @@ const mobileEndorsementRows = [
             <div><span class="prompt">$</span> cd kassiber &amp;&amp; ./scripts/bootstrap-dev-env.sh</div>
             <div class="dim">✓ deps ready · quality gate: ./scripts/quality-gate.sh</div>
             <div><span class="prompt">$</span> kassiber --machine reports summary</div>
-            <div class="dim">&#123;"status": <span class="accent">"ok"</span>, "command": "reports summary"&#125;</div>
+            <div class="dim">&#123;"kind": <span class="accent">"reports.summary"</span>, "schema_version": 1, "data": …&#125;</div>
             <div class="cursor"><span class="prompt">$</span><span class="caret"></span></div>
           </div>
         </div>
@@ -976,6 +1017,43 @@ const mobileEndorsementRows = [
     -webkit-line-clamp: 3;
   }
 
+  /* ── Agent-ready CLI ──────────────────────────────────── */
+  .cli-inner {
+    display: grid;
+    grid-template-columns: 1fr 1.1fr;
+    gap: 64px;
+    align-items: center;
+  }
+
+  .cli-copy code,
+  .cli-copy .checklist code {
+    font-family: var(--font-mono);
+    font-size: 0.86em;
+    color: var(--fg);
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    padding: 1px 5px;
+    white-space: nowrap;
+  }
+
+  .cli-term {
+    min-width: 0;
+  }
+
+  .cli-copy .checklist li {
+    align-items: flex-start;
+  }
+
+  .cli-copy .checklist li svg {
+    margin-top: 3px;
+  }
+
+  .cli-copy .checklist li span {
+    flex: 1;
+    line-height: 1.5;
+  }
+
   /* ── Git ──────────────────────────────────────────────── */
   .git-inner {
     display: grid;
@@ -1243,6 +1321,7 @@ const mobileEndorsementRows = [
       grid-column: 1 / -1;
       border-right: 0;
     }
+    .cli-inner { grid-template-columns: 1fr; gap: 40px; }
     .git-inner { grid-template-columns: 1fr; gap: 40px; }
     .open-grid { grid-template-columns: 1fr; }
   }
