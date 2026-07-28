@@ -234,21 +234,19 @@ const mobileEndorsementRows = [
     <div class="container cli-inner">
       <div class="cli-copy">
         <div class="section-head" style="margin-bottom:0">
-          <div class="eyebrow">Agent-ready CLI</div>
-          <h2>Deterministic JSON. No vibes.</h2>
+          <div class="eyebrow">Agents welcome</div>
+          <h2>Let your agent do the books.</h2>
           <p>
-            Agents don't click buttons. <code>--machine</code> means
-            non-interactive: one JSON envelope per command on stdout, and
-            <code>interaction_required</code> instead of a hung prompt. Your
-            agent discovers the live command contract at runtime — no
-            help-text scraping, no browser, no cloud. Headless boxes and cron
-            jobs get the same contract.
+            You weren't going to do it by hand anyway. Point Claude Code — or
+            whichever assistant you already use — at Kassiber and it can pull
+            in statements, match the transfers between your wallets, and
+            draft your reports. You keep the final say.
           </p>
           <ul class="checklist" style="margin-top:24px">
-            <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg> <span>Structured errors with a code, a hint, and a retryable flag</span></li>
-            <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg> <span><code>commands describe</code> exposes every command and argument as data</span></li>
-            <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg> <span><code>health</code> and <code>next-actions</code> tell your agent where the books stand</span></li>
-            <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg> <span>High-impact bulk reviews take <code>--dry-run</code> — preview before anything is booked</span></li>
+            <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg> <span>Imports, reconciles, and drafts reports while you do something better</span></li>
+            <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg> <span>Kassiber gives it clear, predictable answers — the same ones every time</span></li>
+            <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg> <span>Big changes are previewed first — nothing lands in your books unchecked</span></li>
+            <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg> <span>Runs on your machine like everything else — no cloud in between</span></li>
           </ul>
         </div>
       </div>
@@ -1023,18 +1021,6 @@ const mobileEndorsementRows = [
     grid-template-columns: 1fr 1.1fr;
     gap: 64px;
     align-items: center;
-  }
-
-  .cli-copy code,
-  .cli-copy .checklist code {
-    font-family: var(--font-mono);
-    font-size: 0.86em;
-    color: var(--fg);
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid var(--border);
-    border-radius: 5px;
-    padding: 1px 5px;
-    white-space: nowrap;
   }
 
   .cli-term {
