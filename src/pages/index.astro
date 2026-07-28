@@ -171,6 +171,43 @@ const mobileEndorsementRows = [
     </div>
   </section>
 
+  <!-- ── Local-first ───────────────────────────────────────────── -->
+  <section id="local-first" class="sec-sov">
+    <div class="container">
+      <div class="section-head">
+        <div class="eyebrow">Local-first</div>
+        <h2>You decide what you reveal. And to whom.</h2>
+        <p>
+          Kassiber syncs from the sources you choose — your own Bitcoin Core,
+          Electrum, or Esplora, your BTCPay — and keeps the books in one local
+          file. No account, no background sync, no automatic reporting. When
+          someone needs numbers, you export exactly those: a tax report for
+          the tax office, a source-of-funds case for whoever is entitled to
+          ask. Everyone else gets nothing, because there is nothing to get.
+        </p>
+      </div>
+
+      <div class="sov-grid">
+        <div class="tile sov-tile">
+          <h3>Your own nodes</h3>
+          <p>Point it at the infrastructure you already run. Your wallets and queries stay between you and your node.</p>
+        </div>
+        <div class="tile sov-tile">
+          <h3>Watch-only by design</h3>
+          <p>There are no spending keys in Kassiber — nothing to leak, nothing to coerce out of you.</p>
+        </div>
+        <div class="tile sov-tile">
+          <h3>Encrypted at rest</h3>
+          <p>One passphrase, SQLCipher 4. On a stolen or border-searched laptop, your books are noise.</p>
+        </div>
+        <div class="tile sov-tile">
+          <h3>Nothing to subpoena</h3>
+          <p>There is no server behind the app. A request to us turns up nothing, because we hold nothing.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <!-- ── Harnesses ─────────────────────────────────────────────── -->
   <section id="harnesses" class="sec-harness">
     <div class="container">
@@ -844,6 +881,31 @@ const mobileEndorsementRows = [
     object-position: center top;
   }
 
+  /* ── Local-first ──────────────────────────────────────── */
+  .sov-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 16px;
+  }
+
+  .sov-tile {
+    padding: 24px 22px;
+  }
+
+  .sov-tile h3 {
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: -0.015em;
+    margin-bottom: 8px;
+  }
+
+  .sov-tile p {
+    color: var(--fg-muted);
+    font-size: 14px;
+    line-height: 1.55;
+    letter-spacing: -0.003em;
+  }
+
   /* ── Harnesses ─────────────────────────────────────────── */
   .sec-harness { background: #09090b; }
 
@@ -1369,6 +1431,7 @@ const mobileEndorsementRows = [
       grid-column: 1 / -1;
       border-right: 0;
     }
+    .sov-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .cli-inner { grid-template-columns: 1fr; gap: 40px; }
     .git-inner { grid-template-columns: 1fr; gap: 40px; }
     .tax-grid { grid-template-columns: 1fr; }
@@ -1407,5 +1470,9 @@ const mobileEndorsementRows = [
     .endorsement-card p {
       font-size: 13px;
     }
+  }
+
+  @media (max-width: 520px) {
+    .sov-grid { grid-template-columns: 1fr; }
   }
 </style>
