@@ -39,6 +39,9 @@ const {
             <span class="nav-brand-name">Kassiber</span>
           </a>
           <div class="nav-right">
+            <div class="nav-language" aria-label="Language selector; English selected">
+              <span class="is-active">EN</span><span aria-hidden="true">/</span><span>DE</span>
+            </div>
             <a
               class="nav-stars"
               href={GITHUB_REPOSITORY_URL}
@@ -372,6 +375,17 @@ const {
     align-items: center;
     gap: 8px;
   }
+
+  .nav-language {
+    display: inline-flex;
+    gap: 4px;
+    color: var(--fg-dim);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.04em;
+  }
+
+  .nav-language .is-active { color: var(--fg); }
 
   .nav-stars {
     display: inline-flex;
