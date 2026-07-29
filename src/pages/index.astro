@@ -1,6 +1,7 @@
 ---
 import Layout from "../layouts/Layout.astro";
 import CopyCommand from "../components/CopyCommand.astro";
+import HeroChatMock from "../components/HeroChatMock.astro";
 import { GITHUB_REPOSITORY_URL, SKILL_REPOSITORY_URL } from "../lib/site";
 import { RELEASES_URL } from "../lib/releases";
 ---
@@ -61,16 +62,16 @@ import { RELEASES_URL } from "../lib/releases";
 
       <div class="hero-preview">
         <figure class="hero-screenshot-frame">
-          <!-- PLACEHOLDER: not Kassiber yet. Replace with the Bird's-eye screen. -->
           <img
-            src="/updated-screenshot.webp"
-            alt="Kassiber desktop app"
-            width="2508"
-            height="1682"
+            src="/kassiber-overview.webp"
+            alt="The Kassiber Overview screen: Bitcoin balance, a BTC activity chart with cost basis, holdings by source, recent Liquid and on-chain transactions, and the assistant composer with a local Qwen model selected"
+            width="2360"
+            height="1555"
             loading="eager"
             decoding="async"
           />
         </figure>
+        <HeroChatMock />
       </div>
     </div>
   </section>
@@ -215,12 +216,12 @@ import { RELEASES_URL } from "../lib/releases";
     <div class="container git-inner">
       <div class="git-visual">
         <figure class="shot-frame">
-          <!-- PLACEHOLDER: replace with the real Swap matching screen. -->
+          <!-- Stand-in: Overview transactions. Swap matching is the right screen here. -->
           <img
-            src="/placeholder-top.webp"
+            src="/kassiber-transactions.webp"
             alt=""
-            width="2508"
-            height="841"
+            width="1200"
+            height="750"
             loading="lazy"
             decoding="async"
           />
@@ -304,12 +305,12 @@ import { RELEASES_URL } from "../lib/releases";
 
       <div class="mirror-visual">
         <figure class="shot-frame">
-          <!-- PLACEHOLDER: replace with the real Privacy Mirror screen. -->
+          <!-- Stand-in: Overview balance drivers. Privacy Mirror is the right screen here. -->
           <img
-            src="/placeholder-bottom.webp"
+            src="/kassiber-analytics.webp"
             alt=""
-            width="2508"
-            height="841"
+            width="1200"
+            height="750"
             loading="lazy"
             decoding="async"
           />
@@ -816,6 +817,9 @@ import { RELEASES_URL } from "../lib/releases";
   }
 
   .hero-preview {
+    position: relative;
+    /* Query container for the chat mock, which scales itself in cqw. */
+    container-type: inline-size;
     max-width: 1180px;
     margin: 0 auto;
     transform: perspective(2000px) rotateX(2deg);
@@ -829,7 +833,7 @@ import { RELEASES_URL } from "../lib/releases";
   .hero-screenshot-frame {
     position: relative;
     overflow: hidden;
-    aspect-ratio: 2508 / 1682;
+    aspect-ratio: 2360 / 1555;
     border-radius: 14px;
     background: #0a0a0c;
     box-shadow: 0 28px 64px -28px rgba(0, 0, 0, 0.75);
@@ -1299,7 +1303,15 @@ import { RELEASES_URL } from "../lib/releases";
     section { padding: 64px 0; }
     .sec-cta { padding: 96px 0; }
     .container { padding-left: 20px; padding-right: 20px; }
-    .hero-preview { display: none; }
+    /* The screenshot is unreadable at this width; the composer is not, so it
+       stays as the hero's visual and the frame goes. */
+    .hero-screenshot-frame { display: none; }
+    .hero-preview {
+      width: auto;
+      margin-left: 0;
+      transform: none;
+    }
+    .hero-preview:hover { transform: none; }
     .report-row { grid-template-columns: 1fr; gap: 6px; }
     .sov-grid { grid-template-columns: 1fr; }
   }

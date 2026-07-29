@@ -1,0 +1,403 @@
+---
+/*
+ * Static mock of Kassiber's provider/model picker, ported from
+ * ui-tauri/src/components/ai/ProviderModelPicker.tsx.
+ *
+ * The real popover opens from the composer's model chip with side="top"
+ * align="start", w-[min(34rem,100vw-2rem)] and h-[min(27rem,70vh)]: a narrow
+ * provider rail on the left, then a header, a search field, and the model rows.
+ *
+ * Dark-theme tokens are the app's own (styles/globals.css), not the marketing
+ * palette. The privacy badges are the real ones — KIND_TONE /
+ * KIND_BADGE_LABEL in the picker.
+ *
+ * The list is one provider's models (activeGroup.models). Posture is per-model,
+ * not per-provider — modelPrivacyPosture() returns
+ * `model.privacy_posture ?? provider.kind` — so one list can legitimately mix
+ * a locally quantised model with one that runs under encrypted inference.
+ *
+ * Model names come from the project. Only the two MLX ids carry a -4bit build
+ * suffix, following the convention in the app capture; the TEE rows are served
+ * rather than quantised locally, so they have no id line, which is what the app
+ * renders for a model with no display_name.
+ *
+ * Not interactive. It is a picture of a control, not a control.
+ */
+---
+
+<div class="mpm" aria-hidden="true">
+  <div class="mpm-body">
+    <!-- Provider rail: w-14, border-r, bg-muted/40, p-1, aspect-square buttons. -->
+    <div class="mpm-rail">
+      <span class="mpm-rail-btn is-active" title="oMLX">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="16" height="16" x="4" y="4" rx="2" /><rect width="6" height="6" x="9" y="9" rx="1" /><path d="M15 2v2" /><path d="M15 20v2" /><path d="M2 15h2" /><path d="M2 9h2" /><path d="M20 15h2" /><path d="M20 9h2" /><path d="M9 2v2" /><path d="M9 20v2" /></svg>
+        <span class="mpm-dot is-local"></span>
+      </span>
+      <span class="mpm-rail-btn" title="Ollama">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="16" height="16" x="4" y="4" rx="2" /><rect width="6" height="6" x="9" y="9" rx="1" /><path d="M15 2v2" /><path d="M15 20v2" /><path d="M2 15h2" /><path d="M2 9h2" /><path d="M20 15h2" /><path d="M20 9h2" /><path d="M9 2v2" /><path d="M9 20v2" /></svg>
+        <span class="mpm-dot is-local"></span>
+      </span>
+      <span class="mpm-rail-btn" title="Encrypted inference (TEE)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z" /><path d="m9 12 2 2 4-4" /></svg>
+        <span class="mpm-dot is-tee"></span>
+      </span>
+      <span class="mpm-rail-btn" title="Claude Code">
+        <img src="/harnesses/claude-ai-icon.svg" alt="" />
+        <span class="mpm-dot is-remote"></span>
+      </span>
+      <span class="mpm-rail-btn" title="Codex CLI">
+        <img src="/harnesses/openai_dark.svg" alt="" />
+        <span class="mpm-dot is-remote"></span>
+      </span>
+    </div>
+
+    <div class="mpm-main">
+      <!-- Header: provider name + base_url, then the privacy filter + search. -->
+      <div class="mpm-head">
+        <div class="mpm-head-row">
+          <div class="mpm-head-meta">
+            <p class="mpm-provider">oMLX</p>
+            <p class="mpm-url">http://127.0.0.1:8080/v1</p>
+          </div>
+          <div class="mpm-filter" role="group" aria-label="Model privacy filter">
+            <span class="is-on">All</span><span>Local</span>
+          </div>
+        </div>
+
+        <div class="mpm-search">
+          <svg class="mpm-search-mark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /></svg>
+          <span class="mpm-search-placeholder">Search models…</span>
+        </div>
+      </div>
+
+      <!-- Model rows: p-1.5 list, selected row is bg-muted/70 with a Check. -->
+      <div class="mpm-list">
+        <span class="mpm-row is-selected">
+          <span class="mpm-row-text">
+            <span class="mpm-row-name">Qwen 3.6 35B</span>
+            <span class="mpm-row-id">Qwen3.6-35B-A3B-4bit</span>
+          </span>
+          <span class="mpm-badge is-local">local</span>
+          <svg class="mpm-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5" /></svg>
+        </span>
+
+        <span class="mpm-row">
+          <span class="mpm-row-text">
+            <span class="mpm-row-name">Gemma 4 27B</span>
+            <span class="mpm-row-id">Gemma4-27B-4bit</span>
+          </span>
+          <span class="mpm-badge is-local">local</span>
+        </span>
+
+        <!-- No display_name in the app means the id is the row title and there is
+             no mono second line; these two are served, not quantised locally. -->
+        <span class="mpm-row">
+          <span class="mpm-row-text">
+            <span class="mpm-row-name">Kimi3</span>
+          </span>
+          <span class="mpm-badge is-tee">TEE</span>
+        </span>
+
+        <span class="mpm-row">
+          <span class="mpm-row-text">
+            <span class="mpm-row-name">GLM 5.2</span>
+          </span>
+          <span class="mpm-badge is-tee">TEE</span>
+        </span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  /*
+   * Lengths are calc(N * var(--u)) where --u is the panel's root unit and N is
+   * exactly the number in the Tailwind class from ProviderModelPicker.tsx.
+   *
+   * This is deliberate rather than using em: Tailwind's spacing, sizing and
+   * text-* utilities are all *rem*-based, so they resolve against the root, not
+   * the element. On elements that also set a smaller font-size — the search
+   * field, the filter, the badges — em silently scales the box down too. h-8 has
+   * to stay 2 root units whatever the text inside it is.
+   *
+   * --u defaults to 14.4px, which is the app's own root ("root 14.4px = 16 x
+   * 0.9" in globals.css), so the panel renders at the size the app shows.
+   *
+   * --radius in this app is vestigial: the --radius-* scale is never redefined
+   * against it, so rounded-md is Tailwind's 0.375rem = 5.4px here.
+   */
+  .mpm {
+    --u: var(--mpm-size, 14.4px);
+
+    --app-bg: oklch(0.145 0 0);
+    --app-popover: oklch(0.205 0 0);
+    --app-muted: oklch(0.269 0 0);
+    --app-fg: oklch(0.985 0 0);
+    --app-muted-fg: oklch(0.708 0 0);
+    --app-border: oklch(1 0 0 / 10%);
+    --app-input: oklch(1 0 0 / 15%);
+
+    font-size: var(--u);
+    line-height: 1.5;
+    width: calc(34 * var(--u)); /* w-[min(34rem, …)] */
+    max-width: 100%;
+    color: var(--app-fg); /* text-popover-foreground */
+    overflow: hidden;
+    border-radius: calc(0.375 * var(--u)); /* rounded-md */
+
+    /*
+     * .kb-glass-popover: the nested color-mix resolves to --popover at ~84%
+     * alpha, border-color is --foreground at 10%, and the dark shadow is
+     * 0 18px 44px -18px rgb(0 0 0 / 80%).
+     */
+    border: 1px solid color-mix(in srgb, var(--app-fg) 10%, transparent);
+    background-color: color-mix(
+      in srgb,
+      var(--app-popover) 18%,
+      color-mix(in srgb, var(--app-popover) 80%, transparent)
+    );
+    backdrop-filter: blur(12px) saturate(1.14);
+    -webkit-backdrop-filter: blur(12px) saturate(1.14);
+    box-shadow: 0 18px 44px -18px rgb(0 0 0 / 80%);
+  }
+
+  /* h-[min(27rem,70vh)] min-h-72. Four models do not fill it, which is exactly
+     what the app shows with a short list. */
+  .mpm-body {
+    display: flex;
+    height: calc(27 * var(--u));
+  }
+
+  /* w-14 shrink-0 flex-col gap-1 border-r border-border/60 bg-muted/40 p-1 */
+  .mpm-rail {
+    flex: none;
+    display: flex;
+    flex-direction: column;
+    gap: calc(0.25 * var(--u));
+    width: calc(3.5 * var(--u));
+    padding: calc(0.25 * var(--u));
+    border-right: 1px solid color-mix(in srgb, var(--app-border) 60%, transparent);
+    background: color-mix(in srgb, var(--app-muted) 40%, transparent);
+  }
+
+  /* relative aspect-square w-full rounded-md text-muted-foreground */
+  .mpm-rail-btn {
+    position: relative;
+    aspect-ratio: 1;
+    display: grid;
+    place-items: center;
+    border-radius: calc(0.375 * var(--u));
+    color: var(--app-muted-fg);
+  }
+
+  /* active && "bg-background text-foreground shadow-sm" */
+  .mpm-rail-btn.is-active {
+    background: var(--app-bg);
+    color: var(--app-fg);
+    box-shadow: 0 1px 2px 0 rgb(0 0 0 / 5%), 0 1px 3px 0 rgb(0 0 0 / 10%);
+  }
+
+  /* size-5 */
+  .mpm-rail-btn svg,
+  .mpm-rail-btn img {
+    width: calc(1.25 * var(--u));
+    height: calc(1.25 * var(--u));
+  }
+
+  .mpm-rail-btn img {
+    object-fit: contain;
+  }
+
+  /* absolute right-1 top-1 size-1.5 rounded-full */
+  .mpm-dot {
+    position: absolute;
+    right: calc(0.25 * var(--u));
+    top: calc(0.25 * var(--u));
+    width: calc(0.375 * var(--u));
+    height: calc(0.375 * var(--u));
+    border-radius: 999px;
+  }
+
+  .mpm-dot.is-local { background: #10b981; } /* bg-emerald-500 */
+  .mpm-dot.is-remote { background: #f59e0b; } /* bg-amber-500 */
+  .mpm-dot.is-tee { background: #0ea5e9; } /* bg-sky-500 */
+
+  .mpm-main {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    flex: 1;
+  }
+
+  /* border-b border-border/60 p-3 */
+  .mpm-head {
+    padding: calc(0.75 * var(--u));
+    border-bottom: 1px solid color-mix(in srgb, var(--app-border) 60%, transparent);
+  }
+
+  /* mb-2 flex items-center justify-between gap-2 */
+  .mpm-head-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: calc(0.5 * var(--u));
+    margin-bottom: calc(0.5 * var(--u));
+  }
+
+  .mpm-head-meta {
+    min-width: 0;
+  }
+
+  /* truncate text-sm font-medium */
+  .mpm-provider {
+    font-size: calc(0.875 * var(--u));
+    font-weight: 500;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* truncate text-xs text-muted-foreground */
+  .mpm-url {
+    font-size: calc(0.75 * var(--u));
+    color: var(--app-muted-fg);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* inline-flex rounded-md bg-muted p-0.5 text-2xs (--text-2xs: 0.694rem) */
+  .mpm-filter {
+    flex: none;
+    display: inline-flex;
+    padding: calc(0.125 * var(--u));
+    border-radius: calc(0.375 * var(--u));
+    background: var(--app-muted);
+    font-size: calc(0.694 * var(--u));
+  }
+
+  /* rounded px-1.5 py-1 text-muted-foreground */
+  .mpm-filter span {
+    padding: calc(0.25 * var(--u)) calc(0.375 * var(--u));
+    border-radius: calc(0.25 * var(--u));
+    color: var(--app-muted-fg);
+  }
+
+  /* active: bg-background text-foreground shadow-sm */
+  .mpm-filter span.is-on {
+    background: var(--app-bg);
+    color: var(--app-fg);
+    box-shadow: 0 1px 2px 0 rgb(0 0 0 / 5%), 0 1px 3px 0 rgb(0 0 0 / 10%);
+  }
+
+  /*
+   * Input base (components/ui/input.tsx) plus the picker's h-8 pl-8 text-xs:
+   * rounded-md border border-input bg-transparent px-3 py-1 shadow-xs,
+   * dark:bg-input/30, placeholder:text-muted-foreground.
+   */
+  .mpm-search {
+    position: relative;
+    display: flex;
+    align-items: center;
+    height: calc(2 * var(--u));
+    padding: calc(0.25 * var(--u)) calc(0.75 * var(--u)) calc(0.25 * var(--u))
+      calc(2 * var(--u));
+    border: 1px solid var(--app-input);
+    border-radius: calc(0.375 * var(--u));
+    background: color-mix(in srgb, var(--app-input) 30%, transparent);
+    box-shadow: 0 1px 2px 0 rgb(0 0 0 / 5%);
+    font-size: calc(0.75 * var(--u));
+  }
+
+  /* absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground */
+  .mpm-search-mark {
+    position: absolute;
+    left: calc(0.625 * var(--u));
+    top: 50%;
+    transform: translateY(-50%);
+    width: calc(0.875 * var(--u));
+    height: calc(0.875 * var(--u));
+    color: var(--app-muted-fg);
+  }
+
+  .mpm-search-placeholder {
+    color: var(--app-muted-fg);
+  }
+
+  /* min-h-0 flex-1 overflow-y-auto overscroll-contain p-1.5 */
+  .mpm-list {
+    flex: 1;
+    min-height: 0;
+    padding: calc(0.375 * var(--u));
+    overflow: hidden;
+  }
+
+  /* flex w-full items-center gap-3 rounded-md px-3 py-2 */
+  .mpm-row {
+    display: flex;
+    align-items: center;
+    gap: calc(0.75 * var(--u));
+    padding: calc(0.5 * var(--u)) calc(0.75 * var(--u));
+    border-radius: calc(0.375 * var(--u));
+  }
+
+  /* selected && "bg-muted/70" */
+  .mpm-row.is-selected {
+    background: color-mix(in srgb, var(--app-muted) 70%, transparent);
+  }
+
+  .mpm-row-text {
+    min-width: 0;
+    flex: 1;
+  }
+
+  /* block truncate text-sm font-medium */
+  .mpm-row-name {
+    display: block;
+    font-size: calc(0.875 * var(--u));
+    font-weight: 500;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* block truncate font-mono text-2xs text-muted-foreground */
+  .mpm-row-id {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: calc(0.694 * var(--u));
+    color: var(--app-muted-fg);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* shrink-0 rounded-full px-1.5 py-0.5 text-3xs font-medium uppercase
+     (--text-3xs: 0.625rem), tone from KIND_TONE */
+  .mpm-badge {
+    flex: none;
+    padding: calc(0.125 * var(--u)) calc(0.375 * var(--u));
+    border-radius: 999px;
+    font-size: calc(0.625 * var(--u));
+    font-weight: 500;
+    text-transform: uppercase;
+  }
+
+  .mpm-badge.is-local {
+    background: color-mix(in srgb, #10b981 15%, transparent);
+    color: #6ee7b7; /* dark:text-emerald-300 */
+  }
+
+  /* KIND_TONE.tee: bg-sky-500/15 dark:text-sky-300 */
+  .mpm-badge.is-tee {
+    background: color-mix(in srgb, #0ea5e9 15%, transparent);
+    color: #7dd3fc;
+  }
+
+  /* size-4 shrink-0 */
+  .mpm-check {
+    flex: none;
+    width: calc(1 * var(--u));
+    height: calc(1 * var(--u));
+  }
+</style>
