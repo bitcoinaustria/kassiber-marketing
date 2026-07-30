@@ -11,7 +11,8 @@ import ModelPickerMock from "./ModelPickerMock.astro";
  * copied literally rather than remapped to the marketing palette, so the panel
  * reads as part of the screenshot it floats on.
  *
- * Not interactive. It is a picture of a control, not a control.
+ * The picker is a real disclosure so its open/close behavior matches the app;
+ * the model rows themselves remain a visual mock.
  */
 ---
 
@@ -45,6 +46,18 @@ import ModelPickerMock from "./ModelPickerMock.astro";
     </div>
   </div>
 </div>
+
+<script>
+  const pickers = document.querySelectorAll<HTMLDetailsElement>(".hero-chat-picker");
+
+  document.addEventListener("pointerdown", (event) => {
+    for (const picker of pickers) {
+      if (picker.open && (!(event.target instanceof Node) || !picker.contains(event.target))) {
+        picker.open = false;
+      }
+    }
+  });
+</script>
 
 <style>
   /*
