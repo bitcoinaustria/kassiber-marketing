@@ -18,7 +18,7 @@ const { title, description, heading, lede, effectiveDate, lastUpdated, sections 
   <div class="legal-page">
     <a class="legal-index-link" href="/legal"><span aria-hidden="true">&#8592;</span> All legal documents</a>
     <header class="legal-hero">
-      <p class="eyebrow">T3 Tools, Inc. / Legal</p>
+      <p class="eyebrow">Bitcoin Austria / Legal</p>
       <h1>{heading}</h1>
       <p class="legal-lede">{lede}</p>
       <dl class="legal-dates" aria-label="Document dates">
@@ -294,6 +294,16 @@ const { title, description, heading, lede, effectiveDate, lastUpdated, sections 
   .legal-copy strong {
     color: var(--fg);
     font-weight: 600;
+  }
+
+  .legal-copy code {
+    padding: 0.1em 0.36em;
+    border-radius: 4px;
+    background: color-mix(in srgb, var(--fg) 7%, transparent);
+    color: var(--fg);
+    font-family: var(--font-mono);
+    font-size: 0.86em;
+    overflow-wrap: anywhere;
   }
 
   .legal-copy ul,

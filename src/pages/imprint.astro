@@ -1,0 +1,126 @@
+---
+import LegalPage from "../components/LegalPage.astro";
+import { GITHUB_REPOSITORY_URL } from "../lib/site";
+
+const sections = [
+  ["association", "Association details"],
+  ["contact", "Contact"],
+  ["purpose", "Purpose"],
+  ["editorial", "Editorial direction"],
+  ["licence", "Licence and trademark"],
+  ["disclaimer", "Disclaimer"],
+  ["no-advice", "No financial advice"],
+  ["disputes", "Dispute resolution"],
+] as const;
+---
+
+<LegalPage
+  title="Imprint · Kassiber"
+  description="Information pursuant to § 5 ECG and § 25 MedienG for the Kassiber website, published by Bitcoin Austria."
+  heading="Imprint"
+  lede="Information pursuant to § 5 ECG (Austrian E-Commerce Act) and § 25 MedienG (Austrian Media Act)."
+  effectiveDate="2026-07-29"
+  lastUpdated="2026-07-29"
+  sections={sections}
+>
+  <section id="association">
+    <p class="section-number">01</p>
+    <h2>Association Details and Postal Address</h2>
+    <address>
+      <strong>Bitcoin Austria &ndash; Verein zur F&ouml;rderung von Bitcoin in &Ouml;sterreich</strong><br />
+      ZVR number (Register of Associations): 828542896<br />
+      c/o STADLER PARTNER Rechtsanw&auml;lte GmbH<br />
+      Seilerst&auml;tte 24<br />
+      1010 Vienna<br />
+      Austria
+    </address>
+  </section>
+
+  <section id="contact">
+    <p class="section-number">02</p>
+    <h2>Contact</h2>
+    <p>
+      Email:{" "}<a href="mailto:office@bitcoin-austria.at">office@bitcoin-austria.at</a><br />
+      Website:{" "}<a href="https://bitcoin-austria.at">bitcoin-austria.at</a><br />
+      Source code:{" "}<a href={GITHUB_REPOSITORY_URL}>github.com/bitcoinaustria/kassiber</a>
+    </p>
+  </section>
+
+  <section id="purpose">
+    <p class="section-number">03</p>
+    <h2>Purpose</h2>
+    <p>
+      Bitcoin Austria is Europe's oldest Bitcoin association (founded 2011). We promote the adoption
+      and understanding of Bitcoin in Austria. The association is nonprofit and does not operate for
+      profit.
+    </p>
+    <p>
+      Kassiber is a free software project of the association. It is not sold, and there is no
+      commercial entity behind it.
+    </p>
+  </section>
+
+  <section id="editorial">
+    <p class="section-number">04</p>
+    <h2>Editorial Direction (&sect; 25 MedienG)</h2>
+    <p>
+      This website informs the public about the Kassiber software: what it does, how it handles data,
+      and how to run it. Content is created to the best of our knowledge and belief and reflects the
+      positions of the Bitcoin Austria association.
+    </p>
+  </section>
+
+  <section id="licence">
+    <p class="section-number">05</p>
+    <h2>Licence and Trademark</h2>
+    <p>
+      The Kassiber software is licensed under
+      {" "}<a href={`${GITHUB_REPOSITORY_URL}/blob/main/LICENSE`}>AGPL-3.0</a>. The source of this
+      website is published separately under the MIT licence. Third-party components carry their own
+      licences, listed in
+      {" "}<a href={`${GITHUB_REPOSITORY_URL}/blob/main/THIRD_PARTY_LICENSES.md`}
+        >THIRD_PARTY_LICENSES.md</a
+      >.
+    </p>
+    <p>
+      The names <strong>Kassiber</strong> and <strong>Bitcoin Austria</strong>, the logos, and other
+      association marks are not free content and are excluded from those licences. Using them to
+      label your own products or services, or to create the impression of an affiliation with
+      Bitcoin Austria, requires our written consent.
+    </p>
+  </section>
+
+  <section id="disclaimer">
+    <p class="section-number">06</p>
+    <h2>Disclaimer</h2>
+    <p>
+      We create the content on this website with care. However, we assume no liability for the
+      accuracy, completeness, or timeliness of the content. Responsibility for externally linked
+      content lies with the respective site operator.
+    </p>
+    <p>
+      Kassiber itself is pre-alpha software distributed without any warranty. See the
+      {" "}<a href="/terms-of-service">terms of service</a>.
+    </p>
+  </section>
+
+  <section id="no-advice">
+    <p class="section-number">07</p>
+    <h2>No Financial Advice</h2>
+    <p>
+      Nothing on this website constitutes financial, investment, tax, or other advice. Bitcoin
+      Austria does not recommend buying, selling, or holding Bitcoin. Every investment decision is
+      your own responsibility. Do your own research.
+    </p>
+  </section>
+
+  <section id="disputes">
+    <p class="section-number">08</p>
+    <h2>Dispute Resolution</h2>
+    <p>
+      The European Commission provides an online dispute resolution (ODR) platform. Bitcoin Austria
+      is neither willing nor obligated to participate in dispute resolution proceedings before a
+      consumer alternative dispute resolution (ADR) body.
+    </p>
+  </section>
+</LegalPage>

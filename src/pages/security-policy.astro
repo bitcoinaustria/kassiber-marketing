@@ -1,187 +1,144 @@
 ---
 import LegalPage from "../components/LegalPage.astro";
+import { GITHUB_REPOSITORY_URL } from "../lib/site";
 
 const sections = [
-  ["introduction", "Introduction"],
-  ["reporting", "Reporting security issues"],
-  ["safe-harbor", "Responsible research and safe harbor"],
-  ["practices", "Our security practices"],
-  ["responsibilities", "Your responsibilities"],
-  ["updates", "Updates to this policy"],
-  ["contact", "Contact us"],
+  ["reporting", "Reporting a vulnerability"],
+  ["safe-harbor", "Good-faith research"],
+  ["model", "What Kassiber protects"],
+  ["gaps", "What it does not protect"],
+  ["responsibilities", "Your part"],
+  ["contact", "Contact"],
 ] as const;
+
+const SECURITY_MD_URL = `${GITHUB_REPOSITORY_URL}/blob/main/SECURITY.md`;
 ---
 
 <LegalPage
   title="Security Policy · Kassiber"
-  description="How to report security issues in Kassiber and how T3 Tools approaches product security."
-  heading="Kassiber Security Policy"
-  lede="Security is a shared responsibility. This policy explains how to report a vulnerability, how we protect T3 Tools-operated services, and how you can secure the environments and providers you connect to Kassiber."
-  effectiveDate="2026-07-15"
-  lastUpdated="2026-07-15"
+  description="How to report a vulnerability in Kassiber, what the software protects, and what it deliberately does not."
+  heading="Security Policy"
+  lede="Kassiber holds your financial history, so it is worth being precise about what it defends against and what it does not. Report vulnerabilities privately; the full threat model lives in SECURITY.md next to the code."
+  effectiveDate="2026-07-29"
+  lastUpdated="2026-07-29"
   sections={sections}
 >
-  <section id="introduction">
-    <p class="section-number">01</p>
-    <h2>Introduction</h2>
-    <p>
-      This Security Policy describes the vulnerability-reporting process and security practices for
-      the Kassiber desktop and mobile applications, the hosted application at{" "}<a
-        href="https://app.t3.codes">https://app.t3.codes</a
-      >, the optional T3 Connect service, and the Kassiber website at{" "}<a href="https://t3.codes"
-        >https://t3.codes</a
-      >.
-    </p>
-    <p>
-      Kassiber connects software running on your devices and in environments you control with
-      coding-agent harnesses and providers you choose. We secure the software and infrastructure
-      operated by T3 Tools, but we do not control the security of your devices, environments,
-      repositories, networks, credentials, or third-party providers. Please review the shared
-      responsibilities below when assessing risk.
-    </p>
-  </section>
-
   <section id="reporting">
-    <p class="section-number">02</p>
-    <h2>Reporting Security Issues</h2>
-    <p>
-      If you believe you have found a security vulnerability affecting Kassiber or T3 Tools-operated
-      infrastructure, email{" "}<a href="mailto:security@ping.gg">security@ping.gg</a>. Please do not
-      disclose the issue publicly until we have had a reasonable opportunity to investigate and
-      remediate it.
+    <p class="section-number">01</p>
+    <h2>Reporting a Vulnerability</h2>
+    <p class="legal-notice">
+      Do not file security-impacting issues in the public tracker.
     </p>
-    <p>Please include, when available:</p>
-    <ul>
-      <li>A description of the issue and its potential impact;</li>
-      <li>The affected application, version, URL, endpoint, or component;</li>
-      <li>Clear reproduction steps or a minimal proof of concept;</li>
-      <li>Relevant logs, screenshots, or request and response details with secrets removed; and</li>
-      <li>Your preferred contact information and whether you want public credit.</li>
-    </ul>
     <p>
-      We aim to acknowledge complete reports within one business day, keep reporters informed of
-      material progress, and coordinate disclosure after a fix is available. Resolution time varies
-      with severity, complexity, and dependencies on third parties.
+      Email{" "}<a href="mailto:office@bitcoin-austria.at">office@bitcoin-austria.at</a> with
+      &ldquo;Kassiber security&rdquo; in the subject: what the issue is, the affected version or
+      component, and reproduction steps if you have them. Never include descriptors, xpubs, seed
+      words, or keys in a report. Please give us a reasonable chance to fix the issue before
+      disclosing it.
+    </p>
+    <p>
+      In scope: the app, the CLI, this website, and the public nodes we run
+      (<a href="https://mempool.bitcoin-austria.at">mempool.bitcoin-austria.at</a> and our Fulcrum
+      instance). There is no Kassiber application server, so there is none to attack. Kassiber is
+      maintained by a nonprofit, largely by volunteers: we will acknowledge and keep you informed,
+      but there is no bug bounty and no guaranteed response time.
     </p>
   </section>
 
   <section id="safe-harbor">
-    <p class="section-number">03</p>
-    <h2>Responsible Research and Safe Harbor</h2>
+    <p class="section-number">02</p>
+    <h2>Good-Faith Research</h2>
     <p>
-      We support good-faith security research. If you make a genuine effort to comply with this
-      policy, avoid harm, respect privacy, and report findings promptly, we will treat your research
-      as authorized and will not initiate legal action against you for accidental, good-faith
-      violations of this policy. If a third party initiates legal action concerning compliant
-      research, we will make our authorization known where appropriate.
-    </p>
-    <p>To remain within this safe harbor, you must:</p>
-    <ul>
-      <li>Test only accounts, data, and systems you own or have explicit permission to test;</li>
-      <li>Stop and report immediately if you encounter personal, confidential, or production data;</li>
-      <li>Access only the minimum information needed to demonstrate the issue;</li>
-      <li>Avoid disrupting availability, degrading performance, or damaging or deleting data;</li>
-      <li>Not use social engineering, phishing, physical attacks, or denial-of-service testing;</li>
-      <li>Not test third-party services or infrastructure outside T3 Tools’ control; and</li>
-      <li>Give us reasonable time to address the issue before public disclosure.</li>
-    </ul>
-    <p>
-      This safe harbor does not authorize violations of law or activity outside the scope of this
-      policy. Vulnerability rewards are not guaranteed and, if offered, are determined by T3 Tools
-      in its discretion.
+      We support good-faith security research. If you make a genuine effort to avoid harm, respect
+      other people's privacy and data, stay off systems that aren't yours or ours, skip
+      denial-of-service and social engineering, and report what you find, we will treat your
+      research as authorized and won't pursue legal action over accidental, good-faith violations.
+      The code is AGPL and public; auditing it needs no permission at all.
     </p>
   </section>
 
-  <section id="practices">
-    <p class="section-number">04</p>
-    <h2>Our Security Practices</h2>
+  <section id="model">
+    <p class="section-number">03</p>
+    <h2>What Kassiber Protects</h2>
     <p>
-      We use administrative, technical, and organizational safeguards designed for the nature of T3
-      Code and the information processed by T3 Tools-operated services. These practices include:
+      The authoritative version, including every outbound request the app can make, is
+      {" "}<a href={SECURITY_MD_URL}>SECURITY.md</a>. In outline:
     </p>
     <ul>
       <li>
-        <strong>Data minimization.</strong> Kassiber is designed so coding-session content can remain
-        between your clients, your environment, and the harnesses and providers you configure. We
-        process information through T3 Tools-operated infrastructure only when needed for a feature
-        you enable.
+        <strong>No honeypot.</strong> Your addresses, balances, and identity are not aggregated on
+        any server. Nothing to breach, subpoena, or sell.
       </li>
       <li>
-        <strong>Encrypted transport.</strong> T3 Tools-operated network services use encrypted
-        transport. Supported connection flows use scoped credentials and security controls designed
-        to reduce unauthorized reuse.
+        <strong>Watch-only.</strong> No spending keys, ever. Nothing to coerce out of you.
       </li>
       <li>
-        <strong>Credential protection.</strong> Kassiber uses platform-provided protected storage for
-        credentials and session tokens where supported. We design operational logging to avoid
-        collecting secrets that are not needed to operate or troubleshoot the Services.
+        <strong>At-rest encryption.</strong> Optional SQLCipher 4, keyed by a passphrase only in
+        your head, so a stolen or seized device yields an unreadable database.
       </li>
       <li>
-        <strong>Access controls.</strong> Access to production systems and operational data is limited
-        according to job responsibilities and protected using authentication and authorization
-        controls.
+        <strong>No telemetry.</strong> Update checks are opt-in, identifier-free, and never install
+        anything.
       </li>
       <li>
-        <strong>Maintenance and monitoring.</strong> We monitor T3 Tools-operated services for
-        reliability and security events, review dependencies, and deploy updates and mitigations as
-        appropriate.
+        <strong>Scoped AI.</strong> Local model by default, redacted read-only tools, per-call
+        consent for anything that mutates.
       </li>
       <li>
-        <strong>Established providers.</strong> We use specialized providers for services such as
-        authentication, hosting, and application distribution and evaluate the controls relevant to
-        their role.
+        <strong>Recoverable backups.</strong> <code>tar | age</code> archives restorable with stock
+        tools even if this project disappears tomorrow.
       </li>
     </ul>
-    <p>
-      No system is completely secure. These practices reduce risk but do not guarantee that the Site
-      or Services will be free from vulnerabilities or unauthorized access.
-    </p>
+  </section>
+
+  <section id="gaps">
+    <p class="section-number">04</p>
+    <h2>What It Does Not Protect</h2>
+    <p>Stated plainly, because a security page that only lists strengths is marketing:</p>
+    <ul>
+      <li>
+        <strong>A remote backend sees your addresses.</strong> The biggest privacy leak in normal
+        use. The fix is your own node, optionally over Tor.
+      </li>
+      <li>
+        <strong>Not everything is inside the encryption boundary.</strong> Attachments, exports, and
+        some config sit outside SQLCipher; pair it with full-disk encryption.
+      </li>
+      <li>
+        <strong>Nothing protects an unlocked, compromised machine.</strong> Malware or root access
+        defeats everything.
+      </li>
+      <li>
+        <strong>Releases are currently unsigned.</strong> Check the SHA-256 manifest until release
+        signing lands.
+      </li>
+      <li>
+        <strong>Pre-alpha, unaudited.</strong> Expect bugs, including security-relevant ones.
+      </li>
+    </ul>
   </section>
 
   <section id="responsibilities">
     <p class="section-number">05</p>
-    <h2>Your Responsibilities</h2>
-    <p>
-      Because you control much of the Kassiber execution path, you play an important role in securing
-      it. You are responsible for:
-    </p>
+    <h2>Your Part</h2>
     <ul>
-      <li>Keeping Kassiber, your operating systems, and connected tools up to date;</li>
-      <li>Securing your devices, repositories, environments, networks, and backups;</li>
-      <li>Protecting account, provider, repository, and environment credentials;</li>
-      <li>Using multi-factor authentication where your identity and coding-agent providers support it;</li>
-      <li>Granting providers and integrations only the permissions they need;</li>
-      <li>Reviewing commands, source changes, and other agent output before applying or executing it;</li>
-      <li>Removing lost or unused devices and revoking credentials you believe may be compromised; and</li>
-      <li>Following the security policies of your selected harnesses, providers, and infrastructure.</li>
+      <li>Run your own node where privacy matters;</li>
+      <li>Use full-disk encryption and a passphrase you will actually remember;</li>
+      <li>Verify downloads, keep software updated, keep offline backups;</li>
+      <li>Keep AI prompts local unless you've consciously chosen otherwise.</li>
     </ul>
-    <p>
-      Do not send passwords, API keys, access tokens, or private keys in a vulnerability report.
-      Revoke any secret that may have been exposed before sharing sanitized evidence with us.
-    </p>
-  </section>
-
-  <section id="updates">
-    <p class="section-number">06</p>
-    <h2>Updates to This Policy</h2>
-    <p>
-      We may update this Security Policy as Kassiber, our infrastructure, and security practices
-      evolve. We will post revisions at this URL and update the dates above. Material changes to the
-      vulnerability-reporting process or safe-harbor terms will apply prospectively.
-    </p>
   </section>
 
   <section id="contact">
-    <p class="section-number">07</p>
-    <h2>Contact Us</h2>
+    <p class="section-number">06</p>
+    <h2>Contact</h2>
     <p>
-      Report security issues or ask security-related questions at{" "}<a
-        href="mailto:security@ping.gg">security@ping.gg</a
-      >.
-    </p>
-    <p>
-      For general legal questions, contact{" "}<a href="mailto:legal@t3.tools">legal@t3.tools</a>.
-      For privacy requests, contact{" "}<a href="mailto:privacy@t3.tools">privacy@t3.tools</a>.
+      Security reports and questions:{" "}<a href="mailto:office@bitcoin-austria.at"
+        >office@bitcoin-austria.at</a
+      >. Ordinary bugs go to the{" "}<a href={`${GITHUB_REPOSITORY_URL}/issues`}>issue tracker</a>;
+      privacy requests are covered by the{" "}<a href="/privacy-policy">privacy policy</a>. When
+      this page and{" "}<a href={SECURITY_MD_URL}>SECURITY.md</a> disagree, SECURITY.md is correct:
+      it ships with the code.
     </p>
   </section>
 </LegalPage>

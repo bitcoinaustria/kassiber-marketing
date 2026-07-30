@@ -90,11 +90,12 @@ const socialImage = new URL(image, base);
           </div>
           <div class="footer-links">
             <a href={GITHUB_REPOSITORY_URL} target="_blank" rel="noopener noreferrer">GitHub</a>
-            <a href="https://discord.gg/jn4EGJjrvv" target="_blank" rel="noopener noreferrer">Discord</a>
+            <a href="https://bitcoin-austria.at" target="_blank" rel="noopener noreferrer">Bitcoin Austria</a>
             <a href="/download">Download</a>
             <a href="/terms-of-service">Terms</a>
             <a href="/privacy-policy">Privacy</a>
             <a href="/security-policy">Security</a>
+            <a href="/imprint">Imprint</a>
           </div>
         </div>
       </footer>
@@ -163,9 +164,9 @@ const socialImage = new URL(image, base);
     --fg-faint: #52525b;
     --border: rgba(255, 255, 255, 0.08);
     --border-strong: rgba(255, 255, 255, 0.14);
-    --accent-h: 250;
-    --accent: oklch(0.68 0.17 var(--accent-h));
-    --accent-dim: oklch(0.68 0.17 var(--accent-h) / 0.15);
+    /* The app's own accent (--kb-accent), so the site matches what you install. */
+    --accent: #ff3341;
+    --accent-dim: rgb(255 51 65 / 0.15);
     --ok: oklch(0.72 0.16 150);
     --warn: oklch(0.76 0.15 75);
     --font-sans: "DM Sans", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
