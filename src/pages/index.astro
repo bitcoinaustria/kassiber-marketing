@@ -24,8 +24,8 @@ import { RELEASES_URL } from "../lib/releases";
       <span class="hero-float-mark hf-liquid" title="Liquid">
         <img src="/harnesses/liquid.svg" alt="" />
       </span>
-      <span class="hero-float-mark hf-ollama" title="Ollama">
-        <img src="/harnesses/ollama.svg" alt="" />
+      <span class="hero-float-mark hf-btcpay" title="BTCPay Server">
+        <img src="/harnesses/btcpay.svg" alt="" />
       </span>
     </div>
 
@@ -718,7 +718,7 @@ import { RELEASES_URL } from "../lib/releases";
     position: absolute;
     inset: 0;
     pointer-events: none;
-    z-index: 1;
+    z-index: 3;
   }
 
   .hero-float-mark {
@@ -749,7 +749,7 @@ import { RELEASES_URL } from "../lib/releases";
   .hero-float-mark.hf-lightning { background: radial-gradient(circle at 30% 25%, rgba(121, 46, 229, 0.26), rgba(20, 20, 24, 0.92) 65%); top: 6%;  right: 7%; animation-delay: -2.5s; transform: rotate(6deg); }
   .hero-float-mark.hf-opencode  { background: radial-gradient(circle at 30% 25%, rgba(255, 255, 255, 0.06), rgba(20, 20, 24, 0.92) 65%); top: 30%; left: 5%;  animation-delay: -5s;   transform: rotate(4deg); }
   .hero-float-mark.hf-liquid    { background: radial-gradient(circle at 30% 25%, rgba(34, 225, 201, 0.18), rgba(20, 20, 24, 0.92) 65%); top: 30%; right: 5%; animation-delay: -7s;   transform: rotate(-5deg); }
-  .hero-float-mark.hf-ollama    { background: radial-gradient(circle at 30% 25%, rgba(255, 255, 255, 0.08), rgba(20, 20, 24, 0.92) 65%); top: 52%; left: 6%;  animation-delay: -1.2s; transform: rotate(3deg); }
+  .hero-float-mark.hf-btcpay    { background: radial-gradient(circle at 30% 25%, rgba(81, 177, 62, 0.2), rgba(20, 20, 24, 0.92) 65%); top: 52%; left: 6%;  animation-delay: -1.2s; transform: rotate(3deg); }
 
   @media (max-width: 1180px) {
     .hero-float-mark { width: 76px; height: 76px; border-radius: 20px; }
@@ -758,7 +758,7 @@ import { RELEASES_URL } from "../lib/releases";
     .hero-float-mark.hf-lightning { top: 2%;  right: 3%; }
     .hero-float-mark.hf-opencode  { top: 26%; left: 2%; }
     .hero-float-mark.hf-liquid    { top: 24%; right: 2%; }
-    .hero-float-mark.hf-ollama    { top: 48%; left: 2%;  transform: rotate(3deg); }
+    .hero-float-mark.hf-btcpay    { top: 48%; left: 2%;  transform: rotate(3deg); }
   }
 
   @media (max-width: 820px) {
@@ -784,7 +784,7 @@ import { RELEASES_URL } from "../lib/releases";
 
     /* Only the two marks above the headline survive here. The lower three sat
        behind the title and the CTA once the copy wrapped. */
-    .hero-float-mark.hf-ollama,
+    .hero-float-mark.hf-btcpay,
     .hero-float-mark.hf-opencode,
     .hero-float-mark.hf-liquid {
       display: none;
