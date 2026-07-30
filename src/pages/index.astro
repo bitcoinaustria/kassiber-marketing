@@ -822,21 +822,23 @@ import { RELEASES_URL } from "../lib/releases";
     container-type: inline-size;
     max-width: 1180px;
     margin: 0 auto;
-    transform: perspective(2000px) rotateX(2deg);
-    transition: transform 0.6s ease;
-  }
-
-  .hero-preview:hover {
-    transform: perspective(2000px) rotateX(0deg);
   }
 
   .hero-screenshot-frame {
     position: relative;
-    overflow: hidden;
     aspect-ratio: 2360 / 1555;
-    border-radius: 14px;
     background: #0a0a0c;
     box-shadow: 0 28px 64px -28px rgba(0, 0, 0, 0.75);
+    transform: perspective(2000px) rotateX(2deg);
+    transform-origin: center bottom;
+    transition: transform 0.6s ease;
+    will-change: transform;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .hero-screenshot-frame:hover {
+      transform: perspective(2000px) rotateX(0deg);
+    }
   }
 
   .hero-screenshot-frame img {
@@ -1279,10 +1281,7 @@ import { RELEASES_URL } from "../lib/releases";
     .hero-preview {
       width: min(860px, calc(100vw - 24px));
       margin-left: 50%;
-      transform: translateX(-50%) perspective(1600px) rotateX(1.5deg);
-    }
-    .hero-preview:hover {
-      transform: translateX(-50%) perspective(1600px) rotateX(0deg);
+      transform: translateX(-50%);
     }
     .harness-grid { grid-template-columns: 1fr 1fr; }
     .harness { border-right: 0; border-bottom: 1px solid var(--border); }
@@ -1401,6 +1400,11 @@ import { RELEASES_URL } from "../lib/releases";
     .faq-item::details-content,
     .faq-item summary::after {
       transition: none;
+    }
+
+    .hero-screenshot-frame {
+      transform: none;
+      transition: opacity 0.2s ease;
     }
   }
 </style>

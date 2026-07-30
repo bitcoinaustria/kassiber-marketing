@@ -58,7 +58,7 @@ import ModelPickerMock from "./ModelPickerMock.astro";
    * exactly the same factor at every width.
    */
   .hero-chat {
-    --zoom: 2.1875;
+    --zoom: 1.75;
 
     /*
      * Scroll-driven dock. The composer's resting place is below the fold, so it
@@ -177,6 +177,23 @@ import ModelPickerMock from "./ModelPickerMock.astro";
     padding: 0.5em; /* p-2 */
     background: oklch(0.205 0 0 / 0.9); /* dark bg-card/90 */
     box-shadow: 0 20px 48px -22px rgb(0 0 0 / 65%);
+    transform: perspective(2000px) rotateX(2deg);
+    transform-origin: 78% 100%;
+    transition: transform 0.6s ease, box-shadow 0.6s ease;
+    will-change: transform;
+  }
+
+  /* The composer occupies a separate plane from the app capture behind it.
+     Giving each its own hover target makes the stack feel layered, not fused. */
+  @media (hover: hover) and (pointer: fine) {
+    .hero-chat {
+      pointer-events: auto;
+    }
+
+    .hero-chat:hover .hero-chat-dock {
+      transform: perspective(2000px) translateY(-10px) rotateX(0deg) rotateY(-1deg) scale(1.0125);
+      box-shadow: 0 28px 58px -22px rgb(0 0 0 / 78%);
+    }
   }
 
   /* App tokens (dark theme), copied from ui-tauri/src/styles/globals.css. */
@@ -346,6 +363,11 @@ import ModelPickerMock from "./ModelPickerMock.astro";
     .hero-chat,
     .hero-chat-caret {
       animation: none;
+    }
+
+    .hero-chat-dock {
+      transform: none !important;
+      transition: opacity 0.2s ease;
     }
   }
 
