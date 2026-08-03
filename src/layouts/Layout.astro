@@ -86,7 +86,7 @@ const socialImage = new URL(image, base);
         <div class="footer-inner">
           <div class="footer-brand">
             <img src="/bitcoin-austria-logomark.svg" alt="Bitcoin Austria" />
-            <span>&copy; {new Date().getFullYear()} Bitcoin Austria · AGPL-3.0 licensed</span>
+            <span>&copy; {new Date().getFullYear()} Bitcoin Austria · Website source: MIT</span>
           </div>
           <div class="footer-links">
             <a href={GITHUB_REPOSITORY_URL} target="_blank" rel="noopener noreferrer">GitHub</a>
@@ -489,16 +489,6 @@ const socialImage = new URL(image, base);
     width: 20px;
     height: 20px;
     object-fit: contain;
-  }
-
-  .footer-brand a {
-    color: inherit;
-    text-decoration: underline;
-    text-underline-offset: 3px;
-  }
-
-  .footer-brand a:hover {
-    color: var(--fg);
   }
 
   .footer-links {
