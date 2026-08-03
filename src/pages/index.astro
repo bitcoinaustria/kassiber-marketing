@@ -166,7 +166,7 @@ import { RELEASES_URL } from "../lib/releases";
         </div>
       </div>
 
-      <div class="agents-detail cli-inner">
+      <div class="agents-detail">
         <div class="cli-copy">
           <p class="cli-lead">
             It imports, reconciles, and drafts reports while you do something
@@ -184,29 +184,6 @@ import { RELEASES_URL } from "../lib/releases";
           </div>
         </div>
 
-        <div class="tile open-term cli-term">
-        <div class="open-term-head">
-          <span></span><span></span><span></span>
-          <span class="open-term-title">agent · ~/books</span>
-        </div>
-        <div class="open-term-body">
-          <div class="open-term-command">
-            <span class="command-text"><span class="prompt">$</span> npx skills add bitcoinaustria/kassiber-skill</span>
-            <button type="button" class="copy-cmd-btn open-term-copy" data-copy="npx skills add bitcoinaustria/kassiber-skill" aria-label="Copy skill install command">
-              <svg class="copy-cmd-icon copy-cmd-icon--copy" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2" /><path d="M5 15V5a2 2 0 012-2h8" /></svg>
-              <svg class="copy-cmd-icon copy-cmd-icon--done" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12l5 5L20 6" /></svg>
-            </button>
-          </div>
-          <div class="dim">✓ Kassiber skill installed</div>
-          <div><span class="prompt">$</span> opencode</div>
-          <div class="dim">✓ Kassiber skill ready</div>
-          <div><span class="prompt">›</span> Use the Kassiber skill to prepare my 2026 tax report.</div>
-          <div class="dim">✓ Preparing your 2026 tax report</div>
-          <div><span class="prompt">›</span> kassiber --machine reports summary</div>
-          <div class="dim">&#123;"kind": <span class="accent">"reports.summary"</span>, "schema_version": 1, "data": …&#125;</div>
-          <div class="cursor"><span class="prompt">$</span><span class="caret"></span></div>
-          </div>
-        </div>
       </div>
     </div>
   </section>
@@ -912,6 +889,7 @@ import { RELEASES_URL } from "../lib/releases";
 
   .agents-detail {
     margin-top: 56px;
+    max-width: 640px;
   }
 
   .skill-block {
@@ -988,17 +966,6 @@ import { RELEASES_URL } from "../lib/releases";
   }
 
   /* ── Agent-ready CLI ──────────────────────────────────── */
-  .cli-inner {
-    display: grid;
-    grid-template-columns: 1fr 1.1fr;
-    gap: 64px;
-    align-items: center;
-  }
-
-  .cli-term {
-    min-width: 0;
-  }
-
   .cli-lead {
     color: var(--fg-muted);
     font-size: 15px;
@@ -1291,7 +1258,6 @@ import { RELEASES_URL } from "../lib/releases";
       border-right: 0;
     }
     .mirror-inner { grid-template-columns: 1fr; gap: 40px; }
-    .cli-inner { grid-template-columns: 1fr; gap: 40px; }
     .git-inner { grid-template-columns: 1fr; gap: 40px; }
     .spec-strip { grid-template-columns: 1fr 1fr; row-gap: 26px; }
     .spec-group:nth-child(odd) { border-left: 0; padding-left: 0; }
