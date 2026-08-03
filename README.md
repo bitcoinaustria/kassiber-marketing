@@ -2,9 +2,10 @@
 
 Standalone Astro source for the Kassiber marketing site.
 
-Based on the marketing site from the upstream
-[`pingdotgg/t3code`](https://github.com/pingdotgg/t3code) repository. Thanks to
-the T3 Code contributors for making their work available under the MIT license.
+Kassiber was vibed with [T3 Code](https://github.com/pingdotgg/t3code), whose
+awesome open-source work provided the upstream foundation for this marketing
+site. Huge thanks to the T3 Code contributors for making it available under the
+MIT license. If you like how Kassiber looks and feels, go check out T3 Code.
 
 The site is licensed under the original MIT license in [LICENSE](LICENSE).
 The source has intentionally been reduced to the marketing app: it excludes
