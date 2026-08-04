@@ -9,7 +9,7 @@ import { RELEASES_URL } from "../lib/releases";
 <Layout>
   <!-- ── Hero ──────────────────────────────────────────────────── -->
   <section class="hero">
-    <div class="hero-grid" aria-hidden="true"></div>
+    <svg class="hero-links" aria-hidden="true"></svg>
 
     <div class="hero-float" aria-hidden="true">
       <span class="hero-float-mark hf-bitcoin" title="Bitcoin">
@@ -544,6 +544,208 @@ import { RELEASES_URL } from "../lib/releases";
   init();
 </script>
 
+<script>
+  // Ambient network between the floating hero cards: pulses fire between
+  // random card pairs, in random directions, on random timing. Lines exist
+  // only while a transfer is in flight; the receiving card glows briefly.
+  const NS = "http://www.w3.org/2000/svg";
+
+  const COLOR: Record<string, string> = {
+    "hf-bitcoin": "#f7931a",
+    "hf-lightning": "#8b5cf6",
+    "hf-opencode": "#9ca3af",
+    "hf-liquid": "#22e1c9",
+    "hf-btcpay": "#51b13e",
+  };
+
+  let uid = 0;
+
+  function el(tag: string, attrs: Record<string, string>) {
+    const node = document.createElementNS(NS, tag);
+    for (const [k, v] of Object.entries(attrs)) node.setAttribute(k, v);
+    return node;
+  }
+
+  function center(mark: Element, origin: DOMRect) {
+    const r = mark.getBoundingClientRect();
+    return { x: r.left - origin.left + r.width / 2, y: r.top - origin.top + r.height / 2 };
+  }
+
+  function colorOf(mark: Element) {
+    const cls = [...mark.classList].find((c) => c.startsWith("hf-"));
+    return (cls && COLOR[cls]) || "#9ca3af";
+  }
+
+  function glow(mark: Element, ms: number) {
+    mark.animate(
+      [{ filter: "brightness(1)" }, { filter: "brightness(1.25)" }, { filter: "brightness(1)" }],
+      { duration: ms, easing: "ease-in-out" },
+    );
+  }
+
+  function visibleMarks(hero: HTMLElement) {
+    return [...hero.querySelectorAll(".hero-float-mark")].filter(
+      (m) => getComputedStyle(m).display !== "none",
+    );
+  }
+
+  // Value moves between the real Bitcoin connections. OpenCode is the
+  // observer — it only ever polls them (see report/query below).
+  function fire(hero: HTMLElement, svg: SVGSVGElement) {
+    const marks = visibleMarks(hero).filter((m) => !m.classList.contains("hf-opencode"));
+    if (marks.length < 2) return;
+
+    const i = Math.floor(Math.random() * marks.length);
+    let j = Math.floor(Math.random() * (marks.length - 1));
+    if (j >= i) j++;
+    transfer(hero, svg, marks[i], marks[j]);
+  }
+
+  // OpenCode is an LLM agent: it polls one or two connections per round.
+  // Outbound query only — a dashed line marches out to the card and the card
+  // glows in acknowledgment. Nothing that looks like value flows back in.
+  function report(hero: HTMLElement, svg: SVGSVGElement) {
+    const oc = hero.querySelector<HTMLElement>(".hf-opencode");
+    if (!oc || getComputedStyle(oc).display === "none") return;
+    const others = visibleMarks(hero)
+      .filter((m) => m !== oc)
+      .sort(() => Math.random() - 0.5);
+    const n = Math.random() < 0.4 ? 2 : 1;
+    others.slice(0, n).forEach((m, k) => setTimeout(() => query(hero, svg, oc, m), k * 2000));
+  }
+
+  function query(hero: HTMLElement, svg: SVGSVGElement, oc: Element, target: Element) {
+    const origin = hero.getBoundingClientRect();
+    const p1 = center(oc, origin);
+    const p2 = center(target, origin);
+    const bow = (0.06 + Math.random() * 0.1) * (Math.random() < 0.5 ? -1 : 1);
+    const d = `M ${p1.x} ${p1.y} Q ${(p1.x + p2.x) / 2 - (p2.y - p1.y) * bow} ${(p1.y + p2.y) / 2 + (p2.x - p1.x) * bow} ${p2.x} ${p2.y}`;
+
+    const c = colorOf(target);
+    const ask = el("path", { class: "hl-ask", d, stroke: c, style: `--glow: ${c}` });
+    svg.appendChild(ask);
+    const askDur = 700;
+    ask.animate(
+      [
+        { opacity: 0, strokeDashoffset: 44 },
+        { opacity: 0.4, strokeDashoffset: 22, offset: 0.3 },
+        { opacity: 0.18, strokeDashoffset: 0, offset: 0.7 },
+        { opacity: 0, strokeDashoffset: -12 },
+      ],
+      { duration: askDur + 600, easing: "linear" },
+    );
+    setTimeout(() => glow(target, 900), askDur * 0.7);
+    setTimeout(() => ask.remove(), askDur + 700);
+  }
+
+  function transfer(hero: HTMLElement, svg: SVGSVGElement, a: Element, b: Element) {
+    const origin = hero.getBoundingClientRect();
+    const p1 = center(a, origin);
+    const p2 = center(b, origin);
+    const dx = p2.x - p1.x;
+    const dy = p2.y - p1.y;
+    const bow = (0.08 + Math.random() * 0.22) * (Math.random() < 0.5 ? -1 : 1);
+
+    // Lightning transfers get a subtly jagged bolt path; everything else arcs.
+    const isLightning =
+      a.classList.contains("hf-lightning") || b.classList.contains("hf-lightning");
+    let d: string;
+    if (isLightning) {
+      const dist = Math.hypot(dx, dy);
+      const segs = Math.max(4, Math.round(dist / 90));
+      const pts = [`M ${p1.x} ${p1.y}`];
+      for (let s = 1; s < segs; s++) {
+        const t = s / segs;
+        // point on the same quadratic arc, plus perpendicular jitter
+        const qx = (1 - t) ** 2 * p1.x + 2 * (1 - t) * t * ((p1.x + p2.x) / 2 - dy * bow) + t ** 2 * p2.x;
+        const qy = (1 - t) ** 2 * p1.y + 2 * (1 - t) * t * ((p1.y + p2.y) / 2 + dx * bow) + t ** 2 * p2.y;
+        const jitter = (Math.random() - 0.5) * 16;
+        pts.push(`L ${qx - (dy / dist) * jitter} ${qy + (dx / dist) * jitter}`);
+      }
+      pts.push(`L ${p2.x} ${p2.y}`);
+      d = pts.join(" ");
+    } else {
+      d = `M ${p1.x} ${p1.y} Q ${(p1.x + p2.x) / 2 - dy * bow} ${(p1.y + p2.y) / 2 + dx * bow} ${p2.x} ${p2.y}`;
+    }
+
+    const ca = colorOf(a);
+    const cb = colorOf(b);
+    const id = `hl-${uid++}`;
+    const grad = el("linearGradient", {
+      id,
+      gradientUnits: "userSpaceOnUse",
+      x1: String(p1.x), y1: String(p1.y), x2: String(p2.x), y2: String(p2.y),
+    });
+    grad.appendChild(el("stop", { offset: "0", "stop-color": ca }));
+    grad.appendChild(el("stop", { offset: "1", "stop-color": cb }));
+    svg.appendChild(grad);
+
+    // Lightning is fast — that's the whole point.
+    const dur = isLightning ? 600 + Math.random() * 300 : 1500 + Math.random() * 900;
+    const dispose = (ms: number, ...nodes: Element[]) =>
+      setTimeout(() => nodes.forEach((n) => n.remove()), ms);
+
+    // Faint context line. Bolts flicker like a discharge; arcs snap in and
+    // decay slowly like an afterglow.
+    const base = el("path", { class: "hl-line", d, stroke: `url(#${id})`, style: `--glow: ${cb}` });
+    svg.appendChild(base);
+    base.animate(
+      isLightning
+        ? [
+            { opacity: 0 },
+            { opacity: 0.55, offset: 0.06 },
+            { opacity: 0.12, offset: 0.14 },
+            { opacity: 0.45, offset: 0.24 },
+            { opacity: 0.3, offset: 0.5 },
+            { opacity: 0 },
+          ]
+        : [
+            { opacity: 0 },
+            { opacity: 0.35, offset: 0.12 },
+            { opacity: 0.25, offset: 0.55 },
+            { opacity: 0 },
+          ],
+      { duration: dur + 400, easing: "linear" },
+    );
+
+    const dot = el("circle", { class: "hl-dot", r: "3", fill: cb, style: `--glow: ${cb}` });
+    svg.appendChild(dot);
+    glow(a, 700);
+    const len = (base as SVGPathElement).getTotalLength();
+    const t0 = performance.now();
+    const ease = (t: number) => (t < 0.5 ? 2 * t * t : 1 - (-2 * t + 2) ** 2 / 2);
+    const step = (now: number) => {
+      const t = Math.min(1, (now - t0) / dur);
+      const p = (base as SVGPathElement).getPointAtLength(ease(t) * len);
+      dot.setAttribute("cx", String(p.x));
+      dot.setAttribute("cy", String(p.y));
+      dot.setAttribute("opacity", String(Math.min(1, 6 * Math.min(t, 1 - t))));
+      if (t < 1) requestAnimationFrame(step);
+      else glow(b, 700);
+    };
+    requestAnimationFrame(step);
+    dispose(dur + 400, grad, base, dot);
+  }
+
+  if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    document.querySelectorAll<HTMLElement>(".hero").forEach((hero) => {
+      const svg = hero.querySelector<SVGSVGElement>(".hero-links");
+      if (!svg) return;
+      // Fire only while the hero is on screen.
+      let visible = false;
+      new IntersectionObserver(([entry]) => {
+        visible = entry.isIntersecting;
+      }).observe(hero);
+      const tick = () => {
+        // Roughly every fifth event is an OpenCode poll round.
+        if (visible) (Math.random() < 0.2 ? report : fire)(hero, svg);
+        setTimeout(tick, 800 + Math.random() * 1600);
+      };
+      setTimeout(tick, Math.random() * 1200);
+    });
+  }
+</script>
+
 <style>
   /* ── Section base ─────────────────────────────────────────── */
   section {
@@ -605,16 +807,36 @@ import { RELEASES_URL } from "../lib/releases";
     border-top: 0;
   }
 
-  .hero-grid {
+  /* Connection layer between the floating cards (built by script below) */
+  .hero-links {
     position: absolute;
     inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
     pointer-events: none;
-    background-image:
-      linear-gradient(to right, rgba(255, 255, 255, 0.035) 1px, transparent 1px),
-      linear-gradient(to bottom, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
-    background-size: 48px 48px;
-    mask-image: radial-gradient(ellipse 80% 60% at 50% 40%, black 40%, transparent 100%);
-    -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 40%, black 40%, transparent 100%);
+    overflow: visible;
+  }
+
+  .hero :global(.hl-line) {
+    fill: none;
+    stroke-width: 1.3;
+    opacity: 0;
+    filter: drop-shadow(0 0 3px var(--glow));
+  }
+
+  .hero :global(.hl-ask) {
+    fill: none;
+    stroke-width: 1;
+    stroke-linecap: round;
+    stroke-dasharray: 4 7;
+    opacity: 0;
+    filter: drop-shadow(0 0 3px var(--glow));
+  }
+
+  .hero :global(.hl-dot) {
+    opacity: 0;
+    filter: drop-shadow(0 0 4px var(--glow));
   }
 
   .hero-inner {
@@ -741,6 +963,8 @@ import { RELEASES_URL } from "../lib/releases";
   @media (max-width: 820px) {
     .hero {
       padding-top: 132px;
+      /* Room for the card trio that replaces the preview below the CTA. */
+      padding-bottom: 170px;
     }
 
     .hero-title {
@@ -748,23 +972,20 @@ import { RELEASES_URL } from "../lib/releases";
       margin-top: 14px;
     }
 
-    /* The preview is hidden at this width, so no room needs reserving for it. */
     .hero-actions {
-      margin-bottom: 40px;
+      margin-bottom: 0;
+    }
+
+    /* The app preview and chat mock are too much for a phone — the cards and
+       their network animation carry the hero visual instead. */
+    .hero-preview {
+      display: none;
     }
 
     .hero-float {
       position: absolute;
       inset: 0;
       display: block;
-    }
-
-    /* Only the two marks above the headline survive here. The lower three sat
-       behind the title and the CTA once the copy wrapped. */
-    .hero-float-mark.hf-btcpay,
-    .hero-float-mark.hf-opencode,
-    .hero-float-mark.hf-liquid {
-      display: none;
     }
 
     .hero-float-mark {
@@ -779,7 +1000,7 @@ import { RELEASES_URL } from "../lib/releases";
       height: 44px;
     }
 
-    /* Three stacked on the left, two on the right, keeping the center CTA clear. */
+    /* Two flank the headline; three form a loose trio where the preview was. */
     .hero-float-mark.hf-bitcoin {
       top: 44px;
       left: 10px;
@@ -790,6 +1011,41 @@ import { RELEASES_URL } from "../lib/releases";
       top: 44px;
       right: 10px;
       transform: rotate(8deg);
+    }
+
+    .hero-float-mark.hf-opencode,
+    .hero-float-mark.hf-liquid,
+    .hero-float-mark.hf-btcpay {
+      top: auto;
+      width: 66px;
+      height: 66px;
+      border-radius: 18px;
+    }
+
+    .hero-float-mark.hf-opencode img,
+    .hero-float-mark.hf-liquid img,
+    .hero-float-mark.hf-btcpay img {
+      width: 38px;
+      height: 38px;
+    }
+
+    .hero-float-mark.hf-opencode {
+      bottom: 64px;
+      left: 12%;
+      transform: rotate(6deg);
+    }
+
+    .hero-float-mark.hf-btcpay {
+      bottom: 26px;
+      left: calc(50% - 33px);
+      transform: rotate(-4deg);
+    }
+
+    .hero-float-mark.hf-liquid {
+      bottom: 64px;
+      left: auto;
+      right: 12%;
+      transform: rotate(-7deg);
     }
   }
 
