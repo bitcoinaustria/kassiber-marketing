@@ -1310,6 +1310,9 @@ import { RELEASES_URL } from "../lib/releases";
       transform: translateX(-50%);
     }
     .git-inner { grid-template-columns: 1fr; gap: 40px; }
+    /* Stacked, the copy has to come first: the diagram means nothing before
+       you've read what it is. */
+    .git-copy { order: -1; }
     .sov-inner { grid-template-columns: 1fr; gap: 40px; }
     .agents-detail { grid-template-columns: 1fr; gap: 40px; }
     .open-grid { grid-template-columns: 1fr; }

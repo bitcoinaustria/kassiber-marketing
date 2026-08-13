@@ -305,17 +305,65 @@
     }
   }
 
+  /* Touch: no hover to hint with, so the two legs become a segmented control —
+     both options always visible, the selected one filled. Half the height of
+     the stacked cards, and obviously a choice. */
   @media (max-width: 560px) {
     .swap-route {
-      grid-template-columns: 1fr;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
     }
 
-    .swap-peg {
+    .swap-leg {
+      grid-row: 1;
+      gap: 3px;
+      padding: 10px 11px;
+      min-height: 64px;
       justify-content: center;
+      background: rgba(255, 255, 255, 0.02);
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
     }
 
+    [data-leg="liquid"] .swap-leg[data-leg-btn="liquid"],
+    [data-leg="bitcoin"] .swap-leg[data-leg-btn="bitcoin"] {
+      background: rgba(255, 255, 255, 0.09);
+      border-color: rgba(255, 255, 255, 0.45);
+    }
+
+    /* The fill carries the state on a phone; the chip is redundant width. */
+    .swap-leg-chip {
+      display: none;
+    }
+
+    .swap-leg-asset {
+      font-size: 13.5px;
+    }
+
+    .swap-leg-amt {
+      font-size: 11.5px;
+    }
+
+    /* The peg drops to one line under the pair it joins. */
+    .swap-peg {
+      grid-column: 1 / -1;
+      grid-row: 2;
+      justify-content: center;
+      gap: 10px;
+      padding-top: 2px;
+    }
+
+    /* The legs sit left-to-right again, so the arrows point that way too. */
     .swap-peg > svg {
-      transform: rotate(90deg);
+      transform: none;
+      width: 13px;
+      height: 13px;
+    }
+
+    .swap-peg-mid {
+      flex-direction: row;
+      align-items: center;
+      gap: 8px;
     }
   }
 </style>
