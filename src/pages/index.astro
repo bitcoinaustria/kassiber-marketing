@@ -2,6 +2,10 @@
 import Layout from "../layouts/Layout.astro";
 import CopyCommand from "../components/CopyCommand.astro";
 import HeroChatMock from "../components/HeroChatMock.astro";
+import SwapFlowMock from "../components/SwapFlowMock.astro";
+import AddConnectionMock from "../components/AddConnectionMock.astro";
+import TaxSheetMock from "../components/TaxSheetMock.astro";
+import AgentChatMock from "../components/AgentChatMock.astro";
 import { GITHUB_REPOSITORY_URL, SKILL_REPOSITORY_URL } from "../lib/site";
 import { RELEASES_URL } from "../lib/releases";
 ---
@@ -64,9 +68,9 @@ import { RELEASES_URL } from "../lib/releases";
         <figure class="hero-screenshot-frame">
           <img
             src="/kassiber-overview.webp"
-            alt="The Kassiber Overview screen: Bitcoin balance, a BTC activity chart with cost basis, holdings by source, recent Liquid and on-chain transactions, and the assistant composer with a local Qwen model selected"
-            width="2360"
-            height="1555"
+            alt="The Kassiber Overview screen: Bitcoin balance, a seven-year BTC activity chart with cost basis and price, sixteen configured connections, and recent Lightning and BTCPay transactions"
+            width="3024"
+            height="1992"
             loading="eager"
             decoding="async"
           />
@@ -76,133 +80,11 @@ import { RELEASES_URL } from "../lib/releases";
     </div>
   </section>
 
-  <!-- ── Spec strip ────────────────────────────────────────────── -->
-  <!-- Deliberately headless: a quiet facts bar between two heavy sections. -->
-  <section id="covers" class="sec-spec" aria-label="What Kassiber covers">
-    <div class="container spec-strip">
-      <div class="spec-group">
-        <div class="spec-key">Sources</div>
-        <div class="spec-val">Bitcoin Core · Electrum · Esplora · BTCPay Server</div>
-      </div>
-      <div class="spec-group">
-        <div class="spec-key">Layers</div>
-        <div class="spec-val">On-chain · Lightning · Liquid · Submarine swaps</div>
-      </div>
-      <div class="spec-group">
-        <div class="spec-key">Accounting</div>
-        <div class="spec-val">FIFO · LIFO · HIFO · LOFO · Moving average</div>
-      </div>
-      <div class="spec-group">
-        <div class="spec-key">Exports</div>
-        <div class="spec-val">PDF · XLSX · CSV · Live spreadsheet formulas</div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ── Local-first ───────────────────────────────────────────── -->
-  <section id="local-first" class="sec-sov">
-    <div class="container">
-      <div class="section-head">
-        <div class="eyebrow">Local-first</div>
-        <h2>You decide what you reveal. And to whom.</h2>
-        <p>
-          It syncs only from the sources you pick, never behind your back, and
-          keeps the books in one local file. It reports to nobody, so anyone who
-          wants your numbers has to get them from you.
-        </p>
-      </div>
-
-      <div class="sov-grid">
-        <div class="tile sov-tile">
-          <h3>Watch-only by design</h3>
-          <p>Kassiber holds no spending keys, so there is nothing to leak and nothing anyone can coerce out of you.</p>
-        </div>
-        <div class="tile sov-tile">
-          <h3>Encrypted at rest</h3>
-          <p>One passphrase, SQLCipher 4. On a stolen or border-searched laptop, your books are noise.</p>
-        </div>
-        <div class="tile sov-tile">
-          <h3>Nothing to subpoena</h3>
-          <p>There is no server behind the app. Send us a subpoena and all we can hand over is a shrug.</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ── Agents ────────────────────────────────────────────────── -->
-  <section id="agents" class="sec-harness">
-    <div class="container">
-      <div class="section-head">
-        <div class="eyebrow">Agents welcome</div>
-        <h2>Built by AI agents. Made for them too.</h2>
-        <p>
-          Kassiber was written by AI agents working alongside Bitcoin people,
-          and it's built to be driven by yours. Run the model locally, or use
-          encrypted inference if you want a bigger brain. You didn't keep
-          your books off the cloud just to paste them into a chatbot.
-        </p>
-      </div>
-
-      <div class="harness-grid">
-        <div class="harness">
-          <div class="harness-mark"><img src="/harnesses/opencode-dark.svg" alt="" /></div>
-          <div class="harness-name">OpenCode</div>
-        </div>
-        <div class="harness">
-          <div class="harness-mark"><img src="/harnesses/claude-ai-icon.svg" alt="" /></div>
-          <div class="harness-name">Claude Code</div>
-        </div>
-        <div class="harness">
-          <div class="harness-mark"><img src="/harnesses/openai_dark.svg" alt="" /></div>
-          <div class="harness-name">Codex CLI</div>
-        </div>
-        <div class="harness">
-          <div class="harness-mark"><img src="/harnesses/ollama.svg" alt="" /></div>
-          <div class="harness-name">Ollama</div>
-        </div>
-        <div class="harness">
-          <div class="harness-mark harness-mark-text" aria-hidden="true">oM</div>
-          <div class="harness-name">oMLX</div>
-        </div>
-      </div>
-
-      <div class="agents-detail">
-        <div class="cli-copy">
-          <p class="cli-lead">
-            It imports, reconciles, and drafts reports while you do something
-            better. Every command answers in the same shape every time, so
-            nothing drifts between runs, and anything big gets previewed before
-            it lands.
-          </p>
-
-          <div class="skill-block">
-            <p class="skill-note">
-              Don't explain Kassiber to your agent. Hand it <a href={SKILL_REPOSITORY_URL} target="_blank" rel="noopener noreferrer">the skill</a> instead:
-              one line, and it knows the commands, the rules, and where the
-              sharp edges are.
-            </p>
-          </div>
-        </div>
-
-      </div>
-    </div>
-  </section>
-
   <!-- ── Pairing ───────────────────────────────────────────────── -->
   <section id="pairing" class="sec-git">
     <div class="container git-inner">
       <div class="git-visual">
-        <figure class="shot-frame">
-          <!-- Stand-in: Overview transactions. Swap matching is the right screen here. -->
-          <img
-            src="/kassiber-transactions.webp"
-            alt=""
-            width="1200"
-            height="750"
-            loading="lazy"
-            decoding="async"
-          />
-        </figure>
+        <SwapFlowMock />
       </div>
 
       <div class="git-copy">
@@ -225,6 +107,32 @@ import { RELEASES_URL } from "../lib/releases";
     </div>
   </section>
 
+  <!-- ── Local-first ───────────────────────────────────────────── -->
+  <section id="local-first" class="sec-sov">
+    <div class="container sov-inner">
+      <div class="sov-copy">
+        <div class="section-head" style="margin-bottom:0">
+          <div class="eyebrow">Local-first</div>
+          <h2>You decide what you reveal. And to whom.</h2>
+          <p>
+            It syncs only from the sources you pick, never behind your back, and
+            keeps the books in one local file.
+          </p>
+        </div>
+
+        <ul class="checklist sov-facts">
+          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg> No spending keys, so there is nothing to leak and nothing to coerce out of you</li>
+          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg> One passphrase, SQLCipher 4: on a stolen laptop your books are noise</li>
+          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg> No server behind the app, so a subpoena gets you a shrug</li>
+        </ul>
+      </div>
+
+      <div class="sov-visual">
+        <AddConnectionMock />
+      </div>
+    </div>
+  </section>
+
   <!-- ── Tax & reports ─────────────────────────────────────────── -->
   <section id="tax" class="sec-tax">
     <div class="container">
@@ -241,57 +149,55 @@ import { RELEASES_URL } from "../lib/releases";
         </p>
       </div>
 
-      <dl class="report-rows">
-        <div class="report-row">
-          <dt>Capital gains</dt>
-          <dd>§ 27b EStG for Austria with E 1kv, generic books everywhere else. Country-specific reports ship on request.</dd>
-        </div>
-        <div class="report-row">
-          <dt>Exit tax</dt>
-          <dd>Leaving the country prices the deemed disposal for you, at the rates that applied on the day.</dd>
-        </div>
-        <div class="report-row">
-          <dt>Portfolio</dt>
-          <dd>Summary, balance sheet, portfolio, and balance history, at any date you pick.</dd>
-        </div>
-        <div class="report-row">
-          <dt>Evidence</dt>
-          <dd>Receipts and invoices attached to the transaction they belong to, with notes, tags, and BIP329 labels.</dd>
-        </div>
-      </dl>
+      <TaxSheetMock />
     </div>
   </section>
 
-  <!-- ── Privacy Mirror ────────────────────────────────────────── -->
-  <section id="privacy-mirror" class="sec-mirror">
-    <div class="container mirror-inner">
-      <div class="mirror-copy">
+  <!-- ── Agents ────────────────────────────────────────────────── -->
+  <section id="agents" class="sec-harness">
+    <div class="container agents-detail">
+      <div class="agents-copy">
         <div class="section-head" style="margin-bottom:0">
-          <div class="eyebrow">Privacy Mirror</div>
-          <h2>See yourself the way an analyst would.</h2>
+          <div class="eyebrow">Agents welcome</div>
+          <h2>Built by AI agents. Made for them too.</h2>
           <p>
-            Kassiber scores your books from 0 to 100, A+ down to F, on the
-            linkage it can already see in your own data: common-input edges,
-            change that ties two wallets together, reused addresses. It answers
-            what is linkable, who could plausibly infer it, and which local
-            evidence says so. No chain lookups, no signing, no writes to your
-            books.
+            Kassiber was written by AI agents, and it's built to be driven by
+            yours. Run the model locally, or use encrypted inference if you
+            want a bigger brain — you didn't keep your books off the cloud
+            just to paste them into a chatbot.
           </p>
         </div>
+
+        <p class="skill-note">
+          Don't explain Kassiber to your agent — hand it <a href={SKILL_REPOSITORY_URL} target="_blank" rel="noopener noreferrer">the skill</a>.
+        </p>
+
+        <ul class="harness-row" aria-label="Works with">
+          <li class="harness">
+            <span class="harness-mark"><img src="/harnesses/opencode-dark.svg" alt="" /></span>
+            <span class="harness-name">OpenCode</span>
+          </li>
+          <li class="harness">
+            <span class="harness-mark"><img src="/harnesses/claude-ai-icon.svg" alt="" /></span>
+            <span class="harness-name">Claude Code</span>
+          </li>
+          <li class="harness">
+            <span class="harness-mark"><img src="/harnesses/openai_dark.svg" alt="" /></span>
+            <span class="harness-name">Codex CLI</span>
+          </li>
+          <li class="harness">
+            <span class="harness-mark"><img src="/harnesses/ollama.svg" alt="" /></span>
+            <span class="harness-name">Ollama</span>
+          </li>
+          <li class="harness">
+            <span class="harness-mark harness-mark-text" aria-hidden="true">oM</span>
+            <span class="harness-name">oMLX</span>
+          </li>
+        </ul>
       </div>
 
-      <div class="mirror-visual">
-        <figure class="shot-frame">
-          <!-- Stand-in: Overview balance drivers. Privacy Mirror is the right screen here. -->
-          <img
-            src="/kassiber-analytics.webp"
-            alt=""
-            width="1200"
-            height="750"
-            loading="lazy"
-            decoding="async"
-          />
-        </figure>
+      <div class="agents-visual">
+        <AgentChatMock />
       </div>
     </div>
   </section>
@@ -1059,7 +965,7 @@ import { RELEASES_URL } from "../lib/releases";
 
   .hero-screenshot-frame {
     position: relative;
-    aspect-ratio: 2360 / 1555;
+    aspect-ratio: 3024 / 1992;
     background: #0a0a0c;
     box-shadow: 0 28px 64px -28px rgba(0, 0, 0, 0.75);
     transform: perspective(2000px) rotateX(2deg);
@@ -1083,131 +989,81 @@ import { RELEASES_URL } from "../lib/releases";
   }
 
   /* ── Local-first ──────────────────────────────────────── */
-  .sov-grid {
+  .sov-inner {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 16px;
+    grid-template-columns: 1fr 1.1fr;
+    gap: 64px;
+    align-items: center;
   }
 
-  .sov-tile {
-    padding: 24px 22px;
+  .sov-facts {
+    margin-top: 28px;
   }
 
-  .sov-tile h3 {
-    font-size: 16px;
-    font-weight: 600;
-    letter-spacing: -0.015em;
-    margin-bottom: 8px;
-  }
-
-  .sov-tile p {
-    color: var(--fg-muted);
-    font-size: 14px;
-    line-height: 1.55;
-    letter-spacing: -0.003em;
+  .sov-visual {
+    min-width: 0;
   }
 
   /* ── Harnesses ─────────────────────────────────────────── */
-  .sec-harness { background: var(--bg-band); }
-
-  .harness-grid {
+  .agents-detail {
     display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 0;
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    overflow: hidden;
+    grid-template-columns: 1fr 1.05fr;
+    gap: 56px;
+    align-items: start;
+  }
+
+  .agents-visual {
+    min-width: 0;
+  }
+
+  /* Quiet logo row, not a card grid: marks sit dim and come alive on hover. */
+  .harness-row {
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px 28px;
+    margin-top: 32px;
+    padding-top: 28px;
+    border-top: 1px solid var(--border);
   }
 
   .harness {
-    padding: 18px 20px;
-    display: flex; align-items: center; gap: 14px;
-    border-right: 1px solid var(--border);
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.015), transparent);
-    transition: background 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    opacity: 0.62;
+    transition: opacity 0.2s ease;
   }
-  .harness:last-child { border-right: 0; }
-  .harness:hover { background: rgba(255, 255, 255, 0.025); }
+  .harness:hover { opacity: 1; }
 
   .harness-mark {
-    color: var(--fg); opacity: 0.95;
-    flex-shrink: 0; width: 28px; height: 28px;
+    color: var(--fg);
+    flex-shrink: 0; width: 20px; height: 20px;
     display: grid; place-items: center;
   }
-  .harness-mark img { width: 22px; height: 22px; object-fit: contain; }
-  .harness-mark-text { font-family: var(--font-mono); font-size: 14px; font-weight: 600; }
+  .harness-mark img { width: 18px; height: 18px; object-fit: contain; }
+  .harness-mark-text { font-family: var(--font-mono); font-size: 12px; font-weight: 600; }
 
   .harness-name {
-    flex: 1; min-width: 0;
-    font-size: 14px; font-weight: 500;
+    font-size: 13.5px; font-weight: 500;
     letter-spacing: -0.01em;
-  }
-
-  .agents-detail {
-    margin-top: 56px;
-    max-width: 640px;
-  }
-
-  .skill-block {
-    margin-top: 32px;
-    padding-top: 28px;
-    border-top: 1px dashed var(--border);
+    color: var(--fg-muted);
+    white-space: nowrap;
   }
 
   .skill-note {
+    margin-top: 28px;
     color: var(--fg-muted);
     font-size: 15px;
     line-height: 1.55;
     margin-bottom: 16px;
   }
 
-  /* ── Spec strip ───────────────────────────────────────── */
-  /* Facts bar, not a card grid: one band, no chrome, a third the height. */
-  .sec-spec {
-    padding: 0;
-    background: var(--bg-band);
-  }
-
-  .spec-strip {
-    display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    padding-top: 30px;
-    padding-bottom: 30px;
-  }
-
-  .spec-group {
-    padding: 0 28px;
-    border-left: 1px solid var(--border);
-  }
-
-  .spec-group:first-child {
-    padding-left: 0;
-    border-left: 0;
-  }
-
-  .spec-key {
-    font-family: var(--font-mono);
-    font-size: 10px;
-    font-weight: 500;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: var(--fg-faint);
-    margin-bottom: 9px;
-  }
-
-  .spec-val {
-    font-size: 13.5px;
-    line-height: 1.5;
-    color: var(--fg-muted);
-    letter-spacing: -0.005em;
-  }
-
   /* ── Screenshot slots ─────────────────────────────────── */
-  /* Fixed slot so swapping in a real screenshot of any aspect keeps the
-     two-column layout stable. */
+  /* All app captures share one aspect, so the frame just takes the image's
+     natural shape instead of cropping it. */
   .shot-frame {
     overflow: hidden;
-    aspect-ratio: 16 / 10;
     border: 1px solid var(--border);
     border-radius: var(--radius);
     background: #0a0a0c;
@@ -1216,20 +1072,13 @@ import { RELEASES_URL } from "../lib/releases";
 
   .shot-frame img {
     width: 100%;
-    height: 100%;
-    object-fit: cover;
-    object-position: left top;
-  }
-
-  /* ── Agent-ready CLI ──────────────────────────────────── */
-  .cli-lead {
-    color: var(--fg-muted);
-    font-size: 15px;
-    line-height: 1.6;
-    letter-spacing: -0.005em;
+    height: auto;
+    display: block;
   }
 
   /* ── Git ──────────────────────────────────────────────── */
+  .sec-git { background: var(--bg-band); }
+
   .git-inner {
     display: grid;
     grid-template-columns: 1.1fr 1fr;
@@ -1257,52 +1106,6 @@ import { RELEASES_URL } from "../lib/releases";
   .sec-tax .section-head p a:hover,
   .skill-note a:hover {
     text-decoration-color: var(--fg);
-  }
-
-  .report-rows {
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    overflow: hidden;
-    max-width: 1020px;
-  }
-
-  .report-row {
-    display: grid;
-    grid-template-columns: 168px 1fr;
-    gap: 24px;
-    align-items: baseline;
-    padding: 18px 22px;
-    border-top: 1px solid var(--border);
-  }
-
-  .report-row:first-child {
-    border-top: 0;
-  }
-
-  .report-row dt {
-    font-family: var(--font-mono);
-    font-size: 12px;
-    letter-spacing: 0.02em;
-    color: var(--fg);
-  }
-
-  .report-row dd {
-    color: var(--fg-muted);
-    font-size: 15px;
-    line-height: 1.55;
-    letter-spacing: -0.005em;
-  }
-
-  /* ── Privacy Mirror ───────────────────────────────────── */
-  .mirror-inner {
-    display: grid;
-    grid-template-columns: 1fr 1.1fr;
-    gap: 64px;
-    align-items: center;
-  }
-
-  .mirror-visual {
-    min-width: 0;
   }
 
   /* ── Open source ──────────────────────────────────────── */
@@ -1506,17 +1309,9 @@ import { RELEASES_URL } from "../lib/releases";
       margin-left: 50%;
       transform: translateX(-50%);
     }
-    .harness-grid { grid-template-columns: 1fr 1fr; }
-    .harness { border-right: 0; border-bottom: 1px solid var(--border); }
-    .harness:nth-child(odd) { border-right: 1px solid var(--border); }
-    .harness:nth-child(5):last-child {
-      grid-column: 1 / -1;
-      border-right: 0;
-    }
-    .mirror-inner { grid-template-columns: 1fr; gap: 40px; }
     .git-inner { grid-template-columns: 1fr; gap: 40px; }
-    .spec-strip { grid-template-columns: 1fr 1fr; row-gap: 26px; }
-    .spec-group:nth-child(odd) { border-left: 0; padding-left: 0; }
+    .sov-inner { grid-template-columns: 1fr; gap: 40px; }
+    .agents-detail { grid-template-columns: 1fr; gap: 40px; }
     .open-grid { grid-template-columns: 1fr; }
   }
 
@@ -1533,13 +1328,7 @@ import { RELEASES_URL } from "../lib/releases";
       transform: none;
     }
     .hero-preview:hover { transform: none; }
-    .report-row { grid-template-columns: 1fr; gap: 6px; }
     .sov-grid { grid-template-columns: 1fr; }
-  }
-
-  @media (max-width: 520px) {
-    .spec-strip { grid-template-columns: 1fr; row-gap: 22px; }
-    .spec-group { border-left: 0; padding-left: 0; }
   }
 
   /* ── FAQ ──────────────────────────────────────────────── */
