@@ -141,7 +141,10 @@ const STATES = [
   /* Spreadsheet chrome on the site's own dark tokens: gridlines, mono
      figures, a formula bar, the workbook's tab strip. No window around it. */
   .sheet {
-    max-width: 720px;
+    max-width: 828px;
+    min-height: 352px;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
     font-family: var(--font-mono);
   }
 
@@ -215,6 +218,7 @@ const STATES = [
   .sheet-grid {
     display: grid;
     grid-template-columns: 26px 1.05fr 0.55fr 0.95fr 0.95fr 0.9fr 0.9fr 0.6fr;
+    min-height: 100%;
     min-width: 560px;
     font-size: 12px;
     line-height: 1;
@@ -373,6 +377,11 @@ const STATES = [
      up: without them all seven data columns fit, so the gain and the tax due
      stay on screen instead of hiding behind a sideways scroll. */
   @media (max-width: 620px) {
+    .sheet {
+      min-height: 0;
+      display: block;
+    }
+
     .sheet-bar {
       font-size: 10.5px;
     }

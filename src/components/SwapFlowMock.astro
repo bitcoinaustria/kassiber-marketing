@@ -24,12 +24,6 @@
 
     <div class="swap-peg" aria-hidden="true">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M13 6l6 6-6 6"/></svg>
-      <div class="swap-peg-mid">
-        <span class="swap-peg-kind">peg-out</span>
-        <span class="swap-peg-tax">Taxable</span>
-        <span class="swap-peg-fee">Fee 0.1%</span>
-      </div>
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M13 6l6 6-6 6"/></svg>
     </div>
 
     <button class="swap-leg" type="button" data-leg-btn="bitcoin" aria-pressed="false">
@@ -44,12 +38,6 @@
 
   <div class="swap-graph-head">
     <div class="swap-graph-title">Transaction graph</div>
-    <p class="swap-graph-sub" data-sub="liquid">
-      Reference graph: public references are available; confidential amounts stay hidden
-    </p>
-    <p class="swap-graph-sub" data-sub="bitcoin">
-      Valued Bitcoin input/output graph
-    </p>
   </div>
 
   <!-- Liquid leg: a consolidation — eight internal legs converge into the one
@@ -76,12 +64,25 @@
 
 <script>
   for (const mock of document.querySelectorAll<HTMLElement>(".swap-mock")) {
-    for (const btn of mock.querySelectorAll<HTMLButtonElement>("[data-leg-btn]")) {
+    const buttons = [...mock.querySelectorAll<HTMLButtonElement>("[data-leg-btn]")];
+    let automatic = !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    const select = (leg: string) => {
+      mock.dataset.leg = leg;
+      for (const button of buttons) {
+        button.setAttribute("aria-pressed", String(button.dataset.legBtn === leg));
+      }
+    };
+
+    const timer = window.setInterval(() => {
+      if (automatic) select(mock.dataset.leg === "liquid" ? "bitcoin" : "liquid");
+    }, 4200);
+
+    for (const btn of buttons) {
       btn.addEventListener("click", () => {
-        mock.dataset.leg = btn.dataset.legBtn;
-        for (const b of mock.querySelectorAll<HTMLButtonElement>("[data-leg-btn]")) {
-          b.setAttribute("aria-pressed", String(b === btn));
-        }
+        automatic = false;
+        window.clearInterval(timer);
+        select(btn.dataset.legBtn ?? "liquid");
       });
     }
   }
@@ -91,6 +92,7 @@
   /* App dark-theme values copied literally, so the panel reads as the app. */
   /* No card: the route, graph, and ledger sit straight on the section. */
   .swap-mock {
+    overflow: hidden;
     padding: 0;
   }
 
@@ -182,45 +184,16 @@
   }
 
   .swap-peg {
-    display: flex;
+    display: grid;
     align-items: center;
-    gap: 8px;
+    place-items: center;
     color: var(--fg-dim);
   }
 
   .swap-peg > svg {
-    width: 15px;
-    height: 15px;
+    width: 20px;
+    height: 20px;
     flex: none;
-  }
-
-  .swap-peg-mid {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 4px;
-  }
-
-  .swap-peg-kind {
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--fg);
-    letter-spacing: -0.01em;
-  }
-
-  .swap-peg-tax {
-    font-size: 11.5px;
-    color: var(--fg-dim);
-  }
-
-  .swap-peg-fee {
-    font-size: 10.5px;
-    line-height: 1;
-    padding: 4px 6px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 5px;
-    color: var(--fg-muted);
-    white-space: nowrap;
   }
 
   /* ── Graph ────────────────────────────────────────────── */
@@ -235,23 +208,12 @@
     margin-bottom: 3px;
   }
 
-  .swap-graph-sub {
-    display: none;
-    font-size: 12px;
-    color: var(--fg-dim);
-    letter-spacing: -0.003em;
-  }
-
-  [data-leg="liquid"] .swap-graph-sub[data-sub="liquid"],
-  [data-leg="bitcoin"] .swap-graph-sub[data-sub="bitcoin"] {
-    display: block;
-  }
-
-
   .swap-sankey {
     display: none;
     width: 100%;
     height: auto;
+    transform: translateX(-17.5%) scaleX(1.29);
+    transform-origin: left center;
   }
 
   [data-leg="liquid"] .swap-sankey[data-sankey="liquid"],
@@ -298,13 +260,6 @@
     color: var(--fg-dim);
   }
 
-  @media (max-width: 560px) {
-    .swap-io {
-      grid-template-columns: 1fr;
-      gap: 14px;
-    }
-  }
-
   /* Touch: no hover to hint with, so the two legs become a segmented control —
      both options always visible, the selected one filled. Half the height of
      the stacked cards, and obviously a choice. */
@@ -349,7 +304,6 @@
       grid-column: 1 / -1;
       grid-row: 2;
       justify-content: center;
-      gap: 10px;
       padding-top: 2px;
     }
 
@@ -360,10 +314,5 @@
       height: 13px;
     }
 
-    .swap-peg-mid {
-      flex-direction: row;
-      align-items: center;
-      gap: 8px;
-    }
   }
 </style>

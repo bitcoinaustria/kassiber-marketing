@@ -186,10 +186,6 @@ import { RELEASES_URL } from "../lib/releases";
             <span class="harness-name">Codex CLI</span>
           </li>
           <li class="harness">
-            <span class="harness-mark"><img src="/harnesses/ollama.svg" alt="" /></span>
-            <span class="harness-name">Ollama</span>
-          </li>
-          <li class="harness">
             <span class="harness-mark harness-mark-text" aria-hidden="true">oM</span>
             <span class="harness-name">oMLX</span>
           </li>
@@ -534,8 +530,8 @@ import { RELEASES_URL } from "../lib/releases";
     ask.animate(
       [
         { opacity: 0, strokeDashoffset: 44 },
-        { opacity: 0.4, strokeDashoffset: 22, offset: 0.3 },
-        { opacity: 0.18, strokeDashoffset: 0, offset: 0.7 },
+        { opacity: 0.5, strokeDashoffset: 22, offset: 0.3 },
+        { opacity: 0.23, strokeDashoffset: 0, offset: 0.7 },
         { opacity: 0, strokeDashoffset: -12 },
       ],
       { duration: askDur + 600, easing: "linear" },
@@ -599,22 +595,22 @@ import { RELEASES_URL } from "../lib/releases";
       isLightning
         ? [
             { opacity: 0 },
-            { opacity: 0.55, offset: 0.06 },
-            { opacity: 0.12, offset: 0.14 },
-            { opacity: 0.45, offset: 0.24 },
-            { opacity: 0.3, offset: 0.5 },
+            { opacity: 0.69, offset: 0.06 },
+            { opacity: 0.15, offset: 0.14 },
+            { opacity: 0.56, offset: 0.24 },
+            { opacity: 0.38, offset: 0.5 },
             { opacity: 0 },
           ]
         : [
             { opacity: 0 },
-            { opacity: 0.35, offset: 0.12 },
-            { opacity: 0.25, offset: 0.55 },
+            { opacity: 0.44, offset: 0.12 },
+            { opacity: 0.31, offset: 0.55 },
             { opacity: 0 },
           ],
       { duration: dur + 400, easing: "linear" },
     );
 
-    const dot = el("circle", { class: "hl-dot", r: "3", fill: cb, style: `--glow: ${cb}` });
+    const dot = el("circle", { class: "hl-dot", r: "4.5", fill: cb, style: `--glow: ${cb}` });
     svg.appendChild(dot);
     glow(a, 700);
     const len = (base as SVGPathElement).getTotalLength();
@@ -726,23 +722,23 @@ import { RELEASES_URL } from "../lib/releases";
 
   .hero :global(.hl-line) {
     fill: none;
-    stroke-width: 1.3;
+    stroke-width: 2;
     opacity: 0;
-    filter: drop-shadow(0 0 3px var(--glow));
+    filter: drop-shadow(0 0 4px var(--glow));
   }
 
   .hero :global(.hl-ask) {
     fill: none;
-    stroke-width: 1;
+    stroke-width: 1.5;
     stroke-linecap: round;
-    stroke-dasharray: 4 7;
+    stroke-dasharray: 5 8;
     opacity: 0;
-    filter: drop-shadow(0 0 3px var(--glow));
+    filter: drop-shadow(0 0 4px var(--glow));
   }
 
   .hero :global(.hl-dot) {
     opacity: 0;
-    filter: drop-shadow(0 0 4px var(--glow));
+    filter: drop-shadow(0 0 6px var(--glow));
   }
 
   .hero-inner {

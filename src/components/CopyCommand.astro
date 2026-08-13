@@ -1,4 +1,11 @@
 ---
+/*
+ * The whole row is the button: a 30px icon was a poor target on a phone, and
+ * the command itself only scrolled sideways inside its box, so you could
+ * neither read it nor reliably hit copy. Now anywhere in the row copies, and
+ * on narrow screens the command wraps instead of hiding.
+ */
+
 interface Props {
   command: string;
   label?: string;
@@ -9,26 +16,30 @@ const { command, label } = Astro.props;
 
 <div class="copy-cmd">
   {label && <div class="copy-cmd-label">{label}</div>}
-  <div class="copy-cmd-row">
+  <button
+    type="button"
+    class="copy-cmd-row copy-cmd-btn"
+    data-copy={command}
+    aria-label={`Copy command: ${command}`}
+  >
     <code>{command}</code>
-    <button
-      type="button"
-      class="copy-cmd-btn"
-      data-copy={command}
-      aria-label={`Copy command: ${command}`}
-    >
-      <svg class="copy-cmd-icon copy-cmd-icon--copy" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <span class="copy-cmd-mark" aria-hidden="true">
+      <svg class="copy-cmd-icon copy-cmd-icon--copy" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
         <rect x="9" y="9" width="12" height="12" rx="2" />
         <path d="M5 15V5a2 2 0 012-2h8" />
       </svg>
-      <svg class="copy-cmd-icon copy-cmd-icon--done" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <svg class="copy-cmd-icon copy-cmd-icon--done" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <path d="M4 12l5 5L20 6" />
       </svg>
-    </button>
-  </div>
+    </span>
+  </button>
 </div>
 
 <style>
+  .copy-cmd {
+    min-width: 0;
+  }
+
   .copy-cmd-label {
     font-family: var(--font-mono);
     font-size: 11px;
@@ -42,15 +53,28 @@ const { command, label } = Astro.props;
     display: flex;
     align-items: center;
     gap: 10px;
-    padding: 10px 10px 10px 14px;
+    width: 100%;
+    text-align: left;
+    padding: 11px 11px 11px 14px;
     border: 1px solid var(--border);
     border-radius: 10px;
     background: rgba(255, 255, 255, 0.02);
-    transition: border-color 0.18s ease;
+    transition: border-color 0.18s ease, background 0.18s ease;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
   }
 
   .copy-cmd-row:hover {
     border-color: var(--border-strong);
+    background: rgba(255, 255, 255, 0.035);
+  }
+
+  .copy-cmd-row:active {
+    background: rgba(255, 255, 255, 0.05);
+  }
+
+  .copy-cmd-row.is-copied {
+    border-color: color-mix(in srgb, var(--ok) 45%, transparent);
   }
 
   .copy-cmd-row code {
@@ -58,6 +82,7 @@ const { command, label } = Astro.props;
     min-width: 0;
     font-family: var(--font-mono);
     font-size: 13px;
+    line-height: 1.45;
     color: var(--fg);
     white-space: nowrap;
     overflow-x: auto;
@@ -68,7 +93,7 @@ const { command, label } = Astro.props;
     display: none;
   }
 
-  .copy-cmd-btn {
+  .copy-cmd-mark {
     flex: none;
     display: grid;
     place-items: center;
@@ -80,7 +105,7 @@ const { command, label } = Astro.props;
     transition: color 0.18s ease, background 0.18s ease;
   }
 
-  .copy-cmd-btn:hover {
+  .copy-cmd-row:hover .copy-cmd-mark {
     color: var(--fg);
     background: rgba(255, 255, 255, 0.08);
   }
@@ -90,16 +115,37 @@ const { command, label } = Astro.props;
   }
 
   .copy-cmd-icon--done,
-  .copy-cmd-btn.is-copied .copy-cmd-icon--copy {
+  .copy-cmd-row.is-copied .copy-cmd-icon--copy {
     display: none;
   }
 
-  .copy-cmd-btn.is-copied .copy-cmd-icon--done {
+  .copy-cmd-row.is-copied .copy-cmd-icon--done {
     display: block;
-    color: var(--ok);
   }
 
-  .copy-cmd-btn.is-copied {
+  .copy-cmd-row.is-copied .copy-cmd-mark {
     color: var(--ok);
+    background: color-mix(in srgb, var(--ok) 14%, transparent);
+  }
+
+  /* On a phone the command wraps so all of it is readable, and the row grows
+     into a target you cannot miss. */
+  @media (max-width: 640px) {
+    .copy-cmd-row {
+      align-items: flex-start;
+      gap: 12px;
+      padding: 13px 12px 13px 14px;
+    }
+
+    .copy-cmd-row code {
+      white-space: normal;
+      overflow-wrap: anywhere;
+      font-size: 12.5px;
+    }
+
+    .copy-cmd-mark {
+      width: 34px;
+      height: 34px;
+    }
   }
 </style>
