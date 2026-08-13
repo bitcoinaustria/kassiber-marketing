@@ -1,0 +1,529 @@
+---
+/*
+ * Interactive mock of Kassiber's "Add connection" dialog, ported like
+ * HeroChatMock and SwapFlowMock: app dark-theme values copied literally,
+ * every source scraped from the real dialog (regtest demo book, v0.22.70).
+ *
+ * The category rail is real: clicking a tab swaps the source list, and each
+ * list carries its full roster and scrolls inside the panel, as in the app.
+ * Rows are simplified to icon + name + one line; the app's mono provenance
+ * line is dropped so the whole roster stays readable at column width.
+ */
+
+/*
+ * Logos are the app's own integration assets (ui-tauri/src/assets/integrations),
+ * with the app's two treatments preserved: hardware-wallet glyphs are near-black
+ * and get inverted to white, and a few dark-ink marks sit on a light plate the
+ * way the app frames them. ZEUS and Phoenix ship no mark in the app (it falls
+ * back to a bolt and a "PHX" tile), so their real logos come from the projects'
+ * own repos — ZeusLN/zeus and ACINQ/phoenix. Sources with no logo anywhere
+ * (Electrum, Specter, the file importers) keep the app's generated tiles.
+ */
+type Tile = { label: string; bg: string; fg: string };
+type Item = {
+  title: string;
+  desc: string;
+  logo?: string;
+  tile?: Tile;
+  treat?: "invert" | "plate";
+  planned?: boolean;
+};
+
+const BTC = "/harnesses/bitcoin.svg";
+const LQ = "/harnesses/liquid.svg";
+const BTCPAY = "/harnesses/btcpay.svg";
+const I = (name: string) => `/integrations/${name}`;
+
+// The app's generated tiles, label and colour for colour.
+const T_EL: Tile = { label: "EL", bg: "#2563eb", fg: "#ffffff" };
+const T_SP: Tile = { label: "SP", bg: "#7c3aed", fg: "#ffffff" };
+const T_XLS: Tile = { label: "XLS", bg: "#f2a900", fg: "#1a1a1a" };
+const T_CSVY: Tile = { label: "CSV", bg: "#f2a900", fg: "#1a1a1a" };
+const T_CSV: Tile = { label: "CSV", bg: "#64748b", fg: "#ffffff" };
+const T_LBL: Tile = { label: "LBL", bg: "#475569", fg: "#ffffff" };
+
+const TABS: { id: string; label: string; items: Item[] }[] = [
+  {
+    id: "wallets",
+    label: "Wallets",
+    items: [
+      { logo: BTC, title: "Wallet export", desc: "Descriptor, BSMS, or xpub-family import." },
+      { logo: BTC, title: "Address list", desc: "A flat list of addresses, e.g. a pre-HD Core keypool." },
+      { logo: BTC, title: "Silent Payments", desc: "Watch-only BIP352 from BIP392 sp() material." },
+      { logo: LQ, title: "Liquid wallet export", desc: "Liquid wallet export or Elements descriptor." },
+      { logo: I("samourai.webp"), title: "Samourai", desc: "Samourai and Whirlpool account descriptors." },
+      { logo: I("wasabi.webp"), title: "Wasabi", desc: "RPC output with CoinJoin and anonymity evidence." },
+      { logo: I("sparrow.webp"), title: "Sparrow", desc: "Descriptor or xpub export." },
+      { tile: T_SP, title: "Specter Desktop", desc: "Descriptor export." },
+      { logo: I("bluewallet.webp"), title: "BlueWallet", desc: "Account xpub export." },
+      { logo: I("blockstream-green.svg"), title: "Blockstream Green", desc: "Singlesig xpub export." },
+      { logo: I("liana.svg"), title: "Liana", desc: "Timelock multisig descriptor import." },
+      { logo: I("nunchuk.svg"), title: "Nunchuk", desc: "Descriptor or BSMS export." },
+      { logo: I("bitbox.svg"), treat: "invert", title: "BitBox", desc: "Account xpub export." },
+      { logo: I("trezor.svg"), treat: "invert", title: "Trezor", desc: "Account xpub export." },
+      { logo: I("coldcard.svg"), treat: "invert", title: "Coldcard", desc: "Descriptor or xpub export." },
+      { logo: I("ledger.svg"), treat: "invert", title: "Ledger", desc: "Ledger Live account export." },
+      { logo: I("foundation-passport.svg"), treat: "invert", title: "Foundation Passport", desc: "Descriptor or xpub export." },
+      { logo: I("bullbitcoin-mark.webp"), title: "Bull Bitcoin Wallet", desc: "Unified wallet transaction CSV." },
+    ],
+  },
+  {
+    id: "nodes",
+    label: "Nodes",
+    items: [
+      { logo: BTC, title: "Bitcoin Core", desc: "Your own full node over JSON-RPC." },
+      { tile: T_EL, title: "Electrum server", desc: "Electrum over TCP/SSL — Fulcrum, ElectrumX." },
+      { logo: I("mempool-space.svg"), treat: "plate", title: "Esplora / mempool", desc: "Esplora-type HTTP REST, with explorer links." },
+    ],
+  },
+  {
+    id: "lightning",
+    label: "Lightning",
+    items: [
+      { logo: I("phoenix.svg"), title: "Phoenix", desc: "Lightning wallet CSV activity import." },
+      { logo: I("zeus.svg"), treat: "invert", title: "ZEUS", desc: "Lightning node interface.", planned: true },
+    ],
+  },
+  {
+    id: "merchant",
+    label: "Merchant",
+    items: [
+      { logo: BTCPAY, title: "BTCPay Server", desc: "Stores, wallet history, and invoice provenance." },
+      { logo: BTCPAY, title: "BTCPay CSV", desc: "Manual export when API sync isn't available." },
+    ],
+  },
+  {
+    id: "exchanges",
+    label: "Exchanges",
+    items: [
+      { logo: I("river.webp"), title: "River", desc: "Bitcoin or account activity CSV." },
+      { logo: I("bullbitcoin-mark.webp"), title: "Bull Bitcoin", desc: "Order CSV with exact execution pricing." },
+      { logo: I("pocket-bitcoin.svg"), title: "Pocket Bitcoin", desc: "Account CSV with exact buy pricing." },
+      { logo: I("coinfinity-mark.svg"), treat: "plate", title: "Coinfinity", desc: "Order CSV with exact execution pricing." },
+      { logo: I("strike.webp"), title: "Strike", desc: "Custodial wallet and exchange import." },
+      { logo: I("21bitcoin.webp"), title: "21bitcoin", desc: "Custodial ledger with exact trade pricing." },
+      { logo: I("binance.svg"), title: "Binance", desc: "BTC supplemental rows from Binance exports." },
+      { logo: I("relai.svg"), treat: "plate", title: "Relai", desc: "Bitcoin-only app activity import.", planned: true },
+      { logo: I("swan-bitcoin.svg"), title: "Swan Bitcoin", desc: "Savings and broker activity import.", planned: true },
+      { logo: I("bitpanda.svg"), title: "Bitpanda", desc: "History export.", planned: true },
+      { logo: I("kraken.svg"), title: "Kraken", desc: "Private API history.", planned: true },
+      { logo: I("coinbase.svg"), title: "Coinbase", desc: "API history.", planned: true },
+    ],
+  },
+  {
+    id: "files",
+    label: "Files",
+    items: [
+      { tile: T_XLS, title: "Generic ledger", desc: "Fill-in spreadsheet for manual transactions." },
+      { tile: T_CSVY, title: "Other exchange or broker", desc: "Any export from a platform not listed yet." },
+      { tile: T_CSV, title: "CSV import", desc: "One-shot import from a local file." },
+      { tile: T_LBL, title: "BIP329 labels", desc: "JSONL wallet label import and export." },
+    ],
+  },
+];
+
+const TOTAL = TABS.reduce((n, tab) => n + tab.items.length, 0);
+---
+
+<div class="conn-mock" data-tab="wallets">
+  <div class="conn-head">
+    <div class="conn-title">Add connection</div>
+    <div class="conn-sub">{TOTAL} sources: watch-only wallets, your node, merchant tools, files.</div>
+  </div>
+
+  <div class="conn-body">
+    <nav class="conn-rail" aria-label="Source categories">
+      {TABS.map((tab, i) => (
+        <button
+          class="conn-tab"
+          type="button"
+          data-tab-btn={tab.id}
+          aria-pressed={i === 0 ? "true" : "false"}
+        >
+          <span>{tab.label}</span>
+          <span class="conn-tab-count">{tab.items.length}</span>
+        </button>
+      ))}
+    </nav>
+
+    <!-- All lists share one grid cell and scroll inside it, so the panel keeps
+         one height and the page never reflows when you switch tabs. -->
+    <div class="conn-stack">
+      {TABS.map((tab) => (
+        <ul class="conn-list" data-list={tab.id}>
+          {tab.items.map((item, i) => (
+            <li class:list={["conn-item", { "conn-item--active": i === 0 }]}>
+              <span
+                class:list={["conn-item-mark", {
+                  "conn-item-mark--plate": item.treat === "plate",
+                  "conn-item-mark--tile": !!item.tile,
+                }]}
+                style={item.tile ? `background:${item.tile.bg};color:${item.tile.fg}` : undefined}
+              >
+                {item.logo
+                  ? <img src={item.logo} alt="" class:list={{ "is-inverted": item.treat === "invert" }} />
+                  : <span class="conn-item-letter">{item.tile?.label}</span>}
+              </span>
+              <span class="conn-item-copy">
+                <span class="conn-item-title">
+                  {item.title}
+                  {item.planned && <span class="conn-item-planned">Planned</span>}
+                </span>
+                <span class="conn-item-desc">{item.desc}</span>
+              </span>
+            </li>
+          ))}
+        </ul>
+      ))}
+      <div class="conn-fade" aria-hidden="true"></div>
+    </div>
+  </div>
+
+  <div class="conn-foot" aria-hidden="true">
+    <span class="conn-foot-note">Third-party marks belong to their owners.</span>
+    <span class="conn-btn conn-btn--ghost">Cancel</span>
+    <span class="conn-btn conn-btn--go">Continue</span>
+  </div>
+</div>
+
+<script>
+  for (const mock of document.querySelectorAll<HTMLElement>(".conn-mock")) {
+    for (const btn of mock.querySelectorAll<HTMLButtonElement>("[data-tab-btn]")) {
+      btn.addEventListener("click", () => {
+        mock.dataset.tab = btn.dataset.tabBtn;
+        for (const b of mock.querySelectorAll<HTMLButtonElement>("[data-tab-btn]")) {
+          b.setAttribute("aria-pressed", String(b === btn));
+        }
+        // Each tab starts at the top, like reopening the dialog on that category.
+        mock.querySelector<HTMLElement>(`[data-list="${btn.dataset.tabBtn}"]`)?.scrollTo(0, 0);
+      });
+    }
+  }
+</script>
+
+<style>
+  /* App dark-theme values copied literally, so the panel reads as the app. */
+  .conn-mock {
+    --conn-bg: #0f0f11;
+
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--conn-bg);
+    box-shadow: 0 24px 56px -28px rgba(0, 0, 0, 0.75);
+    padding: 22px 22px 18px;
+  }
+
+  .conn-head {
+    margin-bottom: 18px;
+  }
+
+  .conn-title {
+    font-size: 16px;
+    font-weight: 650;
+    letter-spacing: -0.015em;
+    margin-bottom: 4px;
+  }
+
+  .conn-sub {
+    font-size: 12.5px;
+    color: var(--fg-dim);
+  }
+
+  .conn-body {
+    display: grid;
+    grid-template-columns: 148px 1fr;
+    gap: 18px;
+    align-items: start;
+  }
+
+  /* ── Category rail ────────────────────────────────────── */
+  .conn-rail {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    border-right: 1px solid rgba(255, 255, 255, 0.06);
+    padding-right: 14px;
+    align-self: stretch;
+  }
+
+  .conn-tab {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    text-align: left;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    color: var(--fg-muted);
+    padding: 8px 11px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: color 0.15s ease, background 0.15s ease;
+  }
+
+  /* Hover moves the text only. The selected tab owns the filled surface, so
+     the two never read as one state. */
+  .conn-tab:hover {
+    color: var(--fg);
+  }
+
+  .conn-tab[aria-pressed="true"] {
+    color: var(--fg);
+    font-weight: 600;
+    background: rgba(255, 255, 255, 0.08);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+  }
+
+  .conn-tab-count {
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    color: var(--fg-faint);
+  }
+
+  .conn-tab[aria-pressed="true"] .conn-tab-count {
+    color: var(--fg-muted);
+  }
+
+  /* ── Source list ──────────────────────────────────────── */
+  .conn-stack {
+    position: relative;
+    display: grid;
+    min-width: 0;
+  }
+
+  .conn-list {
+    grid-area: 1 / 1;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    /* The long rosters scroll in place, as the dialog does. */
+    max-height: 396px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding-right: 8px;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s ease, visibility 0.2s;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.14) transparent;
+  }
+
+  .conn-list::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .conn-list::-webkit-scrollbar-thumb {
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.14);
+  }
+
+  [data-tab="wallets"] .conn-list[data-list="wallets"],
+  [data-tab="nodes"] .conn-list[data-list="nodes"],
+  [data-tab="lightning"] .conn-list[data-list="lightning"],
+  [data-tab="merchant"] .conn-list[data-list="merchant"],
+  [data-tab="exchanges"] .conn-list[data-list="exchanges"],
+  [data-tab="files"] .conn-list[data-list="files"] {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  /* Hints that the roster continues past the fold. */
+  .conn-fade {
+    position: absolute;
+    inset: auto 0 0 0;
+    height: 26px;
+    pointer-events: none;
+    background: linear-gradient(to top, var(--conn-bg) 20%, transparent);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .conn-list {
+      transition: none;
+    }
+  }
+
+  .conn-item {
+    display: flex;
+    gap: 13px;
+    align-items: center;
+    padding: 12px 15px;
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-radius: 10px;
+    background: #121215;
+  }
+
+  .conn-item--active {
+    border-color: rgba(255, 255, 255, 0.3);
+  }
+
+  .conn-item-mark {
+    flex: none;
+    width: 28px;
+    height: 28px;
+    display: grid;
+    place-items: center;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.05);
+    overflow: hidden;
+  }
+
+  .conn-item-mark img {
+    width: 19px;
+    height: 19px;
+    object-fit: contain;
+  }
+
+  /* The app's own treatments: hardware-wallet glyphs are near-black, so they
+     are forced to white here; a few dark-ink marks get a light plate instead. */
+  .conn-item-mark img.is-inverted {
+    filter: brightness(0) invert(1);
+  }
+
+  .conn-item-mark--plate {
+    background: #e8e8ea;
+  }
+
+  .conn-item-mark--tile {
+    /* Colour comes from the app's generated tile, inline. */
+    background: none;
+  }
+
+  .conn-item-letter {
+    font-family: var(--font-sans);
+    font-size: 9.5px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+
+  .conn-item-copy {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  .conn-item-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13.5px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+
+  .conn-item-planned {
+    font-size: 9.5px;
+    font-weight: 500;
+    line-height: 1;
+    padding: 3px 6px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 5px;
+    color: var(--fg-dim);
+    white-space: nowrap;
+  }
+
+  .conn-item-desc {
+    font-size: 12px;
+    line-height: 1.45;
+    color: var(--fg-muted);
+  }
+
+  /* ── Footer ───────────────────────────────────────────── */
+  /* Illustration, not a control surface: nothing here takes a click. */
+  .conn-foot {
+    pointer-events: none;
+    user-select: none;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 18px;
+    padding-top: 15px;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+  }
+
+  .conn-foot-note {
+    flex: 1;
+    min-width: 0;
+    font-size: 11px;
+    color: var(--fg-faint);
+  }
+
+  .conn-btn {
+    flex: none;
+    font-size: 12.5px;
+    font-weight: 500;
+    line-height: 1;
+    padding: 9px 15px;
+    border-radius: 8px;
+  }
+
+  .conn-btn--ghost {
+    color: var(--fg-muted);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .conn-btn--go {
+    color: #09090b;
+    background: var(--fg);
+    font-weight: 600;
+  }
+
+  /* ── Mobile ───────────────────────────────────────────── */
+  @media (max-width: 620px) {
+    .conn-mock {
+      padding: 18px 16px 14px;
+    }
+
+    .conn-body {
+      grid-template-columns: 1fr;
+      gap: 14px;
+    }
+
+    /* The rail becomes a pill row that scrolls sideways inside itself, so all
+       six categories stay reachable without stealing vertical space. */
+    .conn-rail {
+      flex-direction: row;
+      gap: 6px;
+      border-right: 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      padding: 0 0 12px;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+
+    .conn-rail::-webkit-scrollbar {
+      display: none;
+    }
+
+    .conn-tab {
+      flex: none;
+      gap: 7px;
+      padding: 7px 11px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 999px;
+      white-space: nowrap;
+    }
+
+    .conn-list {
+      max-height: 330px;
+      padding-right: 4px;
+    }
+
+    /* One tap target per row on a phone: the copy wraps instead of truncating. */
+    .conn-item {
+      padding: 11px 13px;
+      gap: 11px;
+    }
+
+    .conn-foot-note {
+      display: none;
+    }
+
+    .conn-btn {
+      flex: 1;
+      text-align: center;
+    }
+  }
+</style>

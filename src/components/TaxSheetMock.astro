@@ -1,0 +1,431 @@
+---
+/*
+ * A slice of the real full-report.xlsx, mocked live — modelled on the
+ * workbook Kassiber exports for the Austrian profile (Disposals sheet +
+ * Verify sheet, regtest demo book). The layout, column names, and formulas
+ * are the export's own, trimmed to the columns that carry the story:
+ *
+ *   Gain/Loss  =C3-D3                the sheet re-derives every gain
+ *   Check      =IF(ABS(E3-F3)<=Verify!$B$3,"OK",…)   …and audits Kassiber
+ *   Total      =SUM(E3:E5)
+ *   Tax due    =E6*27.5%             § 27b EStG
+ *
+ * Numbers are internally consistent: 606.25 + 1,826.87 − 14.25 = 2,418.87,
+ * and 27.5% of that is 665.19. The selection cycles through the computed
+ * cells with each formula in the bar and its referenced cells highlighted,
+ * the way a spreadsheet looks while you audit it. Clicking a cell selects it.
+ */
+
+const STATES = [
+  { id: "s1", cell: "E3", formula: "=C3-D3" },
+  { id: "s2", cell: "G3", formula: '=IF(ABS(E3-F3)<=Verify!$B$3,"OK","DIFF")' },
+  { id: "s3", cell: "E6", formula: "=SUM(E3:E5)" },
+  { id: "s4", cell: "E7", formula: "=E6*27.5%" },
+];
+---
+
+<div class="sheet" data-sel="s1">
+  <div class="sheet-bar">
+    <span class="sheet-cellref">
+      {STATES.map((s) => <span data-ref={s.id}>{s.cell}</span>)}
+    </span>
+    <span class="sheet-fx">fx</span>
+    <span class="sheet-formula">
+      {STATES.map((s) => <span data-formula={s.id}>{s.formula}</span>)}
+    </span>
+  </div>
+
+  <div class="sheet-scroll">
+    <div class="sheet-grid" role="img" aria-label="The Disposals sheet of Kassiber's report export: each row re-derives its gain from proceeds minus cost basis, a Check column compares the result against Kassiber's figure and reads OK, the gains total 2,418.87 euro, and the 27.5 percent paragraph 27b tax on that is 665.19 euro">
+      <div class="sh sh-corner"></div>
+      <div class="sh">A</div>
+      <div class="sh">B</div>
+      <div class="sh">C</div>
+      <div class="sh">D</div>
+      <div class="sh">E</div>
+      <div class="sh">F</div>
+      <div class="sh">G</div>
+
+      <div class="sh">1</div>
+      <div class="sc sc-title" style="grid-column: 2 / 9">Disposals ledger (inputs reduce holdings)</div>
+
+      <div class="sh">2</div>
+      <div class="sc sc-h">Occurred At</div>
+      <div class="sc sc-h sc-colb">Asset</div>
+      <div class="sc sc-h sc-num">Proceeds</div>
+      <div class="sc sc-h sc-num">Cost Basis</div>
+      <div class="sc sc-h sc-num">Gain/Loss</div>
+      <div class="sc sc-h sc-num sc-colf">Kassiber</div>
+      <div class="sc sc-h sc-mid">Check</div>
+
+      <div class="sh">3</div>
+      <div class="sc">2024-03-19</div>
+      <div class="sc sc-colb">BTC</div>
+      <div class="sc sc-num c-C3">1,912.45</div>
+      <div class="sc sc-num c-D3">1,306.20</div>
+      <button class="sc sc-num sc-calc c-E3" type="button" data-sel-btn="s1">606.25</button>
+      <div class="sc sc-num sc-colf c-F3">606.25</div>
+      <button class="sc sc-mid sc-calc sc-ok c-G3" type="button" data-sel-btn="s2">OK</button>
+
+      <div class="sh">4</div>
+      <div class="sc">2024-11-02</div>
+      <div class="sc sc-colb">BTC</div>
+      <div class="sc sc-num">5,004.00</div>
+      <div class="sc sc-num">3,177.13</div>
+      <div class="sc sc-num c-E4">1,826.87</div>
+      <div class="sc sc-num sc-colf">1,826.87</div>
+      <div class="sc sc-mid sc-ok">OK</div>
+
+      <div class="sh">5</div>
+      <div class="sc">2025-02-27</div>
+      <div class="sc sc-colb">LBTC</div>
+      <div class="sc sc-num">731.60</div>
+      <div class="sc sc-num">745.85</div>
+      <div class="sc sc-num sc-loss c-E5">-14.25</div>
+      <div class="sc sc-num sc-loss sc-colf">-14.25</div>
+      <div class="sc sc-mid sc-ok">OK</div>
+
+      <div class="sh">6</div>
+      <div class="sc sc-label" style="grid-column: 2 / 6">Total gain</div>
+      <button class="sc sc-num sc-calc sc-gain c-E6" type="button" data-sel-btn="s3">2,418.87</button>
+      <div class="sc sc-mid sc-ok sc-allok" style="grid-column: 7 / 9">ALL CHECKS OK</div>
+
+      <div class="sh">7</div>
+      <div class="sc sc-label" style="grid-column: 2 / 6">Tax due · 27.5% § 27b EStG</div>
+      <button class="sc sc-num sc-calc sc-tax c-E7" type="button" data-sel-btn="s4">665.19</button>
+      <div class="sc" style="grid-column: 7 / 9"></div>
+    </div>
+  </div>
+
+  <!-- The workbook's tab strip: the export really ships all of these. -->
+  <div class="sheet-tabs" aria-hidden="true">
+    <span>Overview</span>
+    <span>Portfolio</span>
+    <span>Capital Summary</span>
+    <span class="sheet-tab-active">Disposals</span>
+    <span>Verify</span>
+    <span>Control</span>
+  </div>
+</div>
+
+<script>
+  const REDUCED = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  for (const sheet of document.querySelectorAll<HTMLElement>(".sheet")) {
+    const order = ["s1", "s2", "s3", "s4"];
+    let timer: number | undefined;
+
+    const cycle = () => {
+      const next = order[(order.indexOf(sheet.dataset.sel ?? "s1") + 1) % order.length];
+      sheet.dataset.sel = next;
+    };
+
+    const arm = () => {
+      if (REDUCED) return;
+      window.clearInterval(timer);
+      timer = window.setInterval(cycle, 2800);
+    };
+
+    for (const btn of sheet.querySelectorAll<HTMLButtonElement>("[data-sel-btn]")) {
+      btn.addEventListener("click", () => {
+        sheet.dataset.sel = btn.dataset.selBtn;
+        arm(); // a click restarts the beat from the chosen cell
+      });
+    }
+
+    arm();
+  }
+</script>
+
+<style>
+  /* Spreadsheet chrome on the site's own dark tokens: gridlines, mono
+     figures, a formula bar, the workbook's tab strip. No window around it. */
+  .sheet {
+    max-width: 720px;
+    font-family: var(--font-mono);
+  }
+
+  /* ── Formula bar ──────────────────────────────────────── */
+  .sheet-bar {
+    display: flex;
+    align-items: stretch;
+    border: 1px solid var(--border);
+    border-bottom: 0;
+    border-radius: 8px 8px 0 0;
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0.02);
+    font-size: 12px;
+  }
+
+  .sheet-cellref {
+    display: grid;
+    place-items: center;
+    min-width: 52px;
+    padding: 8px 10px;
+    border-right: 1px solid var(--border);
+    color: var(--fg);
+    font-weight: 500;
+  }
+
+  .sheet-fx {
+    display: grid;
+    place-items: center;
+    padding: 8px 10px;
+    border-right: 1px solid var(--border);
+    color: var(--fg-faint);
+    font-style: italic;
+  }
+
+  .sheet-formula {
+    display: grid;
+    align-items: center;
+    padding: 8px 12px;
+    color: var(--ok);
+    letter-spacing: 0.01em;
+    white-space: nowrap;
+    overflow: hidden;
+    min-width: 0;
+  }
+
+  /* The texts share one cell; the active state shows its own. */
+  .sheet-cellref span,
+  .sheet-formula span {
+    grid-area: 1 / 1;
+    opacity: 0;
+    transition: opacity 0.25s ease;
+  }
+
+  [data-sel="s1"] [data-ref="s1"], [data-sel="s1"] [data-formula="s1"],
+  [data-sel="s2"] [data-ref="s2"], [data-sel="s2"] [data-formula="s2"],
+  [data-sel="s3"] [data-ref="s3"], [data-sel="s3"] [data-formula="s3"],
+  [data-sel="s4"] [data-ref="s4"], [data-sel="s4"] [data-formula="s4"] {
+    opacity: 1;
+  }
+
+  /* ── Grid ─────────────────────────────────────────────── */
+  /* Sheets scroll sideways when the window is narrow; so does this one. */
+  .sheet-scroll {
+    overflow-x: auto;
+    border: 1px solid var(--border);
+    background: #0b0b0d;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.14) transparent;
+  }
+
+  .sheet-grid {
+    display: grid;
+    grid-template-columns: 26px 1.05fr 0.55fr 0.95fr 0.95fr 0.9fr 0.9fr 0.6fr;
+    min-width: 560px;
+    font-size: 12px;
+    line-height: 1;
+  }
+
+  /* Row/column headers */
+  .sh {
+    display: grid;
+    place-items: center;
+    padding: 7px 4px;
+    background: rgba(255, 255, 255, 0.025);
+    color: var(--fg-faint);
+    font-size: 10px;
+    border-right: 1px solid rgba(255, 255, 255, 0.05);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  }
+
+  /* Cells */
+  .sc {
+    display: flex;
+    align-items: center;
+    padding: 8px 9px;
+    color: var(--fg-muted);
+    border-right: 1px solid rgba(255, 255, 255, 0.05);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .sheet-grid > :nth-child(8n) {
+    border-right: 0;
+  }
+
+  .sc-title {
+    color: var(--fg-dim);
+    font-size: 11px;
+  }
+
+  .sc-h {
+    color: var(--fg-dim);
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .sc-num {
+    justify-content: flex-end;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .sc-mid {
+    justify-content: center;
+  }
+
+  .sc-label {
+    color: var(--fg-dim);
+    font-family: var(--font-sans);
+    font-size: 11.5px;
+    letter-spacing: -0.005em;
+  }
+
+  .sc-ok {
+    color: var(--ok);
+    font-size: 10.5px;
+    letter-spacing: 0.04em;
+  }
+
+  .sc-allok {
+    white-space: nowrap;
+  }
+
+  .sc-loss {
+    color: var(--fg-dim);
+  }
+
+  /* Computed cells are the clickable ones. */
+  .sc-calc {
+    position: relative;
+    color: var(--fg);
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s ease;
+  }
+
+  .sc-calc:hover {
+    background: rgba(255, 255, 255, 0.04);
+  }
+
+  .sc-calc.sc-ok {
+    color: var(--ok);
+  }
+
+  .sc-gain {
+    color: var(--ok);
+  }
+
+  .sc-tax {
+    color: var(--warn);
+  }
+
+  /* ── Selection ring + referenced cells ────────────────── */
+  .c-C3, .c-D3, .c-E3, .c-F3, .c-G3, .c-E4, .c-E5, .c-E6, .c-E7 {
+    transition: box-shadow 0.25s ease, background 0.25s ease;
+  }
+
+  [data-sel="s1"] .c-E3,
+  [data-sel="s2"] .c-G3,
+  [data-sel="s3"] .c-E6,
+  [data-sel="s4"] .c-E7 {
+    box-shadow: inset 0 0 0 2px var(--ok);
+    background: rgba(255, 255, 255, 0.03);
+  }
+
+  /* Cells the active formula reads from, tinted like a spreadsheet's
+     range highlight. */
+  [data-sel="s1"] .c-C3, [data-sel="s1"] .c-D3,
+  [data-sel="s2"] .c-E3, [data-sel="s2"] .c-F3,
+  [data-sel="s3"] .c-E3, [data-sel="s3"] .c-E4, [data-sel="s3"] .c-E5,
+  [data-sel="s4"] .c-E6 {
+    box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--ok) 45%, transparent);
+    background: color-mix(in srgb, var(--ok) 7%, transparent);
+  }
+
+  /* ── Workbook tab strip ───────────────────────────────── */
+  .sheet-tabs {
+    display: flex;
+    gap: 2px;
+    padding: 5px 8px 0;
+    border: 1px solid var(--border);
+    border-top: 0;
+    border-radius: 0 0 8px 8px;
+    background: rgba(255, 255, 255, 0.02);
+    font-size: 10px;
+    color: var(--fg-faint);
+    overflow: hidden;
+    pointer-events: none;
+    user-select: none;
+  }
+
+  .sheet-tabs span {
+    padding: 6px 9px 7px;
+    border-radius: 5px 5px 0 0;
+    white-space: nowrap;
+  }
+
+  .sheet-tab-active {
+    background: #0b0b0d;
+    color: var(--fg-muted);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06),
+      inset 1px 0 0 rgba(255, 255, 255, 0.05),
+      inset -1px 0 0 rgba(255, 255, 255, 0.05);
+  }
+
+  /* On a phone the row/column gutters are the first thing a spreadsheet gives
+     up: without them all seven data columns fit, so the gain and the tax due
+     stay on screen instead of hiding behind a sideways scroll. */
+  @media (max-width: 620px) {
+    .sheet-bar {
+      font-size: 10.5px;
+    }
+
+    .sheet-grid {
+      /* gutter · date · [asset] · proceeds · basis · gain · [kassiber] · check */
+      grid-template-columns: 0 1fr 0 1fr 1fr 1fr 0 0.55fr;
+      min-width: 0;
+      font-size: 10.5px;
+    }
+
+    /* Same collapse trick as the gutter: kept in flow, given no space. */
+    .sc-colb,
+    .sc-colf {
+      visibility: hidden;
+      padding: 0;
+      font-size: 0;
+      border: 0;
+    }
+
+    /* Collapsed, not removed: each row places its cells after this gutter
+       cell, so `display: none` would shift the whole grid one column left. */
+    .sh {
+      visibility: hidden;
+      padding: 0;
+      font-size: 0;
+      border: 0;
+    }
+
+    .sc {
+      padding: 7px 5px;
+    }
+
+    .sc-h {
+      font-size: 9px;
+      letter-spacing: 0.04em;
+    }
+
+    .sc-ok {
+      font-size: 9px;
+    }
+
+    /* The per-row OKs carry this already; the banner has no room. */
+    .sc-allok {
+      visibility: hidden;
+    }
+
+    .sheet-tabs {
+      font-size: 9px;
+    }
+
+    .sheet-tabs span {
+      padding: 5px 7px 6px;
+    }
+  }
+</style>
