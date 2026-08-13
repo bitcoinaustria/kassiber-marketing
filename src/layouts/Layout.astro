@@ -86,14 +86,9 @@ const socialImage = new URL(image, base);
         <div class="footer-inner">
           <div class="footer-brand">
             <a class="footer-logo" href="https://bitcoin-austria.at" target="_blank" rel="noopener noreferrer">
-              <img src="/bitcoin-austria-logomark.svg" alt="" />
-              <span>Bitcoin Austria</span>
+              <img src="/bitcoin-austria-logo-horizontal-light.svg" alt="Bitcoin Austria" />
             </a>
             <p>Building open-source Bitcoin tools that keep your data and decisions yours.</p>
-            <p class="footer-meta">
-              &copy; {new Date().getFullYear()} Bitcoin Austria<br />
-              Website source: MIT · <a href="https://github.com/pingdotgg/t3code" target="_blank" rel="noopener noreferrer">Vibed with T3 Code</a>
-            </p>
           </div>
           <nav class="footer-column" aria-label="Product links">
             <h2>Product</h2>
@@ -106,9 +101,14 @@ const socialImage = new URL(image, base);
             <h2>Legal</h2>
             <a href="/legal">Overview</a>
             <a href="/terms-of-service">Terms</a>
-            <a href="/privacy-policy">Privacy</a>
             <a href="/security-policy">Security</a>
+          </nav>
+        </div>
+        <div class="footer-meta">
+          <span>&copy; {new Date().getFullYear()} Bitcoin Austria</span>
+          <nav aria-label="Footer policies">
             <a href="/imprint">Imprint</a>
+            <a href="/privacy-policy">Data policy</a>
           </nav>
         </div>
       </footer>
@@ -475,11 +475,11 @@ const socialImage = new URL(image, base);
   .footer {
     margin-top: auto;
     border-top: 1px solid var(--border);
-    padding: 64px 0 52px;
+    padding: 64px 0 0;
   }
 
   .footer-inner {
-    max-width: 1240px;
+    max-width: 1080px;
     margin: 0 auto;
     padding: 0 32px;
     display: grid;
@@ -493,32 +493,39 @@ const socialImage = new URL(image, base);
   }
 
   .footer-logo {
-    display: inline-flex;
-    align-items: center;
-    gap: 14px;
-    color: var(--fg);
-    font-size: 20px;
-    font-weight: 600;
-    letter-spacing: -0.025em;
+    display: inline-block;
   }
 
   .footer-logo img {
-    width: 38px;
-    height: 32px;
-    object-fit: contain;
+    display: block;
+    width: 230px;
+    max-width: 100%;
+    height: auto;
   }
 
   .footer-brand > p {
     margin-top: 20px;
-    color: var(--fg-dim);
+    color: var(--fg-muted);
     font-size: 14px;
     line-height: 1.6;
   }
 
-  .footer-brand .footer-meta {
-    margin-top: 24px;
-    color: var(--fg-faint);
+  .footer-meta {
+    max-width: 1016px;
+    margin: 56px auto 0;
+    padding: 20px 0 24px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    color: var(--fg-dim);
     font-size: 12px;
+  }
+
+  .footer-meta nav {
+    display: flex;
+    gap: 20px;
   }
 
   .footer-meta a:hover { color: var(--fg); }
@@ -527,6 +534,11 @@ const socialImage = new URL(image, base);
     display: grid;
     justify-items: start;
     gap: 13px;
+  }
+
+  .footer-column:last-child {
+    justify-items: end;
+    text-align: right;
   }
 
   .footer-column h2 {
@@ -540,7 +552,7 @@ const socialImage = new URL(image, base);
 
   .footer-column a {
     font-size: 13px;
-    color: var(--fg-dim);
+    color: var(--fg-muted);
     transition: color 0.18s ease;
   }
 
@@ -548,7 +560,8 @@ const socialImage = new URL(image, base);
 
   @media (max-width: 820px) {
     .nav-inner,
-    .footer-inner {
+    .footer-inner,
+    .footer-meta {
       padding-left: 20px;
       padding-right: 20px;
     }
@@ -557,7 +570,7 @@ const socialImage = new URL(image, base);
       display: none;
     }
 
-    .footer {
+    .footer-meta {
       padding-bottom: max(32px, env(safe-area-inset-bottom));
     }
 
