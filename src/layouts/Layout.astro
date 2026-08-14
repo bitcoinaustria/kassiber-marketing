@@ -509,9 +509,9 @@ const socialImage = new URL(image, base);
   }
 
   .footer-meta {
-    max-width: 1016px;
+    max-width: 1080px;
     margin: 56px auto 0;
-    padding: 20px 0 24px;
+    padding: 20px 32px 24px;
     border-top: 1px solid var(--border);
     display: flex;
     align-items: center;
@@ -532,11 +532,6 @@ const socialImage = new URL(image, base);
     display: grid;
     justify-items: start;
     gap: 13px;
-  }
-
-  .footer-column:last-child {
-    justify-items: end;
-    text-align: right;
   }
 
   .footer-column h2 {
@@ -564,10 +559,6 @@ const socialImage = new URL(image, base);
       padding-right: 20px;
     }
 
-    .legal-document-page .nav {
-      display: none;
-    }
-
     .footer-meta {
       padding-bottom: max(32px, env(safe-area-inset-bottom));
     }
@@ -583,14 +574,24 @@ const socialImage = new URL(image, base);
       padding-top: 48px;
     }
 
+    /* Vertical stack; the brand block moves below the link columns. */
     .footer-inner {
-      grid-template-columns: 1fr 1fr;
-      gap: 40px 28px;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 36px;
     }
 
     .footer-brand {
-      grid-column: 1 / -1;
+      order: 1;
       max-width: 360px;
+    }
+
+    .footer-meta {
+      margin-top: 40px;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 14px;
     }
   }
 

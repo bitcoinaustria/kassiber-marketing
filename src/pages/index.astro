@@ -39,9 +39,10 @@ import { RELEASES_URL } from "../lib/releases";
       </h1>
 
       <p class="hero-sub">
-        Private, local-first Bitcoin accounting: one bird's-eye view of every
-        wallet across on-chain, Lightning, and Liquid, computed on your machine
-        against your own node. Desktop app and CLI for macOS, Windows, and Linux.
+        Every wallet across on-chain, Lightning, and Liquid — booked on your
+        machine, and only there. No account, no upload, no company database
+        with your net worth in it. Desktop app and CLI for macOS, Windows,
+        and Linux.
       </p>
 
       <div class="hero-actions">
@@ -95,7 +96,8 @@ import { RELEASES_URL } from "../lib/releases";
             channel isn't either. Every hop between your own wallets still looks
             like a transaction, and naive tools book it as one: a 0.5 BTC peg-in
             becomes a 0.5 BTC disposal, and you owe tax on a gain you never
-            made. Kassiber pairs both sides across layers.
+            made. Kassiber pairs both sides across layers — tooling that exists
+            because it's built for Bitcoin, not for ten thousand tokens.
           </p>
           <ul class="checklist" style="margin-top:24px">
             <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg> Paste any address or txid and Kassiber tells you whether it's yours</li>
@@ -115,8 +117,10 @@ import { RELEASES_URL } from "../lib/releases";
           <div class="eyebrow">Local-first</div>
           <h2>You decide what you reveal. And to whom.</h2>
           <p>
-            It syncs only from the sources you pick, never behind your back, and
-            keeps the books in one local file.
+            Every hosted tax tool is a honeypot: the addresses, balances, and
+            net worth of thousands of bitcoiners in one database, one breach or
+            one subpoena away. Kassiber keeps your books in one encrypted file
+            on your disk and syncs only from the sources you pick.
           </p>
         </div>
 
@@ -170,26 +174,8 @@ import { RELEASES_URL } from "../lib/releases";
 
         <p class="skill-note">
           Don't explain Kassiber to your agent — hand it <a href={SKILL_REPOSITORY_URL} target="_blank" rel="noopener noreferrer">the skill</a>.
+          Works with OpenCode, Claude Code, Codex CLI, and oMLX.
         </p>
-
-        <ul class="harness-row" aria-label="Works with">
-          <li class="harness">
-            <span class="harness-mark"><img src="/harnesses/opencode-dark.svg" alt="" /></span>
-            <span class="harness-name">OpenCode</span>
-          </li>
-          <li class="harness">
-            <span class="harness-mark"><img src="/harnesses/claude-ai-icon.svg" alt="" /></span>
-            <span class="harness-name">Claude Code</span>
-          </li>
-          <li class="harness">
-            <span class="harness-mark"><img src="/harnesses/openai_dark.svg" alt="" /></span>
-            <span class="harness-name">Codex CLI</span>
-          </li>
-          <li class="harness">
-            <span class="harness-mark harness-mark-text" aria-hidden="true">oM</span>
-            <span class="harness-name">oMLX</span>
-          </li>
-        </ul>
       </div>
 
       <div class="agents-visual">
@@ -1010,41 +996,6 @@ import { RELEASES_URL } from "../lib/releases";
 
   .agents-visual {
     min-width: 0;
-  }
-
-  /* Quiet logo row, not a card grid: marks sit dim and come alive on hover. */
-  .harness-row {
-    list-style: none;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px 28px;
-    margin-top: 32px;
-    padding-top: 28px;
-    border-top: 1px solid var(--border);
-  }
-
-  .harness {
-    display: inline-flex;
-    align-items: center;
-    gap: 9px;
-    opacity: 0.62;
-    transition: opacity 0.2s ease;
-  }
-  .harness:hover { opacity: 1; }
-
-  .harness-mark {
-    color: var(--fg);
-    flex-shrink: 0; width: 20px; height: 20px;
-    display: grid; place-items: center;
-  }
-  .harness-mark img { width: 18px; height: 18px; object-fit: contain; }
-  .harness-mark-text { font-family: var(--font-mono); font-size: 12px; font-weight: 600; }
-
-  .harness-name {
-    font-size: 13.5px; font-weight: 500;
-    letter-spacing: -0.01em;
-    color: var(--fg-muted);
-    white-space: nowrap;
   }
 
   .skill-note {
