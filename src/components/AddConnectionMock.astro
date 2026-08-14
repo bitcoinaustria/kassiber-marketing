@@ -68,6 +68,24 @@ const TABS: { id: string; label: string; items: Item[] }[] = [
     ],
   },
   {
+    id: "exchanges",
+    label: "Exchanges",
+    items: [
+      { logo: I("river.webp"), title: "River", desc: "CSV activity export with trades, transfers, and fees." },
+      { logo: I("bullbitcoin-mark.webp"), title: "Bull Bitcoin", desc: "CSV order export with execution prices, fees, and transfers." },
+      { logo: I("pocket-bitcoin.svg"), title: "Pocket Bitcoin", desc: "CSV account export with buy prices, fees, and transfers." },
+      { logo: I("coinfinity-mark.svg"), treat: "plate", title: "Coinfinity", desc: "CSV order export with execution prices, fees, and transfers." },
+      { logo: I("strike.webp"), title: "Strike", desc: "CSV activity export with trades, transfers, and fees." },
+      { logo: I("21bitcoin.webp"), title: "21bitcoin", desc: "CSV ledger export with trades, transfers, and fees." },
+      { logo: I("binance.svg"), title: "Binance", desc: "CSV export with trades, deposits, withdrawals, and fees." },
+      { logo: I("relai.svg"), treat: "plate", title: "Relai", desc: "CSV activity export with buys, transfers, and fees.", planned: true },
+      { logo: I("swan-bitcoin.svg"), title: "Swan Bitcoin", desc: "CSV account export with buys, transfers, and fees.", planned: true },
+      { logo: I("bitpanda.svg"), title: "Bitpanda", desc: "CSV history export with trades, transfers, and fees.", planned: true },
+      { logo: I("kraken.svg"), title: "Kraken", desc: "API history with trades, transfers, and fees.", planned: true },
+      { logo: I("coinbase.svg"), title: "Coinbase", desc: "API history with trades, transfers, and fees.", planned: true },
+    ],
+  },
+  {
     id: "nodes",
     label: "Nodes",
     items: [
@@ -90,24 +108,6 @@ const TABS: { id: string; label: string; items: Item[] }[] = [
     items: [
       { logo: BTCPAY, title: "BTCPay Server", desc: "Stores, wallet history, and invoice provenance." },
       { logo: BTCPAY, title: "BTCPay CSV", desc: "Manual export when API sync isn't available." },
-    ],
-  },
-  {
-    id: "exchanges",
-    label: "Exchanges",
-    items: [
-      { logo: I("river.webp"), title: "River", desc: "Bitcoin or account activity CSV." },
-      { logo: I("bullbitcoin-mark.webp"), title: "Bull Bitcoin", desc: "Order CSV with exact execution pricing." },
-      { logo: I("pocket-bitcoin.svg"), title: "Pocket Bitcoin", desc: "Account CSV with exact buy pricing." },
-      { logo: I("coinfinity-mark.svg"), treat: "plate", title: "Coinfinity", desc: "Order CSV with exact execution pricing." },
-      { logo: I("strike.webp"), title: "Strike", desc: "Custodial wallet and exchange import." },
-      { logo: I("21bitcoin.webp"), title: "21bitcoin", desc: "Custodial ledger with exact trade pricing." },
-      { logo: I("binance.svg"), title: "Binance", desc: "BTC supplemental rows from Binance exports." },
-      { logo: I("relai.svg"), treat: "plate", title: "Relai", desc: "Bitcoin-only app activity import.", planned: true },
-      { logo: I("swan-bitcoin.svg"), title: "Swan Bitcoin", desc: "Savings and broker activity import.", planned: true },
-      { logo: I("bitpanda.svg"), title: "Bitpanda", desc: "History export.", planned: true },
-      { logo: I("kraken.svg"), title: "Kraken", desc: "Private API history.", planned: true },
-      { logo: I("coinbase.svg"), title: "Coinbase", desc: "API history.", planned: true },
     ],
   },
   {
