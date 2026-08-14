@@ -1,12 +1,9 @@
 import { defineConfig } from "astro/config";
 
-// Absolute URLs for canonical/og tags. Set SITE_URL once the real domain is
-// decided; on Vercel the production domain is picked up automatically.
-const site =
-  process.env.SITE_URL ??
-  (process.env.VERCEL_PROJECT_PRODUCTION_URL
-    ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
-    : "http://localhost:4173");
+// Absolute URLs for canonical/og tags. SITE_URL can override (e.g. previews),
+// but the production domain is the default — a localhost fallback here ships
+// broken og:image URLs whenever the build env lacks the Vercel variables.
+const site = process.env.SITE_URL ?? "https://kassiber.app";
 
 export default defineConfig({
   site,
