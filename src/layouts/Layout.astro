@@ -83,31 +83,32 @@ const socialImage = new URL(image, base);
       <footer class="footer">
         <div class="footer-inner">
           <div class="footer-brand">
-            <a class="footer-logo" href="https://bitcoin-austria.at" target="_blank" rel="noopener noreferrer">
-              <img src="/bitcoin-austria-logo-horizontal-light.svg" alt="Bitcoin Austria" />
+            <a class="footer-logo" href="/" aria-label="Kassiber home">
+              <img src="/kassiber-icon-dark.svg" alt="" />
+              <span>Kassiber</span>
             </a>
-            <p>Building open-source Bitcoin tools that keep your data and decisions yours.</p>
+            <p>
+              Private, local-first Bitcoin accounting. Built and maintained
+              by <a href="https://bitcoin-austria.at" target="_blank" rel="noopener noreferrer">Bitcoin Austria</a>.
+            </p>
           </div>
           <nav class="footer-column" aria-label="Product links">
             <h2>Product</h2>
             <a href="/download">Download</a>
             <a href={GITHUB_REPOSITORY_URL} target="_blank" rel="noopener noreferrer">GitHub</a>
             <a href={`${GITHUB_REPOSITORY_URL}/releases`} target="_blank" rel="noopener noreferrer">Releases</a>
-            <a href="https://bitcoin-austria.at" target="_blank" rel="noopener noreferrer">Bitcoin Austria</a>
+            <a href={`${GITHUB_REPOSITORY_URL}/issues`} target="_blank" rel="noopener noreferrer">Report an issue</a>
           </nav>
           <nav class="footer-column" aria-label="Legal links">
             <h2>Legal</h2>
-            <a href="/legal">Overview</a>
             <a href="/terms-of-service">Terms</a>
+            <a href="/privacy-policy">Privacy</a>
             <a href="/security-policy">Security</a>
+            <a href="/imprint">Imprint</a>
           </nav>
         </div>
         <div class="footer-meta">
           <span>&copy; {new Date().getFullYear()} Bitcoin Austria</span>
-          <nav aria-label="Footer policies">
-            <a href="/imprint">Imprint</a>
-            <a href="/privacy-policy">Data policy</a>
-          </nav>
         </div>
       </footer>
     </div>
@@ -491,14 +492,22 @@ const socialImage = new URL(image, base);
   }
 
   .footer-logo {
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--fg);
   }
 
   .footer-logo img {
     display: block;
-    width: 230px;
-    max-width: 100%;
-    height: auto;
+    width: 28px;
+    height: 28px;
+  }
+
+  .footer-logo span {
+    font-size: 17px;
+    font-weight: 650;
+    letter-spacing: -0.025em;
   }
 
   .footer-brand > p {
@@ -506,6 +515,18 @@ const socialImage = new URL(image, base);
     color: var(--fg-muted);
     font-size: 14px;
     line-height: 1.6;
+  }
+
+  .footer-brand > p a {
+    color: var(--fg);
+    text-decoration: underline;
+    text-decoration-color: var(--border-strong);
+    text-underline-offset: 3px;
+    transition: text-decoration-color 0.18s ease;
+  }
+
+  .footer-brand > p a:hover {
+    text-decoration-color: var(--fg);
   }
 
   .footer-meta {
