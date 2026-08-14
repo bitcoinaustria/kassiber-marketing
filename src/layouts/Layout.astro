@@ -89,12 +89,9 @@ const socialImage = new URL(image, base);
               <span>Kassiber</span>
             </a>
             <p>
-              Kassiber is private, local-first Bitcoin accounting: one set of
-              books across on-chain, Lightning, and Liquid, with verifiable
-              tax reports computed on your machine. Desktop app and CLI,
-              driven by AI agents like Claude Code, OpenCode, and Codex CLI.
-              AGPL-3.0 open source, built and maintained
-              by <a href="https://bitcoin-austria.at" target="_blank" rel="noopener noreferrer">Bitcoin Austria</a>.
+              Kassiber is private, local-first Bitcoin accounting across on-chain,
+              Lightning, and Liquid. Desktop app and CLI, with verifiable reports
+              computed on your machine.
             </p>
           </div>
           <nav class="footer-column" aria-label="Product links">
@@ -114,6 +111,10 @@ const socialImage = new URL(image, base);
         </div>
         <div class="footer-meta">
           <span>&copy; {new Date().getFullYear()} Bitcoin Austria</span>
+          <span>
+            <a href={`${GITHUB_REPOSITORY_URL}/blob/main/LICENSE`} target="_blank" rel="noopener noreferrer">AGPL-3.0 open source</a>
+            &middot; Built and maintained by <a href="https://bitcoin-austria.at" target="_blank" rel="noopener noreferrer">Bitcoin Austria</a>
+          </span>
         </div>
       </footer>
     </div>
@@ -495,7 +496,7 @@ const socialImage = new URL(image, base);
     margin: 0 auto;
     padding: 0 32px;
     display: grid;
-    grid-template-columns: minmax(0, 1fr) 150px 150px;
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) minmax(0, 1fr);
     gap: clamp(48px, 8vw, 112px);
     align-items: start;
   }
@@ -597,10 +598,7 @@ const socialImage = new URL(image, base);
       padding-bottom: max(32px, env(safe-area-inset-bottom));
     }
 
-    .footer-inner {
-      grid-template-columns: minmax(0, 1fr) 130px 130px;
-      gap: 40px;
-    }
+    .footer-inner { gap: 40px; }
   }
 
   @media (max-width: 620px) {

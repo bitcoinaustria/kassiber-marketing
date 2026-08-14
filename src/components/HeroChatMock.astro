@@ -103,11 +103,17 @@ import ModelPickerMock from "./ModelPickerMock.astro";
     font-size: calc(0.86cqw * var(--zoom));
     line-height: 1;
     pointer-events: none;
-    /* No duration: where scroll timelines are unsupported this resolves to 0s
-       and `both` leaves the element in its docked end state. */
-    animation: heroChatDock linear both;
+    /* Firefox needs a non-zero duration for scroll-driven animations. */
+    animation: heroChatDock 1ms linear both;
     animation-timeline: scroll(root block);
     animation-range: 0 var(--dock-travel);
+  }
+
+  @supports not (animation-timeline: scroll(root block)) {
+    .hero-chat {
+      animation: none;
+      transform: translateY(0);
+    }
   }
 
   @keyframes heroChatDock {
