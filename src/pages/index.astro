@@ -41,8 +41,7 @@ import { RELEASES_URL } from "../lib/releases";
       <p class="hero-sub">
         Every wallet across on-chain, Lightning, and Liquid — booked on your
         machine, and only there. No account, no upload, no company database
-        with your net worth in it. Desktop app and CLI for macOS, Windows,
-        and Linux.
+        with your net worth in it.
       </p>
 
       <div class="hero-actions">
@@ -101,8 +100,8 @@ import { RELEASES_URL } from "../lib/releases";
           </p>
           <ul class="checklist" style="margin-top:24px">
             <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg> Paste any address or txid and Kassiber tells you whether it's yours</li>
-            <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg> Lost and stolen coins classified, not booked as sales</li>
-            <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg> Survives years of wallet migrations, so old addresses still resolve as yours</li>
+            <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg> Lost or stolen coins are booked as exactly that, not as sales</li>
+            <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg> Wallet migrations don't break history — addresses you left years ago still resolve as yours</li>
           </ul>
         </div>
       </div>
@@ -118,15 +117,15 @@ import { RELEASES_URL } from "../lib/releases";
           <h2>You decide what you reveal. And to whom.</h2>
           <p>
             Every hosted tax tool is a honeypot: the addresses, balances, and
-            net worth of thousands of bitcoiners in one database, one breach or
-            one subpoena away. Kassiber keeps your books in one encrypted file
-            on your disk and syncs only from the sources you pick.
+            net worth of thousands of bitcoiners in one database, one breach
+            away. Kassiber keeps your books in one encrypted file on your disk
+            and syncs only from the sources you pick.
           </p>
         </div>
 
         <ul class="checklist sov-facts">
-          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg> No spending keys, so there is nothing to leak and nothing to coerce out of you</li>
-          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg> One passphrase, SQLCipher 4: on a stolen laptop your books are noise</li>
+          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg> Watch-only by design — Kassiber can read your history, never move a coin</li>
+          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg> One passphrase encrypts everything; your books open for you and nobody else</li>
           <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg> No server behind the app, so a subpoena gets you a shrug</li>
         </ul>
       </div>
@@ -145,9 +144,9 @@ import { RELEASES_URL } from "../lib/releases";
         <h2>Don't trust. Verify your tax report.</h2>
         <p>
           The math runs locally through <a href="https://github.com/eprbell/rp2" target="_blank" rel="noopener noreferrer">RP2</a>,
-          the open-source crypto tax engine eprbell wrote, in a Bitcoin-focused
-          fork Kassiber maintains. Pick the standard your jurisdiction expects:
-          FIFO, LIFO, HIFO, LOFO, or moving average. Every report exports to a
+          an open-source crypto tax engine, in a Bitcoin-focused fork Kassiber
+          maintains. Pick the standard your jurisdiction expects: FIFO, HIFO,
+          or moving average. Every report exports to a
           spreadsheet with live formulas, so you can recompute each balance,
           price, and gain yourself.
         </p>
@@ -166,9 +165,8 @@ import { RELEASES_URL } from "../lib/releases";
           <h2>Built by AI agents. Made for them too.</h2>
           <p>
             Kassiber was written by AI agents, and it's built to be driven by
-            yours. Run the model locally, or use encrypted inference if you
-            want a bigger brain — you didn't keep your books off the cloud
-            just to paste them into a chatbot.
+            yours. Run the model locally — you didn't keep your books off the
+            cloud just to paste them into a chatbot.
           </p>
         </div>
 
@@ -293,12 +291,11 @@ import { RELEASES_URL } from "../lib/releases";
           <summary>Can I try it without connecting my own wallets?</summary>
           <p>
             Yes, if you have Docker. One script spins up a throwaway regtest
-            network and seeds a complete set of demo books: thirteen wallets
-            across every address type, Lightning channels, Liquid, a BTCPay
-            store, loans, coin consolidations, and years of monthly business
-            activity to reconcile. One command brings it up, another adds fresh
-            activity, and a third tears it down and deletes every trace. None of
-            it touches mainnet and none of it is your data.
+            network and seeds complete demo books: thirteen wallets, Lightning
+            channels, Liquid, a BTCPay store, and years of activity to
+            reconcile. One command brings it up, one tears it down and deletes
+            every trace. None of it touches mainnet and none of it is your
+            data.
           </p>
         </details>
 
@@ -340,15 +337,6 @@ import { RELEASES_URL } from "../lib/releases";
             No. It never holds spending keys and only ever reads descriptors and
             watch-only addresses. The worst case is a wrong number in a report,
             not a missing coin.
-          </p>
-        </details>
-
-        <details class="faq-item">
-          <summary>Do I have to use AI agents?</summary>
-          <p>
-            No. The desktop app and the CLI do the whole job on their own. The
-            agent side is optional, and it drives the same commands you can run
-            yourself.
           </p>
         </details>
 
