@@ -615,8 +615,16 @@ const socialImage = new URL(image, base);
     }
 
     .footer-brand {
-      order: 1;
+      order: 0;
       max-width: 360px;
+    }
+
+    .footer-column[aria-label="Product links"] {
+      order: 1;
+    }
+
+    .footer-column[aria-label="Legal links"] {
+      order: 2;
     }
 
     .footer-meta {
