@@ -623,6 +623,7 @@ const SLIDES = [
   // random card pairs, in random directions, on random timing. Lines exist
   // only while a transfer is in flight; the receiving card glows briefly.
   const NS = "http://www.w3.org/2000/svg";
+  const LINE_INTENSITY = 1.15;
 
   const COLOR: Record<string, string> = {
     "hf-bitcoin": "#f7931a",
@@ -702,8 +703,8 @@ const SLIDES = [
     ask.animate(
       [
         { opacity: 0, strokeDashoffset: 44 },
-        { opacity: 0.5, strokeDashoffset: 22, offset: 0.3 },
-        { opacity: 0.23, strokeDashoffset: 0, offset: 0.7 },
+        { opacity: 0.5 * LINE_INTENSITY, strokeDashoffset: 22, offset: 0.3 },
+        { opacity: 0.23 * LINE_INTENSITY, strokeDashoffset: 0, offset: 0.7 },
         { opacity: 0, strokeDashoffset: -12 },
       ],
       { duration: askDur + 600, easing: "linear" },
@@ -767,16 +768,16 @@ const SLIDES = [
       isLightning
         ? [
             { opacity: 0 },
-            { opacity: 0.69, offset: 0.06 },
-            { opacity: 0.15, offset: 0.14 },
-            { opacity: 0.56, offset: 0.24 },
-            { opacity: 0.38, offset: 0.5 },
+            { opacity: 0.69 * LINE_INTENSITY, offset: 0.06 },
+            { opacity: 0.15 * LINE_INTENSITY, offset: 0.14 },
+            { opacity: 0.56 * LINE_INTENSITY, offset: 0.24 },
+            { opacity: 0.38 * LINE_INTENSITY, offset: 0.5 },
             { opacity: 0 },
           ]
         : [
             { opacity: 0 },
-            { opacity: 0.44, offset: 0.12 },
-            { opacity: 0.31, offset: 0.55 },
+            { opacity: 0.44 * LINE_INTENSITY, offset: 0.12 },
+            { opacity: 0.31 * LINE_INTENSITY, offset: 0.55 },
             { opacity: 0 },
           ],
       { duration: dur + 400, easing: "linear" },
@@ -894,18 +895,18 @@ const SLIDES = [
 
   .hero :global(.hl-line) {
     fill: none;
-    stroke-width: 2;
+    stroke-width: 2.2;
     opacity: 0;
-    filter: drop-shadow(0 0 4px var(--glow));
+    filter: drop-shadow(0 0 4px var(--glow)) brightness(1.25);
   }
 
   .hero :global(.hl-ask) {
     fill: none;
-    stroke-width: 1.5;
+    stroke-width: 1.65;
     stroke-linecap: round;
     stroke-dasharray: 5 8;
     opacity: 0;
-    filter: drop-shadow(0 0 4px var(--glow));
+    filter: drop-shadow(0 0 4px var(--glow)) brightness(1.25);
   }
 
   .hero :global(.hl-dot) {
