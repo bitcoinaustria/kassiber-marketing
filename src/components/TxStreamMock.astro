@@ -147,28 +147,42 @@ const ROWS = Array.from({ length: DECK }, (_, i) => {
     --k-border: oklch(1 0 0 / 10%);
 
     position: relative;
-    height: 560px;
-    /* Rows arrive and leave through the edges rather than popping. */
-    mask-image: linear-gradient(to bottom, transparent, #000 7%, #000 93%, transparent);
-    -webkit-mask-image: linear-gradient(to bottom, transparent, #000 7%, #000 93%, transparent);
   }
-  .txs-stage { position: absolute; inset: 0; }
 
-  /* Each row is its own object, so they can slide over one another. */
+  /* Default is a plain, finished list. If the script never runs — Safari
+     Lockdown Mode, a thrown error, JS off — this is what renders, and it is
+     still a real transactions table. The animation is opted into below. */
+  .txs-stage { display: flex; flex-direction: column; gap: 10px; }
+  .txs-row:nth-child(n + 8) { display: none; }
+
   .txs-row {
-    position: absolute;
-    left: 0;
-    right: 0;
-    top: 0;
+    position: relative;
     display: grid;
     grid-template-columns: minmax(0, 1fr) 180px 130px 132px;
     align-items: center;
     border: 1px solid var(--k-border);
     border-radius: 10px;
     background: var(--k-card);
+    pointer-events: none;
+  }
+
+  /* ── animated mode ─────────────────────────────────────────── */
+  .txs.is-anim {
+    height: 560px;
+    /* Rows arrive and leave through the edges rather than popping. */
+    mask-image: linear-gradient(to bottom, transparent, #000 7%, #000 93%, transparent);
+    -webkit-mask-image: linear-gradient(to bottom, transparent, #000 7%, #000 93%, transparent);
+  }
+  .txs.is-anim .txs-stage { display: block; position: absolute; inset: 0; }
+  .txs.is-anim .txs-row:nth-child(n + 8) { display: grid; }
+  /* Each row is its own object, so they can slide over one another. */
+  .txs.is-anim .txs-row {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
     box-shadow: 0 10px 26px rgb(0 0 0 / 0.34);
     opacity: 0;
-    pointer-events: none;
     will-change: transform, opacity;
   }
   .txs-row > span { padding: 10px 12px; min-width: 0; }
@@ -286,22 +300,24 @@ const ROWS = Array.from({ length: DECK }, (_, i) => {
   .txs-c-status em.is-free { color: #4ade80; }
 
   /* ── unclassified vs classified ─────────────────────────────
-     Both states occupy identical boxes. Anything that appears on
-     classification is reserved beforehand, never display-toggled, or the
-     row would change height mid-flight and shunt the whole stack. */
-  .is-known { display: none; }
-  .txs-row.is-class .txs-schip.is-known { display: inline-flex; }
-  .txs-row.is-class .is-unknown { display: none; }
+     Classified is the default, so the no-JS render is a finished book. The
+     unclassified state exists only while animating. Both occupy identical
+     boxes: anything that appears on classification is reserved beforehand,
+     never display-toggled, or the row would change height mid-flight and
+     shunt the whole stack. */
+  .is-unknown { display: none; }
+  .txs.is-anim .txs-row:not(.is-class) .is-unknown { display: inline-flex; }
+  .txs.is-anim .txs-row:not(.is-class) .is-known { display: none; }
 
-  .txs-row:not(.is-class) .txs-badge { opacity: 0; }
-  .txs-row:not(.is-class) .txs-c-status em { visibility: hidden; }
+  .txs.is-anim .txs-row:not(.is-class) .txs-badge { opacity: 0; }
+  .txs.is-anim .txs-row:not(.is-class) .txs-c-status em { visibility: hidden; }
   /* Set on the icon itself so it beats the row's inline flow vars. */
-  .txs-row:not(.is-class) .txs-ico {
+  .txs.is-anim .txs-row:not(.is-class) .txs-ico {
     border-color: var(--k-border);
     background: var(--k-muted);
     color: var(--k-muted-fg);
   }
-  .txs-row:not(.is-class) .txs-c-amt b { color: var(--k-muted-fg); }
+  .txs.is-anim .txs-row:not(.is-class) .txs-c-amt b { color: var(--k-muted-fg); }
 
   @media (max-width: 1023px) {
     .txs-row { grid-template-columns: minmax(0, 1fr) 170px 132px; }
@@ -331,10 +347,9 @@ const ROWS = Array.from({ length: DECK }, (_, i) => {
     .txs-meta, .txs-c-amt em, .txs-c-status em, .txs-schip, .txs-badge { font-size: 11px; }
   }
 
+  /* Reduced motion needs no rules of its own: the script simply never adds
+     .is-anim, so the static list above is what renders. */
   @media (prefers-reduced-motion: reduce) {
-    .txs { height: auto; mask-image: none; -webkit-mask-image: none; }
-    .txs-stage { position: static; display: flex; flex-direction: column; gap: 10px; }
-    .txs-row { position: static; opacity: 1; box-shadow: none; }
     .txs-ico { transition: none; }
   }
 </style>
@@ -344,10 +359,9 @@ const ROWS = Array.from({ length: DECK }, (_, i) => {
     const rows = [...root.querySelectorAll<HTMLElement>(".txs-row")];
     if (!rows.length) continue;
 
-    if (matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      for (const r of rows) r.classList.add("is-class");
-      continue;
-    }
+    // Leaving .is-anim off keeps the static finished list, which is also the
+    // render anyone gets if this script never runs at all.
+    if (matchMedia("(prefers-reduced-motion: reduce)").matches) continue;
 
     const DECK = rows.length;
     const SPEED = 0.42;    // rows per second — calm, and constant
@@ -365,11 +379,20 @@ const ROWS = Array.from({ length: DECK }, (_, i) => {
        deck at the top while new arrivals stay full size and readable. The
        cumulative offset has no closed form, so integrate it once per layout. */
     const measure = () => {
-      H = root.clientHeight;
+      // Measure before switching to absolute positioning, or every row
+      // collapses to the same box and rowH comes back wrong.
       rowH = rows[0].offsetHeight || 62;
-      const gap = 12;
-      const spacingAt = (s: number) =>
-        rowH * (1 - 0.66 * smooth(1.4, 7, s)) + gap * (1 - smooth(1.4, 6, s));
+      root.classList.add("is-anim");
+      H = root.clientHeight;
+      /* Spacing is also velocity here, since the slot rate is constant. The
+         entry multiplier makes a row cover the offscreen approach quickly and
+         settle into a tight gap, rather than drifting up through a sparse
+         bottom half. */
+      const spacingAt = (s: number) => {
+        const entry = 1 + 2.4 * (1 - smooth(0, 1.15, s));
+        const deck = 1 - 0.72 * smooth(1.6, 7, s);
+        return (rowH * deck + 6) * entry;
+      };
       table = [0];
       const STEP = 0.02;
       for (let s = STEP, acc = 0; s <= LAST + 1; s += STEP) {

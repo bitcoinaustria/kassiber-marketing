@@ -546,13 +546,29 @@ const SLIDES = [
       });
     };
 
-    screensLayout();
-    screensDrive();
-    window.addEventListener("scroll", screensDrive, { passive: true });
-    window.addEventListener("resize", () => {
+    const screensRelayout = () => {
       screensLayout();
       screensDrive();
-    });
+    };
+
+    screensRelayout();
+    window.addEventListener("scroll", screensDrive, { passive: true });
+    window.addEventListener("resize", screensRelayout);
+
+    /* The runway is derived from the strip's scroll width, which is not final
+       at parse time: images and web fonts both change it after the fact. A
+       stale, too-short runway maps the whole filmstrip onto a few hundred
+       pixels of page scroll and the gallery flies past. Safari in Lockdown
+       Mode blocks custom fonts, so it lands on a different layout than the
+       one measured here — remeasure whenever the strip actually changes. */
+    window.addEventListener("load", screensRelayout);
+    document.fonts?.ready.then(screensRelayout);
+    for (const img of screensStrip.querySelectorAll("img")) {
+      if (!img.complete) img.addEventListener("load", screensRelayout, { once: true });
+    }
+    if ("ResizeObserver" in window) {
+      new ResizeObserver(screensRelayout).observe(screensStrip);
+    }
     screensMq.addEventListener("change", () => {
       screensLayout();
       screensDrive();
