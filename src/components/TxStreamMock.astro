@@ -325,8 +325,10 @@ const ROWS = Array.from({ length: DECK }, (_, i) => {
   }
   /* Phones cannot carry four columns, but Status is the payoff, so it moves
      to a second line instead of being dropped. */
+  /* Heights belong to .is-anim only: the static list sizes to its content,
+     and matching the specificity of the base rule is what lets these win. */
   @media (max-width: 767px) {
-    .txs { height: 460px; }
+    .txs.is-anim { height: 460px; }
     .txs-row { grid-template-columns: minmax(0, 1fr) auto; align-items: start; }
     .txs-c-tx { grid-column: 1; }
     .txs-c-amt { grid-column: 2; }
@@ -341,7 +343,7 @@ const ROWS = Array.from({ length: DECK }, (_, i) => {
     .txs-txhead b { font-size: 13px; }
   }
   @media (max-width: 560px) {
-    .txs { height: 420px; }
+    .txs.is-anim { height: 420px; }
     .txs-ico { width: 28px; height: 28px; }
     .txs-c-status { padding-left: 52px; }
     .txs-meta, .txs-c-amt em, .txs-c-status em, .txs-schip, .txs-badge { font-size: 11px; }
