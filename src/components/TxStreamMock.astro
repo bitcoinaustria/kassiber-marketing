@@ -171,7 +171,15 @@ const ROWS = Array.from({ length: DECK }, (_, i) => {
      into a masked layer that has to be re-composited every frame, which is
      what made this stutter on phones. Rows already fade at both edges via
      their own opacity, so the mask was buying nothing. */
-  .txs.is-anim { height: 560px; }
+  .txs.is-anim {
+    height: 560px;
+    /* The mask used to clip as well as fade. Removing it for performance let
+       rows keep rising past the top and paint over the headline, so the clip
+       has to be stated. overflow is a paint-time clip and costs far less than
+       re-compositing a masked layer every frame. */
+    overflow: hidden;
+    isolation: isolate;
+  }
   .txs.is-anim .txs-stage { display: block; position: absolute; inset: 0; }
   .txs.is-anim .txs-row:nth-child(n + 8) { display: grid; }
   /* Each row is its own object, so they can slide over one another. */
@@ -426,9 +434,11 @@ const ROWS = Array.from({ length: DECK }, (_, i) => {
         let s = phase - j;
         while (s < 0) s += DECK;
 
-        if (s > LAST) {
-          // Hide rather than fade to zero: an opacity-0 row still paints and
-          // still holds a compositor layer, and most of the deck is offscreen.
+        const y = H - rowH - cumY(s);
+
+        // Hide rather than fade to zero: an opacity-0 row still paints and
+        // still holds a compositor layer, and most of the deck is offscreen.
+        if (s > LAST || y < -rowH) {
           if (!L.hidden) {
             el.style.visibility = "hidden";
             L.hidden = true;
@@ -440,10 +450,17 @@ const ROWS = Array.from({ length: DECK }, (_, i) => {
           L.hidden = false;
         }
 
-        const y = H - rowH - cumY(s);
         const scale = 1 - 0.05 * smooth(0, LAST, s);
-        // Fade in at the bottom edge, out as the deck compresses at the top.
-        const op = smooth(0, 0.55, s) * (1 - 0.9 * smooth(6.4, LAST, s));
+        /* Two fades, because the deck runs out at a different place on every
+           breakpoint: rows are 68px against a 560px stage on desktop but 106px
+           against 420px on a phone, so a slot count alone leaves them either
+           cut off mid-opacity or still travelling past the top. The second
+           term is measured against the container, so it lands wherever the
+           top actually is. */
+        const op =
+          smooth(0, 0.55, s) *
+          (1 - 0.9 * smooth(6.4, LAST, s)) *
+          smooth(-rowH * 0.45, H * 0.28, y);
 
         const t = `translate3d(0, ${y.toFixed(1)}px, 0) scale(${scale.toFixed(3)})`;
         if (t !== L.t) { el.style.transform = t; L.t = t; }
