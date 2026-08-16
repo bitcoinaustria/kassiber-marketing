@@ -1,0 +1,435 @@
+---
+/*
+ * Raw transactions in at the bottom, a classified book stacked at the top.
+ *
+ * The rows are a trimmed port of the app's transactions table
+ * (ui-tauri/src/components/transactions/dashboard/TransactionsTable.tsx) —
+ * four of its seven columns, the ones that carry the argument. Values are the
+ * app's own, not approximations:
+ *
+ *   theme tokens      ui-tauri/src/styles/globals.css  (.dark block, oklch)
+ *   flow icon + tint  transactionFlowStyles            (model.ts)
+ *   status chip       transactionStatusStyles          (model.ts)
+ *   type labels       TRANSACTION_TYPE_LABEL_KEYS      (transactionTypeLabel.ts)
+ *   cell padding      TableCell                        (ui/table.tsx)
+ *
+ * No table shell: each row is its own object so they can overlap. Spacing
+ * shrinks as a row rises, so the settled book compresses into a deck at the
+ * top while new arrivals stay full size and readable at the bottom.
+ *
+ * Rows arrive unclassified and resolve as they rise. Every element that
+ * changes between the two states occupies the same box in both, because a
+ * height change mid-flight makes the whole stack jump.
+ */
+const FLOW = {
+  incoming: { bd: "rgb(5 150 105 / 0.2)", bg: "rgb(6 78 59 / 0.25)", fg: "#6ee7b7" },
+  outgoing: { bd: "rgb(220 38 38 / 0.2)", bg: "rgb(127 29 29 / 0.25)", fg: "#fca5a5" },
+  transfer: { bd: "rgb(113 113 122 / 0.2)", bg: "rgb(39 39 42 / 0.7)", fg: "#d4d4d8" },
+  swap: { bd: "rgb(2 132 199 / 0.2)", bg: "rgb(12 74 110 / 0.25)", fg: "#7dd3fc" },
+  "layer-transition": { bd: "rgb(13 148 136 / 0.2)", bg: "rgb(19 78 74 / 0.25)", fg: "#5eead4" },
+} as const;
+type Flow = keyof typeof FLOW;
+
+let seed = 20260628;
+const rnd = () => ((seed = (seed * 1103515245 + 12345) & 0x7fffffff) / 0x7fffffff);
+const hex = (n: number) => Array.from({ length: n }, () => "0123456789abcdef"[Math.floor(rnd() * 16)]).join("");
+
+const KINDS: { type: string; flow: Flow; net: string; w: number }[] = [
+  { type: "Income", flow: "incoming", net: "Lightning", w: 9 },
+  { type: "Buy", flow: "incoming", net: "Exchange", w: 8 },
+  { type: "Deposit", flow: "incoming", net: "On-chain", w: 8 },
+  { type: "Mining", flow: "incoming", net: "On-chain", w: 4 },
+  { type: "LN invoice", flow: "incoming", net: "Lightning", w: 5 },
+  { type: "Sell", flow: "outgoing", net: "Exchange", w: 4 },
+  { type: "Spend", flow: "outgoing", net: "Lightning", w: 4 },
+  { type: "Transfer", flow: "transfer", net: "On-chain", w: 8 },
+  { type: "Swap", flow: "swap", net: "Liquid", w: 5 },
+  { type: "Peg-in", flow: "layer-transition", net: "Liquid", w: 5 },
+];
+const TOTAL_W = KINDS.reduce((s, k) => s + k.w, 0);
+
+const WALLET: Record<string, string> = {
+  "On-chain": "Satoshi-Onchain-Multi",
+  Liquid: "Satoshi-Liquid",
+  Lightning: "Satoshi-Lightning",
+  Exchange: "Coinbase Exchange",
+};
+
+const eur = (n: number) => n.toLocaleString("de-DE", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+// Enough distinct rows that the loop never reads as a loop.
+const DECK = 24;
+const ROWS = Array.from({ length: DECK }, (_, i) => {
+  let r = rnd() * TOTAL_W;
+  let k = KINDS[0];
+  for (const c of KINDS) if ((r -= c.w) <= 0) { k = c; break; }
+  const btc = +(0.00002 + rnd() * (k.flow === "swap" ? 0.9 : 0.35)).toFixed(8);
+  const rate = 52000 + rnd() * 17000;
+  const day = 28 - Math.floor(i * 1.1);
+  // Transfers, swaps and peg-ins move coins without disposing of them, which
+  // is what the app's own Status column already says.
+  const held = k.flow === "transfer" || k.flow === "swap" || k.flow === "layer-transition";
+  return {
+    ...k,
+    held,
+    id: `${hex(10)}…${hex(6)}`,
+    wallet: WALLET[k.net],
+    when: `2026-0${day > 0 ? 6 : 5}-${String(day > 0 ? day : 30 + day).padStart(2, "0")} ${String(6 + (i % 17)).padStart(2, "0")}:${String((i * 7) % 60).padStart(2, "0")}`,
+    btc: btc.toFixed(8),
+    eur: eur(btc * rate),
+    out: k.flow === "outgoing",
+    taxable: !held,
+  };
+});
+---
+
+<div class="txs" data-tx-stream>
+  <div class="txs-stage">
+    {ROWS.map((r, i) => (
+      <article
+        class="txs-row"
+        data-i={i}
+        style={`--bd:${FLOW[r.flow].bd}; --bg:${FLOW[r.flow].bg}; --fg:${FLOW[r.flow].fg}`}
+      >
+        <span class="txs-c-tx">
+          <span class="txs-ico">
+            {r.flow === "incoming" ? (
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m7 7 10 10" /><path d="M17 7v10H7" /></svg>
+            ) : r.flow === "outgoing" ? (
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7h10v10" /><path d="m7 17 10-10" /></svg>
+            ) : (
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3 4 7l4 4" /><path d="M4 7h16" /><path d="m16 21 4-4-4-4" /><path d="M20 17H4" /></svg>
+            )}
+          </span>
+          <span class="txs-txbody">
+            <span class="txs-txhead">
+              <b>{r.id}</b>
+              <i class="txs-badge">{r.type}</i>
+            </span>
+            <span class="txs-meta">
+              <span class="txs-trunc">{r.wallet}</span><span aria-hidden="true">·</span><span>{r.when}</span>
+            </span>
+          </span>
+        </span>
+
+        <span class="txs-c-amt">
+          <b class:list={[r.held ? "is-held" : r.out ? "is-out" : "is-in"]}>
+            {r.held ? "" : r.out ? "− " : "+ "}€ {r.eur}
+          </b>
+          <em>&#x0243; {r.btc}</em>
+        </span>
+
+        <span class="txs-c-net"><i class="txs-nchip">{r.net}</i></span>
+
+        <span class="txs-c-status">
+          <i class="txs-schip is-known">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.801 10A10 10 0 1 1 17 3.335" /><path d="m9 11 3 3L22 4" /></svg>
+            Confirmed
+          </i>
+          <i class="txs-schip is-pend is-unknown">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10" /><path d="M12 6v6l4 2" /></svg>
+            Pending
+          </i>
+          <em class:list={[!r.taxable && "is-free"]}>{r.taxable ? "Taxable" : "Not taxable"}</em>
+        </span>
+      </article>
+    ))}
+  </div>
+</div>
+
+<style>
+  /* Theme tokens copied from the app's .dark block in styles/globals.css. */
+  .txs {
+    --k-card: oklch(0.205 0 0);
+    --k-muted: oklch(0.269 0 0);
+    --k-muted-fg: oklch(0.708 0 0);
+    --k-fg: oklch(0.985 0 0);
+    --k-border: oklch(1 0 0 / 10%);
+
+    position: relative;
+    height: 560px;
+    /* Rows arrive and leave through the edges rather than popping. */
+    mask-image: linear-gradient(to bottom, transparent, #000 7%, #000 93%, transparent);
+    -webkit-mask-image: linear-gradient(to bottom, transparent, #000 7%, #000 93%, transparent);
+  }
+  .txs-stage { position: absolute; inset: 0; }
+
+  /* Each row is its own object, so they can slide over one another. */
+  .txs-row {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 180px 130px 132px;
+    align-items: center;
+    border: 1px solid var(--k-border);
+    border-radius: 10px;
+    background: var(--k-card);
+    box-shadow: 0 10px 26px rgb(0 0 0 / 0.34);
+    opacity: 0;
+    pointer-events: none;
+    will-change: transform, opacity;
+  }
+  .txs-row > span { padding: 10px 12px; min-width: 0; }
+
+  .txs-c-tx { display: flex; align-items: center; gap: 12px; overflow: hidden; }
+  /* size-8 rounded-md border + transactionFlowStyles[flow] */
+  .txs-ico {
+    width: 32px;
+    height: 32px;
+    flex: none;
+    display: grid;
+    place-items: center;
+    border-radius: 6px;
+    border: 1px solid var(--bd);
+    background: var(--bg);
+    color: var(--fg);
+    transition: border-color 420ms ease, background-color 420ms ease, color 420ms ease;
+  }
+  .txs-ico svg { width: 16px; height: 16px; }
+
+  .txs-txbody { display: flex; flex-direction: column; min-width: 0; }
+  /* No wrap: a badge dropping to a second line would resize the row and make
+     the whole stack jump at the moment of classification. */
+  .txs-txhead { display: flex; align-items: center; gap: 8px; min-width: 0; flex-wrap: nowrap; }
+  .txs-txhead b {
+    font-family: var(--font-mono);
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--k-fg);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  /* Badge: rounded-md px-2 py-0.5 text-xs font-medium, secondary. */
+  .txs-badge {
+    font-style: normal;
+    flex: none;
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1.35;
+    padding: 2px 8px;
+    border-radius: 6px;
+    background: var(--k-muted);
+    color: var(--k-fg);
+    white-space: nowrap;
+    transition: opacity 380ms ease;
+  }
+
+  .txs-meta {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 4px;
+    font-size: 12px;
+    color: var(--k-muted-fg);
+    min-width: 0;
+    overflow: hidden;
+  }
+  /* Without this the timestamp breaks mid-date and the row grows a line. */
+  .txs-meta > span { white-space: nowrap; }
+  .txs-trunc { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+
+  .txs-c-amt { display: flex; flex-direction: column; align-items: flex-end; text-align: right; }
+  .txs-c-amt b { font-size: 14px; font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .txs-c-amt b.is-in { color: #6ee7b7; }
+  .txs-c-amt b.is-out { color: #fca5a5; }
+  /* amountTone for anything that is not incoming or outgoing. */
+  .txs-c-amt b.is-held { color: var(--k-muted-fg); }
+  .txs-c-amt em {
+    font-style: normal;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--k-muted-fg);
+    font-variant-numeric: tabular-nums;
+    margin-top: 4px;
+  }
+
+  /* Network: rounded-md border px-2 py-0.5 text-xs font-normal. */
+  .txs-nchip {
+    font-style: normal;
+    display: inline-block;
+    font-size: 12px;
+    padding: 2px 8px;
+    border: 1px solid var(--k-border);
+    border-radius: 6px;
+    color: var(--k-muted-fg);
+    white-space: nowrap;
+  }
+
+  .txs-c-status { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; }
+  /* transactionStatusStyles.completed / .pending, dark halves. */
+  .txs-schip {
+    font-style: normal;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1.3;
+    padding: 4px 8px;
+    border-radius: 6px;
+    background: rgb(6 78 59 / 0.3);
+    color: #34d399;
+    box-shadow: inset 0 0 0 1px rgb(52 211 153 / 0.2);
+    white-space: nowrap;
+  }
+  .txs-schip.is-pend {
+    background: rgb(120 53 15 / 0.3);
+    color: #fbbf24;
+    box-shadow: inset 0 0 0 1px rgb(251 191 36 / 0.2);
+  }
+  .txs-schip svg { width: 12px; height: 12px; }
+  .txs-c-status em { font-style: normal; font-size: 12px; color: var(--k-muted-fg); }
+  /* The app already answers the tax question here, so nothing is invented. */
+  .txs-c-status em.is-free { color: #4ade80; }
+
+  /* ── unclassified vs classified ─────────────────────────────
+     Both states occupy identical boxes. Anything that appears on
+     classification is reserved beforehand, never display-toggled, or the
+     row would change height mid-flight and shunt the whole stack. */
+  .is-known { display: none; }
+  .txs-row.is-class .txs-schip.is-known { display: inline-flex; }
+  .txs-row.is-class .is-unknown { display: none; }
+
+  .txs-row:not(.is-class) .txs-badge { opacity: 0; }
+  .txs-row:not(.is-class) .txs-c-status em { visibility: hidden; }
+  /* Set on the icon itself so it beats the row's inline flow vars. */
+  .txs-row:not(.is-class) .txs-ico {
+    border-color: var(--k-border);
+    background: var(--k-muted);
+    color: var(--k-muted-fg);
+  }
+  .txs-row:not(.is-class) .txs-c-amt b { color: var(--k-muted-fg); }
+
+  @media (max-width: 1023px) {
+    .txs-row { grid-template-columns: minmax(0, 1fr) 170px 132px; }
+    .txs-c-net { display: none; }
+  }
+  /* Phones cannot carry four columns, but Status is the payoff, so it moves
+     to a second line instead of being dropped. */
+  @media (max-width: 767px) {
+    .txs { height: 460px; }
+    .txs-row { grid-template-columns: minmax(0, 1fr) auto; align-items: start; }
+    .txs-c-tx { grid-column: 1; }
+    .txs-c-amt { grid-column: 2; }
+    .txs-c-status {
+      grid-column: 1 / -1;
+      flex-direction: row;
+      align-items: center;
+      gap: 8px;
+      padding-top: 0;
+      padding-left: 56px;
+    }
+    .txs-txhead b { font-size: 13px; }
+  }
+  @media (max-width: 560px) {
+    .txs { height: 420px; }
+    .txs-ico { width: 28px; height: 28px; }
+    .txs-c-status { padding-left: 52px; }
+    .txs-meta, .txs-c-amt em, .txs-c-status em, .txs-schip, .txs-badge { font-size: 11px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .txs { height: auto; mask-image: none; -webkit-mask-image: none; }
+    .txs-stage { position: static; display: flex; flex-direction: column; gap: 10px; }
+    .txs-row { position: static; opacity: 1; box-shadow: none; }
+    .txs-ico { transition: none; }
+  }
+</style>
+
+<script>
+  for (const root of document.querySelectorAll<HTMLElement>("[data-tx-stream]")) {
+    const rows = [...root.querySelectorAll<HTMLElement>(".txs-row")];
+    if (!rows.length) continue;
+
+    if (matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      for (const r of rows) r.classList.add("is-class");
+      continue;
+    }
+
+    const DECK = rows.length;
+    const SPEED = 0.42;    // rows per second — calm, and constant
+    const CLASSIFY = 2.55; // slot at which a row resolves
+    const LAST = 9.6;      // slot at which a row has left the top
+
+    const smooth = (a: number, b: number, x: number) => {
+      const t = Math.min(1, Math.max(0, (x - a) / (b - a)));
+      return t * t * (3 - 2 * t);
+    };
+
+    let H = 0, rowH = 0, table: number[] = [];
+
+    /* Spacing shrinks as a row rises, so the settled book compresses into a
+       deck at the top while new arrivals stay full size and readable. The
+       cumulative offset has no closed form, so integrate it once per layout. */
+    const measure = () => {
+      H = root.clientHeight;
+      rowH = rows[0].offsetHeight || 62;
+      const gap = 12;
+      const spacingAt = (s: number) =>
+        rowH * (1 - 0.66 * smooth(1.4, 7, s)) + gap * (1 - smooth(1.4, 6, s));
+      table = [0];
+      const STEP = 0.02;
+      for (let s = STEP, acc = 0; s <= LAST + 1; s += STEP) {
+        acc += spacingAt(s) * STEP;
+        table.push(acc);
+      }
+    };
+    const cumY = (s: number) => {
+      const i = Math.min(table.length - 1, Math.max(0, Math.round(s / 0.02)));
+      return table[i];
+    };
+
+    measure();
+    addEventListener("resize", measure, { passive: true });
+
+    let raf = 0, prev = 0, phase = 0;
+
+    const frame = (now: number) => {
+      if (!prev) prev = now;
+      // Integrate against real elapsed time, not an assumed 60fps.
+      const dt = Math.min(0.064, (now - prev) / 1000);
+      prev = now;
+      phase += SPEED * dt;
+      if (phase >= DECK) phase -= DECK;
+
+      for (let j = 0; j < DECK; j++) {
+        const el = rows[j];
+        let s = phase - j;
+        while (s < 0) s += DECK;
+        if (s > LAST) {
+          if (el.style.opacity !== "0") el.style.opacity = "0";
+          continue;
+        }
+        const y = H - rowH - cumY(s);
+        const scale = 1 - 0.05 * smooth(0, LAST, s);
+        // Fade in at the bottom edge, out as the deck compresses at the top.
+        const op = smooth(0, 0.55, s) * (1 - 0.9 * smooth(6.4, LAST, s));
+        el.style.transform = `translate3d(0, ${y.toFixed(1)}px, 0) scale(${scale.toFixed(3)})`;
+        el.style.opacity = op.toFixed(3);
+        // Newer rows sit above older ones, so the stack tucks upward.
+        el.style.zIndex = String(Math.round((DECK - s) * 4));
+        el.classList.toggle("is-class", s > CLASSIFY);
+      }
+
+      raf = requestAnimationFrame(frame);
+    };
+
+    new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) {
+          if (e.isIntersecting && !raf) {
+            prev = 0;
+            raf = requestAnimationFrame(frame);
+          } else if (!e.isIntersecting && raf) {
+            cancelAnimationFrame(raf);
+            raf = 0;
+          }
+        }
+      },
+      { threshold: 0.1 },
+    ).observe(root);
+  }
+</script>

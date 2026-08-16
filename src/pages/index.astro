@@ -4,6 +4,7 @@ import CopyCommand from "../components/CopyCommand.astro";
 import HeroChatMock from "../components/HeroChatMock.astro";
 import SwapFlowMock from "../components/SwapFlowMock.astro";
 import AddConnectionMock from "../components/AddConnectionMock.astro";
+import TxStreamMock from "../components/TxStreamMock.astro";
 import TaxSheetMock from "../components/TaxSheetMock.astro";
 import AgentChatMock from "../components/AgentChatMock.astro";
 import { GITHUB_REPOSITORY_URL, SKILL_REPOSITORY_URL } from "../lib/site";
@@ -13,27 +14,27 @@ const SLIDES = [
   {
     file: "overview.webp",
     alt: "Overview screen: BTC price, portfolio value, activity chart with cost basis, balance drivers, and holdings by source",
-    caption: "The whole book at a glance — balance, cost basis, and price on one chart.",
+    caption: "Balance, cost basis, and price.",
   },
   {
     file: "transactions-flow.webp",
     alt: "Transactions screen with quarterly flow chart of incoming, outgoing, and transfer volumes",
-    caption: "Flows by quarter: what came in, what went out, what just moved.",
+    caption: "Flows by quarter.",
   },
   {
     file: "transactions-book.webp",
     alt: "Book transactions table: amounts, accounting treatment, pricing source, network, and confirmation status per transaction",
-    caption: "Every transaction booked, priced, and marked taxable — or not.",
+    caption: "Booked, priced, and marked taxable.",
   },
   {
     file: "swap-graph.webp",
     alt: "Swap detail: an L-BTC to BTC peg-out paired across layers, with a valued transaction graph of inputs and outputs",
-    caption: "An L-BTC → BTC swap, paired across layers — booked as a move, not a disposal.",
+    caption: "An L-BTC → BTC swap, paired as a move.",
   },
   {
     file: "swap-confidential.webp",
     alt: "The same swap detail with Liquid confidential amounts hidden while the pairing still resolves",
-    caption: "The same swap, with Liquid confidential amounts kept hidden. The pairing still resolves.",
+    caption: "Liquid amounts hidden. Pairing still resolves.",
   },
   {
     file: "wallets.webp",
@@ -43,12 +44,12 @@ const SLIDES = [
   {
     file: "add-connection.webp",
     alt: "Add connection dialog listing watch-only sources: wallet exports, address lists, Silent Payments, and Liquid descriptors",
-    caption: "Sources are watch-only: descriptors, xpubs, address lists. Never keys.",
+    caption: "Watch-only. Never keys.",
   },
   {
     file: "tax-report.webp",
     alt: "Tax report screen: Austrian filing fields, disposed lot audit, swap audit, and the export report package",
-    caption: "Filing fields, lot audits, and an export package your advisor can check.",
+    caption: "Filing fields and lot audits.",
   },
 ];
 ---
@@ -78,13 +79,12 @@ const SLIDES = [
 
     <div class="container hero-inner">
       <h1 class="hero-title display">
-        Many wallets, several layers,<br />one set of books.
+        Bitcoin accounting that stays on your machine.
       </h1>
 
       <p class="hero-sub">
-        Every wallet across on-chain, Lightning, and Liquid — booked on your
-        machine, and only there. No account, no upload, no company database
-        with your net worth in it.
+        One set of books across on-chain, Lightning, and Liquid. Tax reports
+        when you need them, without handing every address you own to a SaaS.
       </p>
 
       <div class="hero-actions">
@@ -123,6 +123,21 @@ const SLIDES = [
     </div>
   </section>
 
+  <!-- ── Bird's eye: money in, money out, and the internal moves ── -->
+  <section id="history">
+    <div class="container">
+      <div class="section-head">
+        <h2>Raw transactions in. A finished book out.</h2>
+        <p>
+          Deposits, spends, moves between your own wallets, swaps between
+          layers. Hundreds of rows, sorted by what each one actually is, and
+          you label none of them by hand.
+        </p>
+      </div>
+      <TxStreamMock />
+    </div>
+  </section>
+
   <!-- ── Pairing ───────────────────────────────────────────────── -->
   <section id="pairing" class="sec-git">
     <div class="container git-inner">
@@ -132,44 +147,34 @@ const SLIDES = [
 
       <div class="git-copy">
         <div class="section-head" style="margin-bottom:0">
-          <h2>A move stays a move.</h2>
+          <h2>A move between your own wallets isn't a sale.</h2>
           <p>
-            A peg-in isn't a sale. A submarine swap isn't a disposal. Opening a
-            channel isn't either. Every hop between your own wallets still looks
-            like a transaction, and naive tools book it as one: a 0.5 BTC peg-in
-            becomes a 0.5 BTC disposal, and you owe tax on a gain you never
-            made. Kassiber pairs both sides across layers — tooling that exists
-            because it's built for Bitcoin, not for ten thousand tokens.
+            Naive tools book a peg-in as a disposal and tax you on a gain you
+            never made. Kassiber pairs both sides, across layers. Paste any
+            address or txid and it tells you if it's yours.
           </p>
-          <ul class="checklist" style="margin-top:24px">
-            <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg> Paste any address or txid and Kassiber tells you whether it's yours</li>
-            <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg> Lost or stolen coins are booked as exactly that, not as sales</li>
-            <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg> Wallet migrations don't break history — addresses you left years ago still resolve as yours</li>
-          </ul>
         </div>
       </div>
     </div>
   </section>
 
   <!-- ── Local-first ───────────────────────────────────────────── -->
-  <section id="local-first" class="sec-sov">
+  <section id="connections" class="sec-sov">
     <div class="container sov-inner">
       <div class="sov-copy">
         <div class="section-head" style="margin-bottom:0">
-          <div class="eyebrow">Local-first</div>
-          <h2>You decide what you reveal. And to whom.</h2>
+          <h2>Connect anything Bitcoin.</h2>
           <p>
-            Every hosted tax tool is a honeypot: the addresses, balances, and
-            net worth of thousands of bitcoiners in one database, one breach
-            away. Kassiber keeps your books in one encrypted file on your disk
-            and syncs only from the sources you pick.
+            Hardware wallets, Sparrow, Samourai, Silent Payments, Liquid
+            descriptors, Lightning, BTCPay, exchange CSVs. All watch-only,
+            never keys. Point it at your own node and nobody learns which
+            addresses you ask about.
           </p>
         </div>
 
-        <ul class="checklist sov-facts">
-          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg> One passphrase encrypts everything; your books open for you and nobody else</li>
-          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg> No server behind the app, so a subpoena gets you a shrug</li>
-        </ul>
+        <p class="section-note">
+          New sources land with every release. Missing yours? <a href={`${GITHUB_REPOSITORY_URL}/issues`} target="_blank" rel="noopener noreferrer">Open an issue</a> or send the importer.
+        </p>
       </div>
 
       <div class="sov-visual">
@@ -182,15 +187,12 @@ const SLIDES = [
   <section id="tax" class="sec-tax">
     <div class="container">
       <div class="section-head">
-        <div class="eyebrow">Tax &amp; reports</div>
         <h2>Don't trust. Verify your tax report.</h2>
         <p>
-          The math runs locally through <a href="https://github.com/eprbell/rp2" target="_blank" rel="noopener noreferrer">RP2</a>,
-          an open-source crypto tax engine, in a Bitcoin-focused fork Kassiber
-          maintains. Pick the standard your jurisdiction expects: FIFO, HIFO,
-          or moving average. Every report exports to a
-          spreadsheet with live formulas, so you can recompute each balance,
-          price, and gain yourself.
+          FIFO, HIFO, or moving average, computed locally by <a href="https://github.com/eprbell/rp2" target="_blank" rel="noopener noreferrer">RP2</a>.
+          Exports as a spreadsheet with live formulas, so you can recompute
+          every number yourself. Nothing leaves this machine unless you send
+          it, and you decide who gets it.
         </p>
       </div>
 
@@ -203,17 +205,14 @@ const SLIDES = [
     <div class="container agents-detail">
       <div class="agents-copy">
         <div class="section-head" style="margin-bottom:0">
-          <div class="eyebrow">Agents welcome</div>
           <h2>Built by AI agents. Made for them too.</h2>
           <p>
-            Kassiber was written by AI agents, and it's built to be driven by
-            yours. Run the model locally — you didn't keep your books off the
-            cloud just to paste them into a chatbot.
+            Hand your agent <a href={SKILL_REPOSITORY_URL} target="_blank" rel="noopener noreferrer">the skill</a> instead
+            of explaining Kassiber to it. Run the model locally.
           </p>
         </div>
 
-        <p class="skill-note">
-          Don't explain Kassiber to your agent — hand it <a href={SKILL_REPOSITORY_URL} target="_blank" rel="noopener noreferrer">the skill</a>.
+        <p class="section-note">
           Works with OpenCode, Claude Code, Codex CLI, and oMLX.
         </p>
       </div>
@@ -228,7 +227,6 @@ const SLIDES = [
   <section id="open" class="sec-open">
     <div class="container">
       <div class="section-head open-head">
-        <div class="eyebrow">Open source</div>
         <h2>If you don't like something, fork it.</h2>
       </div>
 
@@ -254,15 +252,15 @@ const SLIDES = [
             <ul class="open-pitch-list">
               <li>
                 <span class="open-pitch-mark" aria-hidden="true"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>
-                <span><strong>Audit it.</strong> Your books are one local SQLite file. Open it with whatever you like.</span>
+                <span><strong>Audit it.</strong> Don't trust us. Read the code, or point your agent at it.</span>
               </li>
               <li>
                 <span class="open-pitch-mark" aria-hidden="true"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>
-                <span><strong>Extend it.</strong> Missing your exchange? Importers ship on request, or send a patch.</span>
+                <span><strong>Run it.</strong> One script spins up a throwaway regtest with demo books.</span>
               </li>
               <li>
                 <span class="open-pitch-mark" aria-hidden="true"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>
-                <span><strong>Outlive it.</strong> Backups restore with stock age, tar, and sqlcipher, even if Kassiber disappears.</span>
+                <span><strong>Extend it.</strong> Want something in Kassiber? Send a PR.</span>
               </li>
             </ul>
           </div>
@@ -293,12 +291,11 @@ const SLIDES = [
     <div class="screens-pin">
       <div class="container">
         <div class="section-head screens-head">
-          <div class="eyebrow">Screenshots</div>
           <h2>See for yourself.</h2>
         </div>
       </div>
 
-      <div class="screens-strip" tabindex="0" aria-label="App screenshots — scroll horizontally">
+      <div class="screens-strip" tabindex="0" aria-label="App screenshots, scroll horizontally">
         {SLIDES.map((slide) => (
           <figure class="screens-item">
             <div class="shot-frame">
@@ -340,11 +337,12 @@ const SLIDES = [
   <section id="download" class="sec-cta">
     <div class="container cta-inner">
       <h2 class="display cta-title">
-        Your Bitcoin deserves better than a SaaS that could sell you out.
+        Your Bitcoin deserves better than a SaaS.
       </h2>
       <p class="cta-sub">
-        Honestly pre-alpha, rough edges and all. We'd rather tell you than
-        pretend.
+        Every hosted tax tool is one database away from leaking the addresses,
+        balances, and net worth of everyone in it. Kassiber has no database to
+        leak.
       </p>
       <div class="cta-actions">
         <a id="cta-download-btn" class="btn btn-primary btn-lg" href={RELEASES_URL}>
@@ -356,6 +354,8 @@ const SLIDES = [
         </a>
         <a class="btn btn-ghost btn-lg" href="/download">Windows · Linux · other</a>
       </div>
+
+      <p class="cta-alpha">Pre-alpha, rough edges and all. We'd rather tell you.</p>
 
       <div class="cta-brew">
         <div class="cta-brew-head">Rather use Homebrew?</div>
@@ -372,7 +372,6 @@ const SLIDES = [
   <section id="faq" class="sec-faq">
     <div class="container">
       <div class="section-head faq-head">
-        <div class="eyebrow">FAQ</div>
         <h2>Before you ask.</h2>
       </div>
 
@@ -834,11 +833,6 @@ const SLIDES = [
     max-width: 720px;
   }
 
-  .section-head .eyebrow {
-    margin-bottom: 14px;
-    display: block;
-  }
-
   .section-head h2 {
     font-size: clamp(32px, 4vw, 48px);
     font-weight: 500;
@@ -849,29 +843,10 @@ const SLIDES = [
 
   .section-head p {
     color: var(--fg-muted);
-    font-size: 18px;
+    font-size: 20px;
+    line-height: 1.55;
     max-width: 620px;
     letter-spacing: -0.005em;
-  }
-
-  .checklist {
-    list-style: none;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-  }
-
-  .checklist li {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    color: var(--fg-muted);
-    font-size: 15px;
-  }
-
-  .checklist li svg {
-    color: var(--ok);
-    flex-shrink: 0;
   }
 
   /* ── Hero ─────────────────────────────────────────────────── */
@@ -929,7 +904,7 @@ const SLIDES = [
 
   .hero-sub {
     color: var(--fg-muted);
-    font-size: clamp(16px, 1.4vw, 19px);
+    font-size: clamp(21px, 1.9vw, 24px);
     max-width: 640px;
     margin: 0 auto 36px;
     letter-spacing: -0.005em;
@@ -1165,10 +1140,6 @@ const SLIDES = [
     align-items: center;
   }
 
-  .sov-facts {
-    margin-top: 28px;
-  }
-
   .sov-visual {
     min-width: 0;
   }
@@ -1185,10 +1156,10 @@ const SLIDES = [
     min-width: 0;
   }
 
-  .skill-note {
+  .section-note {
     margin-top: 28px;
     color: var(--fg-muted);
-    font-size: 15px;
+    font-size: 16px;
     line-height: 1.55;
     margin-bottom: 16px;
   }
@@ -1366,6 +1337,11 @@ const SLIDES = [
   }
 
   /* ── Git ──────────────────────────────────────────────── */
+  /* ── Bird's eye ───────────────────────────────────────── */
+
+  /* Bird's eye uses the plain left-aligned .section-head, like #tax and
+     #screens. Centring is reserved for the framing sections. */
+
   .sec-git { background: var(--bg-band); }
 
   .git-inner {
@@ -1384,7 +1360,7 @@ const SLIDES = [
 
   /* ── Tax & reports ────────────────────────────────────── */
   .sec-tax .section-head p a,
-  .skill-note a {
+  .section-note a {
     color: var(--fg);
     text-decoration: underline;
     text-underline-offset: 3px;
@@ -1393,7 +1369,7 @@ const SLIDES = [
   }
 
   .sec-tax .section-head p a:hover,
-  .skill-note a:hover {
+  .section-note a:hover {
     text-decoration-color: var(--fg);
   }
 
@@ -1480,8 +1456,8 @@ const SLIDES = [
     display: flex;
     align-items: flex-start;
     gap: 12px;
-    font-size: 15px;
-    line-height: 1.5;
+    font-size: 16px;
+    line-height: 1.55;
     color: var(--fg-muted);
   }
 
@@ -1556,12 +1532,14 @@ const SLIDES = [
     opacity: 0.6;
   }
   .cta-inner { position: relative; }
+  /* Deliberately below .hero-title at every width: the closing CTA restates
+     the pitch, it does not outrank the line that names the product. */
   .cta-title {
-    font-size: clamp(40px, 6vw, 72px);
+    font-size: clamp(36px, 4.8vw, 62px);
   }
   .cta-sub {
     color: var(--fg-muted);
-    font-size: 18px;
+    font-size: 20px;
     max-width: 560px;
     margin: 20px auto 36px;
     line-height: 1.55;
@@ -1570,6 +1548,11 @@ const SLIDES = [
   .cta-actions {
     display: flex; gap: 10px;
     justify-content: center; flex-wrap: wrap;
+    margin-bottom: 18px;
+  }
+  .cta-alpha {
+    color: var(--fg-dim);
+    font-size: 15px;
     margin-bottom: 24px;
   }
 
@@ -1682,7 +1665,7 @@ const SLIDES = [
     padding: 0 4px 22px;
     max-width: 68ch;
     color: var(--fg-muted);
-    font-size: 15px;
+    font-size: 16px;
     line-height: 1.6;
     letter-spacing: -0.005em;
   }
