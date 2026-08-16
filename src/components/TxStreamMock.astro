@@ -167,12 +167,11 @@ const ROWS = Array.from({ length: DECK }, (_, i) => {
   }
 
   /* ── animated mode ─────────────────────────────────────────── */
-  .txs.is-anim {
-    height: 560px;
-    /* Rows arrive and leave through the edges rather than popping. */
-    mask-image: linear-gradient(to bottom, transparent, #000 7%, #000 93%, transparent);
-    -webkit-mask-image: linear-gradient(to bottom, transparent, #000 7%, #000 93%, transparent);
-  }
+  /* No mask here on purpose. A gradient mask puts the whole moving subtree
+     into a masked layer that has to be re-composited every frame, which is
+     what made this stutter on phones. Rows already fade at both edges via
+     their own opacity, so the mask was buying nothing. */
+  .txs.is-anim { height: 560px; }
   .txs.is-anim .txs-stage { display: block; position: absolute; inset: 0; }
   .txs.is-anim .txs-row:nth-child(n + 8) { display: grid; }
   /* Each row is its own object, so they can slide over one another. */
@@ -181,9 +180,10 @@ const ROWS = Array.from({ length: DECK }, (_, i) => {
     left: 0;
     right: 0;
     top: 0;
-    box-shadow: 0 10px 26px rgb(0 0 0 / 0.34);
+    /* A 26px blur repainted under every row was costing more than it was
+       worth; translate3d already promotes these, so no will-change either. */
+    box-shadow: 0 6px 14px rgb(0 0 0 / 0.28);
     opacity: 0;
-    will-change: transform, opacity;
   }
   .txs-row > span { padding: 10px 12px; min-width: 0; }
 
@@ -361,10 +361,10 @@ const ROWS = Array.from({ length: DECK }, (_, i) => {
 
     // Leaving .is-anim off keeps the static finished list, which is also the
     // render anyone gets if this script never runs at all.
-    if (matchMedia("(prefers-reduced-motion: reduce)").matches) continue;
+    const calm = matchMedia("(prefers-reduced-motion: reduce)");
 
     const DECK = rows.length;
-    const SPEED = 0.42;    // rows per second — calm, and constant
+    const SPEED = 0.78;    // rows per second — constant
     const CLASSIFY = 2.55; // slot at which a row resolves
     const LAST = 9.6;      // slot at which a row has left the top
 
@@ -384,15 +384,9 @@ const ROWS = Array.from({ length: DECK }, (_, i) => {
       rowH = rows[0].offsetHeight || 62;
       root.classList.add("is-anim");
       H = root.clientHeight;
-      /* Spacing is also velocity here, since the slot rate is constant. The
-         entry multiplier makes a row cover the offscreen approach quickly and
-         settle into a tight gap, rather than drifting up through a sparse
-         bottom half. */
-      const spacingAt = (s: number) => {
-        const entry = 1 + 2.4 * (1 - smooth(0, 1.15, s));
-        const deck = 1 - 0.72 * smooth(1.6, 7, s);
-        return (rowH * deck + 6) * entry;
-      };
+      const gap = 12;
+      const spacingAt = (s: number) =>
+        rowH * (1 - 0.66 * smooth(1.4, 7, s)) + gap * (1 - smooth(1.4, 6, s));
       table = [0];
       const STEP = 0.02;
       for (let s = STEP, acc = 0; s <= LAST + 1; s += STEP) {
@@ -410,6 +404,12 @@ const ROWS = Array.from({ length: DECK }, (_, i) => {
 
     let raf = 0, prev = 0, phase = 0;
 
+    /* Last value written per row. Re-assigning a style property the browser
+       already holds still costs a style invalidation, and there are four of
+       them per row per frame; z-index in particular re-sorts paint order.
+       Skipping the no-ops is most of the difference on a phone. */
+    const last = rows.map(() => ({ t: "", o: "", z: "", c: false, hidden: false }));
+
     const frame = (now: number) => {
       if (!prev) prev = now;
       // Integrate against real elapsed time, not an assumed 60fps.
@@ -420,39 +420,102 @@ const ROWS = Array.from({ length: DECK }, (_, i) => {
 
       for (let j = 0; j < DECK; j++) {
         const el = rows[j];
+        const L = last[j];
         let s = phase - j;
         while (s < 0) s += DECK;
+
         if (s > LAST) {
-          if (el.style.opacity !== "0") el.style.opacity = "0";
+          // Hide rather than fade to zero: an opacity-0 row still paints and
+          // still holds a compositor layer, and most of the deck is offscreen.
+          if (!L.hidden) {
+            el.style.visibility = "hidden";
+            L.hidden = true;
+          }
           continue;
         }
+        if (L.hidden) {
+          el.style.visibility = "";
+          L.hidden = false;
+        }
+
         const y = H - rowH - cumY(s);
         const scale = 1 - 0.05 * smooth(0, LAST, s);
         // Fade in at the bottom edge, out as the deck compresses at the top.
         const op = smooth(0, 0.55, s) * (1 - 0.9 * smooth(6.4, LAST, s));
-        el.style.transform = `translate3d(0, ${y.toFixed(1)}px, 0) scale(${scale.toFixed(3)})`;
-        el.style.opacity = op.toFixed(3);
-        // Newer rows sit above older ones, so the stack tucks upward.
-        el.style.zIndex = String(Math.round((DECK - s) * 4));
-        el.classList.toggle("is-class", s > CLASSIFY);
+
+        const t = `translate3d(0, ${y.toFixed(1)}px, 0) scale(${scale.toFixed(3)})`;
+        if (t !== L.t) { el.style.transform = t; L.t = t; }
+
+        const o = op.toFixed(2);
+        if (o !== L.o) { el.style.opacity = o; L.o = o; }
+
+        // Newer rows sit above older ones, so the stack tucks upward. Rows are
+        // a whole slot apart, so rounding keeps the order strict.
+        const z = String(Math.round(DECK - s));
+        if (z !== L.z) { el.style.zIndex = z; L.z = z; }
+
+        const c = s > CLASSIFY;
+        if (c !== L.c) { el.classList.toggle("is-class", c); L.c = c; }
       }
 
       raf = requestAnimationFrame(frame);
     };
 
+    let onScreen = false;
+
+    const stop = () => {
+      if (raf) cancelAnimationFrame(raf);
+      raf = 0;
+    };
+
+    /* CSS collapses animation and transition durations under the OS setting,
+       but it cannot stop a rAF loop, so this has to unwind itself: drop
+       .is-anim, clear every inline style the loop wrote, and fall back to the
+       same static list that renders with no JS at all. */
+    const calmDown = () => {
+      stop();
+      root.classList.remove("is-anim");
+      for (const el of rows) {
+        // Clear only what the loop wrote. Wiping the whole style attribute
+        // would take the inline --bd/--bg/--fg with it, and those carry each
+        // row's flow tint.
+        el.style.transform = "";
+        el.style.opacity = "";
+        el.style.zIndex = "";
+        el.style.visibility = "";
+        el.classList.remove("is-class");
+      }
+      last.forEach((L) => {
+        L.t = L.o = L.z = "";
+        L.c = L.hidden = false;
+      });
+    };
+
+    const run = () => {
+      if (calm.matches) {
+        calmDown();
+        return;
+      }
+      if (!root.classList.contains("is-anim")) measure();
+      if (onScreen && !raf) {
+        prev = 0;
+        raf = requestAnimationFrame(frame);
+      }
+    };
+
+    calm.addEventListener("change", run);
+
     new IntersectionObserver(
       (entries) => {
         for (const e of entries) {
-          if (e.isIntersecting && !raf) {
-            prev = 0;
-            raf = requestAnimationFrame(frame);
-          } else if (!e.isIntersecting && raf) {
-            cancelAnimationFrame(raf);
-            raf = 0;
-          }
+          onScreen = e.isIntersecting;
+          if (onScreen) run();
+          else stop();
         }
       },
       { threshold: 0.1 },
     ).observe(root);
+
+    if (calm.matches) calmDown();
   }
 </script>

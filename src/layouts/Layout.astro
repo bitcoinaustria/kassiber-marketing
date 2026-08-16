@@ -350,6 +350,27 @@ const socialImage = new URL(image, base);
   @keyframes blink {
     50% { opacity: 0; }
   }
+
+  /* One site-wide honouring of the OS setting, rather than per-component
+     guards that each new animation has to remember to add. Durations
+     collapse instead of animations being removed, so anything that ends on
+     its final frame — fade-in, which also translates — still lands there.
+     Being CSS, this tracks the setting live: flipping Reduce Motion in the
+     OS takes effect without a reload. */
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
 </style>
 
 <style>
