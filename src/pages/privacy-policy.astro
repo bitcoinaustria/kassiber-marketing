@@ -22,7 +22,7 @@ const SECURITY_MD_URL = `${GITHUB_REPOSITORY_URL}/blob/main/SECURITY.md`;
   heading="Privacy Policy"
   lede="Kassiber is free software that runs on your machine. There is no Kassiber account, no Kassiber server, and no telemetry, so this policy is short: the little that happens on this website, and the connections the app makes when you ask it to."
   effectiveDate="2026-07-29"
-  lastUpdated="2026-07-29"
+  lastUpdated="2026-08-17"
   sections={sections}
 >
   <section id="controller">
@@ -43,7 +43,9 @@ const SECURITY_MD_URL = `${GITHUB_REPOSITORY_URL}/blob/main/SECURITY.md`;
     <p class="section-number">02</p>
     <h2>Short Version</h2>
     <p>
-      We don't track you. This website sets no cookies and runs no analytics. The app phones nobody:
+      We don't track you. This website loads no analytics script and sets no tracking cookie; the
+      only visitor numbers we see are the ones our host counts from requests it already serves. The
+      app phones nobody:
       your wallets, transactions, and reports stay in a database file on your own disk, and every
       connection it makes is one you configured. There is no Kassiber cloud to breach, subpoena, or
       sell. That is the point of the project, and it is why this policy is short.
@@ -54,10 +56,13 @@ const SECURITY_MD_URL = `${GITHUB_REPOSITORY_URL}/blob/main/SECURITY.md`;
     <p class="section-number">03</p>
     <h2>This Website</h2>
     <p>
-      The site is served by Vercel (Vercel Inc., USA), which receives your IP address, access time,
-      and browser type as part of delivering the page (Art. 6(1)(f) GDPR;{" "}<a
-        href="https://vercel.com/legal/privacy-notice">Vercel's privacy notice</a
-      >). Fonts are self-hosted, and there are no cookies, analytics, pixels, or ads.
+      The site is served by Cloudflare (Cloudflare, Inc., USA), which receives your IP address,
+      access time, and browser type as part of delivering the page (Art. 6(1)(f) GDPR;{" "}<a
+        href="https://www.cloudflare.com/privacypolicy/">Cloudflare's privacy policy</a
+      >). Cloudflare turns those same requests into the traffic figures we read in its dashboard
+      &mdash; page views, countries, referrers &mdash; measured at its servers rather than in your
+      browser. Nothing is loaded onto the page to count you, and the figures are aggregate, not a
+      profile. Fonts are self-hosted, and there are no third-party analytics, pixels, or ads.
     </p>
     <p>
       One exception: the{" "}<a href="/download">download page</a> asks GitHub's public API for the
