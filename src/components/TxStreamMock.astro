@@ -336,7 +336,9 @@ const ROWS = Array.from({ length: DECK }, (_, i) => {
   /* Heights belong to .is-anim only: the static list sizes to its content,
      and matching the specificity of the base rule is what lets these win. */
   @media (max-width: 767px) {
-    .txs.is-anim { height: 460px; }
+    /* Rows are half again as tall here, so the stage needs the extra room to
+       still show a before and an after either side of the resolve line. */
+    .txs.is-anim { height: 520px; }
     .txs-row { grid-template-columns: minmax(0, 1fr) auto; align-items: start; }
     .txs-c-tx { grid-column: 1; }
     .txs-c-amt { grid-column: 2; }
@@ -351,7 +353,7 @@ const ROWS = Array.from({ length: DECK }, (_, i) => {
     .txs-txhead b { font-size: 13px; }
   }
   @media (max-width: 560px) {
-    .txs.is-anim { height: 420px; }
+    .txs.is-anim { height: 480px; }
     .txs-ico { width: 28px; height: 28px; }
     .txs-c-status { padding-left: 52px; }
     .txs-meta, .txs-c-amt em, .txs-c-status em, .txs-schip, .txs-badge { font-size: 11px; }
@@ -375,7 +377,11 @@ const ROWS = Array.from({ length: DECK }, (_, i) => {
 
     const DECK = rows.length;
     const SPEED = 0.78;    // rows per second — constant
-    const CLASSIFY = 2.55; // slot at which a row resolves
+    /* Resolve at half the stage height rather than at a fixed slot. Desktop
+       fits about nine slots and a phone barely three, so a slot count that
+       leaves six classified rows on a desktop left none at all on mobile:
+       rows flipped at the very top edge, where they had already faded out. */
+    const CLASSIFY_AT = 0.5;
     const LAST = 9.6;      // slot at which a row has left the top
 
     const smooth = (a: number, b: number, x: number) => {
@@ -473,7 +479,7 @@ const ROWS = Array.from({ length: DECK }, (_, i) => {
         const z = String(Math.round(DECK - s));
         if (z !== L.z) { el.style.zIndex = z; L.z = z; }
 
-        const c = s > CLASSIFY;
+        const c = y < H * CLASSIFY_AT;
         if (c !== L.c) { el.classList.toggle("is-class", c); L.c = c; }
       }
 
