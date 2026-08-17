@@ -274,9 +274,7 @@ const DIVIDERS = Array.from({ length: BLOCKS - 1 }, (_, i) => (i + 1) * (BLOCK_W
 
     <span class="mp-scan" aria-hidden="true"></span>
 
-    <!-- Filled and placed on hover. Mempool shows you a transaction when you
-         point at one; this shows you a person, from any square you pick. -->
-  </div>
+    </div>
 
   <div class="mp-tip" hidden>
     <div class="mp-tip-head">
@@ -341,6 +339,9 @@ const DIVIDERS = Array.from({ length: BLOCKS - 1 }, (_, i) => (i + 1) * (BLOCK_W
       has to fail once. Kassiber joins the same slices on your machine, so
       there is no copy of it to lose.
     </p>
+    <!-- Says it outright. A pulse can suggest something is alive; only words
+         say it can be pointed at. Retires itself the first time one opens. -->
+    <p class="mp-try" hidden><b data-hint></b> <span>to see who the leaks say it belongs to.</span></p>
   </div>
 </figure>
 
@@ -425,7 +426,7 @@ const DIVIDERS = Array.from({ length: BLOCKS - 1 }, (_, i) => (i + 1) * (BLOCK_W
      blinking in unison. At 7% it should register without being nameable. */
   @keyframes mp-invite {
     0%, 74%, 100% { transform: scale(1); }
-    84% { transform: scale(1.07); }
+    84% { transform: scale(var(--pulse, 1.09)); }
   }
   /* Starts where the square already was, not from the dimmed state. Animating
      up from 0.13 made every future highlight vanish for up to half a second
@@ -471,6 +472,20 @@ const DIVIDERS = Array.from({ length: BLOCKS - 1 }, (_, i) => (i + 1) * (BLOCK_W
     88% { opacity: 1; }
     to { transform: translate3d(calc(100vw + var(--w)), 0, 0); opacity: 0; }
   }
+
+  /* The site says small things in prose, not in floating chips, so this does
+     too. The action carries the emphasis and the rest stays quiet. */
+  .mp-try {
+    margin: 10px 0 0;
+    font-size: 13.5px;
+    line-height: 1.5;
+    color: var(--fg-dim);
+    opacity: 0;
+    transition: opacity 420ms ease;
+  }
+  .mp-try b { font-weight: 500; color: var(--fg-muted); }
+  .mp[data-stage="2"] .mp-try { opacity: 1; transition-delay: 900ms; }
+  .mp.is-used .mp-try { opacity: 0; transition-delay: 0ms; }
 
   /* The block view hands you a transaction when you point at one. This hands
      you a person, assembled out of two breaches neither of which held all of
@@ -647,6 +662,13 @@ const DIVIDERS = Array.from({ length: BLOCKS - 1 }, (_, i) => (i + 1) * (BLOCK_W
       pointer-events: auto;
       box-shadow: 0 0 0 100vmax rgb(0 0 0 / 0.66), 0 18px 46px rgb(0 0 0 / 0.6);
     }
+    /* Everything is roughly a third of the size here, so a beat that reads on a
+       desktop square is a pixel and a half on a phone. Bounded by the gap: a
+       four cell square cannot grow more than 14% before it touches a
+       neighbour. */
+    .mp-sq.is-mine { --pulse: 1.14; }
+    .mp-try { font-size: 13px; }
+
     .mp-tip-x { display: block; }
     /* One column: side by side does not fit, and the person still leads. */
     .mp-tip-body { flex-direction: column; }
@@ -742,6 +764,7 @@ const DIVIDERS = Array.from({ length: BLOCKS - 1 }, (_, i) => (i + 1) * (BLOCK_W
       const show = (sq: SVGRectElement) => {
         if (hot === sq) return;
         hot = sq;
+        root.classList.add("is-used");
         for (const el of tip.querySelectorAll<HTMLElement>("[data-f]")) {
           const v = sq.dataset[el.dataset.f as string] ?? "";
           el.textContent = el.dataset.f === "amt" ? `\u20bf ${v}` : v;
@@ -778,9 +801,34 @@ const DIVIDERS = Array.from({ length: BLOCKS - 1 }, (_, i) => (i + 1) * (BLOCK_W
       };
 
       const at = (e: Event) => (e.target as Element)?.closest?.(".mp-sq.is-mine");
+      /* A two cell square is about 21px across on a phone, well under any
+         sane touch target, so a tap that lands near one counts as a hit. */
+      const near = (e: MouseEvent) => {
+        let best: Element | null = null;
+        let bestD = 34;
+        for (const sq of root.querySelectorAll(".mp-sq.is-mine")) {
+          const r = sq.getBoundingClientRect();
+          if (!r.width) continue;
+          const dx = Math.max(r.left - e.clientX, 0, e.clientX - r.right);
+          const dy = Math.max(r.top - e.clientY, 0, e.clientY - r.bottom);
+          const d = Math.hypot(dx, dy);
+          if (d < bestD) { bestD = d; best = sq; }
+        }
+        return best;
+      };
+
+      const hint = root.querySelector<HTMLElement>(".mp-try");
+      const label = hint?.querySelector("[data-hint]");
+      if (hint && label) {
+        label.textContent = touch ? "Tap any coloured square" : "Hover any coloured square";
+        hint.hidden = false;
+      }
       if (touch) {
         // Tap to open, and an explicit close, because nothing here is hoverable.
-        band.addEventListener("click", (e) => { const sq = at(e); if (sq) show(sq as SVGRectElement); });
+        band.addEventListener("click", (e) => {
+          const sq = at(e) ?? near(e as MouseEvent);
+          if (sq) show(sq as SVGRectElement);
+        });
         tip.querySelector(".mp-tip-x")?.addEventListener("click", hide);
         /* Anywhere off the sheet dismisses it too. The scrim is a shadow rather
            than an element, so it cannot take the tap itself. */
