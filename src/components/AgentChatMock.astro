@@ -44,6 +44,21 @@ const MONTHS = [
   { m: "D", incoming: 4, outgoing: 4, transfers: 5, swaps: 0 },
 ];
 
+/* What it says back, split into words here rather than in the browser.
+   Component CSS is scoped by an attribute Astro stamps onto template elements,
+   and a span created by script never carries it, so the fade and the caret
+   simply did not apply and the whole sentence appeared at once. Authoring the
+   words also means the full answer is there with no JS at all. */
+const SAY = {
+  year:
+    "Money in, money out, transfers, and swaps. Your moves between your own wallets were already paired off, so none of them count as income.",
+  privacy:
+    "Two of them. Reused addresses tie your history together, and merged inputs prove the wallets are one owner.",
+  funds:
+    "Every lot traced back to the day it arrived, with the exchange records attached. Hand them the file, not your wallets.",
+};
+const words = (s: string) => s.split(" ");
+
 // Chart geometry mirrors the app's grouped transaction-overview bars.
 const W = 320;
 const H = 94;
@@ -97,7 +112,7 @@ const bars = MONTHS.map((x, i) => {
         <div class="tout" data-tout></div>
       </div>
 
-      <p data-stream>Money in, money out, transfers, and swaps. Your moves between your own wallets were already paired off, so none of them count as income.</p>
+      <p data-stream>{words(SAY.year).map((w) => <span>{`${w} `}</span>)}</p>
 
       <div class="card" data-card>
         <div class="chart-head">
@@ -113,17 +128,20 @@ const bars = MONTHS.map((x, i) => {
           <line x1="0" y1="12" x2={W} y2="12" class="grid" />
           <line x1="0" y1="42" x2={W} y2="42" class="grid" />
           <line x1="0" y1={BASE} x2={W} y2={BASE} class="axis" />
-          {bars.map((b) => (
-            <rect x={b.x} y={BASE - b.incomingHeight} width={b.width} height={b.incomingHeight} rx="1.5" class="bar incoming" />
+          {/* Delay per month, so the year fills in left to right rather than
+              appearing at once. Each series is nudged a little further so the
+              sweep has some depth instead of moving as one block. */}
+          {bars.map((b, i) => (
+            <rect x={b.x} y={BASE - b.incomingHeight} width={b.width} height={b.incomingHeight} rx="1.5" class="bar incoming" style={`--bd:${i * 38}ms`} />
           ))}
-          {bars.map((b) => (
-            <rect x={b.x + b.width + 1} y={BASE} width={b.width} height={b.outgoingHeight} rx="1.5" class="bar outgoing" />
+          {bars.map((b, i) => (
+            <rect x={b.x + b.width + 1} y={BASE} width={b.width} height={b.outgoingHeight} rx="1.5" class="bar outgoing" style={`--bd:${i * 38 + 20}ms`} />
           ))}
-          {bars.map((b) => (
-            <rect x={b.x + (b.width + 1) * 2} y={BASE - b.transferHeight} width={b.width} height={b.transferHeight} rx="1.5" class="bar transfer" />
+          {bars.map((b, i) => (
+            <rect x={b.x + (b.width + 1) * 2} y={BASE - b.transferHeight} width={b.width} height={b.transferHeight} rx="1.5" class="bar transfer" style={`--bd:${i * 38 + 40}ms`} />
           ))}
-          {bars.map((b) => (
-            <rect x={b.x + (b.width + 1) * 3} y={BASE - b.swapHeight} width={b.width} height={b.swapHeight} rx="1.5" class="bar swap" />
+          {bars.map((b, i) => (
+            <rect x={b.x + (b.width + 1) * 3} y={BASE - b.swapHeight} width={b.width} height={b.swapHeight} rx="1.5" class="bar swap" style={`--bd:${i * 38 + 80}ms`} />
           ))}
           {bars.map((b) => (
             <text x={b.x + slot / 2 - 2} y={H - 2} class="mo">{b.m}</text>
@@ -153,7 +171,7 @@ const bars = MONTHS.map((x, i) => {
         <div class="tout" data-tout></div>
       </div>
 
-      <p data-stream>Two of them. Reused addresses tie your history together, and merged inputs prove the wallets are one owner.</p>
+      <p data-stream>{words(SAY.privacy).map((w) => <span>{`${w} `}</span>)}</p>
 
       <div class="card" data-card>
         <div class="card-top">
@@ -161,9 +179,9 @@ const bars = MONTHS.map((x, i) => {
           <span class="amt">3 findings</span>
         </div>
         <dl class="kv">
-          <div><dt>Reused addresses</dt><dd class="hot">14 outputs</dd></div>
-          <div><dt>Merged inputs</dt><dd>2 wallets</dd></div>
-          <div><dt>Round-number withdrawals</dt><dd>6</dd></div>
+          <div><dt>Reused addresses</dt><dd class="hot" data-count="14" data-suffix=" outputs">14 outputs</dd></div>
+          <div><dt>Merged inputs</dt><dd data-count="2" data-suffix=" wallets">2 wallets</dd></div>
+          <div><dt>Round-number withdrawals</dt><dd data-count="6">6</dd></div>
         </dl>
       </div>
     </div>
@@ -183,12 +201,12 @@ const bars = MONTHS.map((x, i) => {
         <div class="tout" data-tout></div>
       </div>
 
-      <p data-stream>Every lot traced back to the day it arrived, with the exchange records attached. Hand them the file, not your wallets.</p>
+      <p data-stream>{words(SAY.funds).map((w) => <span>{`${w} `}</span>)}</p>
 
       <div class="card" data-card>
         <div class="card-top">
           <span class="card-name">Source of funds · case bank-2025</span>
-          <span class="amt">4.21830000&nbsp;₿</span>
+          <span class="amt" data-count="4.21830000" data-decimals="8" data-suffix="&#8239;₿">4.21830000&#8239;₿</span>
         </div>
         <div class="attach">
           <span class="clip" aria-hidden="true">
@@ -218,12 +236,40 @@ const bars = MONTHS.map((x, i) => {
     const msgs = [...chat.querySelectorAll<HTMLElement>(".msg")];
     const tools = [...chat.querySelectorAll<HTMLElement>("[data-tool]")];
     const cards = [...chat.querySelectorAll<HTMLElement>("[data-card]")];
-    /* The prose is authored in the markup so it ships without JS, which means
-       the full text has to be taken before the first frame clears it. */
-    const proses = new Map<HTMLElement, string>();
+    /* The words are already spans, one per word, rendered by the component.
+       Arming them is what hides them; every word keeps its place from the first
+       frame and only its opacity changes, so nothing reflows as the sentence
+       arrives. */
+    const proses = new Map<HTMLElement, HTMLElement[]>();
     for (const p of chat.querySelectorAll<HTMLElement>("[data-stream]")) {
-      proses.set(p, p.textContent ?? "");
+      p.classList.add("is-armed");
+      proses.set(p, [...p.querySelectorAll<HTMLElement>("span")]);
     }
+
+    const counters = [...chat.querySelectorAll<HTMLElement>("[data-count]")];
+    const countText = (el: HTMLElement, v: number) =>
+      v.toFixed(Number(el.dataset.decimals ?? 0)) + (el.dataset.suffix ?? "");
+
+    /* Counts up to the real figure. A number that lands already finished is
+       just text; one that climbs reads as something being worked out.
+       On the same timers as everything else, not on animation frames: frames
+       are throttled while the tab is in the background, which left the figure
+       sitting on the zero it was reset to, and a stray frame loop outlived
+       Replay. The last tick assigns the target exactly, so the number on screen
+       is never a rounded approximation of itself. */
+    const TICKS = 26;
+    const countUp = (el: HTMLElement) => {
+      const target = Number(el.dataset.count);
+      if (!Number.isFinite(target)) return;
+      let f = 0;
+      const tick = () => {
+        f += 1;
+        const k = f / TICKS;
+        el.textContent = countText(el, f >= TICKS ? target : target * (1 - Math.pow(1 - k, 3)));
+        if (f < TICKS) later(tick, 32);
+      };
+      tick();
+    };
 
     let timers: number[] = [];
     const later = (fn: () => void, ms: number) => {
@@ -238,6 +284,7 @@ const bars = MONTHS.map((x, i) => {
     const follow = () => log.scrollTo({ top: log.scrollHeight, behavior: "auto" });
 
     const reset = () => {
+      chat.classList.remove("is-busy");
       for (const m of msgs) m.classList.remove("is-in");
       for (const t of tools) {
         t.classList.remove("is-run", "is-done");
@@ -245,7 +292,10 @@ const bars = MONTHS.map((x, i) => {
         if (out) out.textContent = "";
       }
       for (const c of cards) c.classList.remove("is-in");
-      for (const p of proses.keys()) p.textContent = "";
+      for (const spans of proses.values()) {
+        for (const s of spans) s.classList.remove("on", "tip");
+      }
+      for (const el of counters) el.textContent = countText(el, 0);
       chat.dataset.turn = "0";
       log.scrollTop = 0;
     };
@@ -261,7 +311,10 @@ const bars = MONTHS.map((x, i) => {
         if (out) out.textContent = t.dataset.out ?? "";
       }
       for (const c of cards) c.classList.add("is-in");
-      for (const [p, text] of proses) p.textContent = text;
+      for (const spans of proses.values()) {
+        for (const s of spans) s.classList.add("on");
+      }
+      for (const el of counters) el.textContent = countText(el, Number(el.dataset.count));
       chat.dataset.turn = "6";
       follow();
     };
@@ -269,13 +322,18 @@ const bars = MONTHS.map((x, i) => {
     /* A word at a time, because that is what generated text looks like. Fast
        enough to read as output rather than as a typewriter effect. */
     const stream = (p: HTMLElement, done: () => void) => {
-      const words = (proses.get(p) ?? "").split(" ");
+      const spans = proses.get(p) ?? [];
       let i = 0;
       const tick = () => {
-        p.textContent = words.slice(0, ++i).join(" ");
+        spans[i - 1]?.classList.remove("tip");
+        const s = spans[i++];
+        s?.classList.add("on", "tip");
         follow();
-        if (i < words.length) later(tick, 26);
-        else done();
+        if (i < spans.length) later(tick, 26);
+        else {
+          s?.classList.remove("tip");
+          done();
+        }
       };
       tick();
     };
@@ -303,7 +361,7 @@ const bars = MONTHS.map((x, i) => {
         // The question lands. A first one arrives sooner than a follow-up.
         steps.push({ wait: k === 0 ? 420 : 950, run: (n) => { ask.classList.add("is-in"); follow(); n(); } });
         // It reaches for a command before it says anything.
-        steps.push({ wait: 460, run: (n) => { answer?.classList.add("is-in"); tool?.classList.add("is-run"); follow(); n(); } });
+        steps.push({ wait: 460, run: (n) => { answer?.classList.add("is-in"); tool?.classList.add("is-run"); chat.classList.add("is-busy"); follow(); n(); } });
         // Held for as long as that command's own work would take.
         steps.push({
           wait: Number(tool?.dataset.dur ?? 900),
@@ -315,7 +373,18 @@ const bars = MONTHS.map((x, i) => {
           },
         });
         steps.push({ wait: 280, run: (n) => (prose ? stream(prose, n) : n()) });
-        steps.push({ wait: 200, run: (n) => { card?.classList.add("is-in"); follow(); n(); } });
+        // The card, and any figure on it, once the sentence introducing it is out.
+        steps.push({
+          wait: 200,
+          run: (n) => {
+            card?.classList.add("is-in");
+            if (card) for (const el of card.querySelectorAll<HTMLElement>("[data-count]")) countUp(el);
+            follow();
+            n();
+          },
+        });
+        // Idle again until the next question, so the badge only breathes on work.
+        steps.push({ wait: 260, run: (n) => { chat.classList.remove("is-busy"); n(); } });
         if (k === asks.length - 1) {
           steps.push({ wait: 0, run: (n) => { chat.dataset.turn = "6"; n(); } });
         }
@@ -413,6 +482,35 @@ const bars = MONTHS.map((x, i) => {
     letter-spacing: -0.005em;
     color: var(--fg-muted);
     margin-bottom: 10px;
+  }
+
+  /* Words are all in the layout from the first frame and only fade in, so the
+     paragraph never reflows while it arrives and the card below it never walks
+     down the pane. Appending text did both.
+     Only hidden once the script has taken charge: without it the sentence has
+     to read normally rather than be invisible forever. */
+  [data-stream].is-armed span {
+    opacity: 0;
+    transition: opacity 240ms ease;
+  }
+
+  [data-stream].is-armed span.on { opacity: 1; }
+
+  /* Rides the leading edge, so the eye has somewhere to sit while it fills. */
+  [data-stream].is-armed span.tip::after {
+    content: "";
+    display: inline-block;
+    width: 0.42em;
+    height: 0.95em;
+    margin-left: 2px;
+    vertical-align: -0.12em;
+    background: var(--fg-dim);
+    animation: caret 1s steps(2, jump-none) infinite;
+  }
+
+  @keyframes caret {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
   }
 
   /* ── Answer cards ─────────────────────────────────────── */
@@ -536,6 +634,33 @@ const bars = MONTHS.map((x, i) => {
   .bar.transfer { fill: oklch(0.56 0.04 260); }
   .bar.swap { fill: oklch(0.62 0.16 246); }
 
+  /* Grown from the axis, the way the app draws them: money above the line,
+     spending below it, so each bar rises or drops from where zero is. */
+  .bar {
+    transform-box: fill-box;
+    transform-origin: 50% 100%;
+  }
+
+  .bar.outgoing { transform-origin: 50% 0%; }
+
+  .card.is-in .bar {
+    animation: barGrow 560ms cubic-bezier(0.2, 0.8, 0.2, 1) var(--bd, 0ms) both;
+  }
+
+  @keyframes barGrow {
+    from { transform: scaleY(0); }
+    to { transform: scaleY(1); }
+  }
+
+  /* Rows land one after another rather than as a finished table. */
+  .card.is-in .kv > div {
+    animation: msgIn 360ms ease both;
+  }
+
+  .card.is-in .kv > div:nth-child(1) { animation-delay: 90ms; }
+  .card.is-in .kv > div:nth-child(2) { animation-delay: 200ms; }
+  .card.is-in .kv > div:nth-child(3) { animation-delay: 310ms; }
+
   .mo {
     font-family: var(--font-mono);
     font-size: 7px;
@@ -634,13 +759,24 @@ const bars = MONTHS.map((x, i) => {
     gap: 10px;
   }
 
-  /* Same emerald the app's model picker uses for a model that runs here. */
+  /* Same emerald the app's model picker uses for a model that runs here. It
+     breathes while the model is working, which is the only sign that the
+     thinking is happening on this machine rather than in a data centre. */
   .chat-head .local {
     font-style: normal;
     padding: 1px 6px;
     border-radius: 999px;
     background: rgba(16, 185, 129, 0.14);
     color: oklch(0.78 0.14 165);
+  }
+
+  .chat.is-busy .local {
+    animation: badge 1.7s ease-in-out infinite;
+  }
+
+  @keyframes badge {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+    50% { box-shadow: 0 0 13px 1px rgba(16, 185, 129, 0.45); }
   }
 
   /* ── Tool calls ───────────────────────────────────────── */
@@ -709,6 +845,26 @@ const bars = MONTHS.map((x, i) => {
     50% { opacity: 1; }
   }
 
+  /* A line crossing the block while the command is out. Clipped by the block's
+     own overflow, so it needs no wrapper of its own. */
+  .tool {
+    position: relative;
+  }
+
+  .tool.is-run::after {
+    content: "";
+    position: absolute;
+    inset: auto 0 0 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--warn), transparent);
+    animation: toolsweep 1.25s linear infinite;
+  }
+
+  @keyframes toolsweep {
+    from { transform: translateX(-100%); }
+    to { transform: translateX(100%); }
+  }
+
   /* Below the rule: what came back, so the command and its result are one
      object rather than two stray lines. */
   .tout {
@@ -749,5 +905,19 @@ const bars = MONTHS.map((x, i) => {
       overflow-y: hidden;
       padding: 14px;
     }
+  }
+
+  /* The script settles straight to the end state here, so everything that only
+     exists to show arrival is switched off rather than left mid-flight. */
+  @media (prefers-reduced-motion: reduce) {
+    .msg.is-in,
+    .card.is-in,
+    .card.is-in .bar,
+    .card.is-in .kv > div { animation: none; }
+    [data-stream] span { opacity: 1; transition: none; }
+    [data-stream] span.tip::after,
+    .tool.is-run::after { display: none; }
+    .tool.is-run .tdot,
+    .chat.is-busy .local { animation: none; }
   }
 </style>
