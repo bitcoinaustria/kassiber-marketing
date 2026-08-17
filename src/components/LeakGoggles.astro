@@ -35,6 +35,11 @@ const BLOCK_W = COLS * CELL;
 const H = ROWS * CELL;
 const BLOCK_GAP = 22;
 const DECK_W = BLOCKS * BLOCK_W + (BLOCKS - 1) * BLOCK_GAP;
+/* The deck tiles on this stride, one gap wider than the blocks fill: the
+   trailing gap is what spaces the loop seam like every gap inside a deck. Two
+   flush decks then read as one endless field. Without it, the last block of a
+   deck touches the first of the next each time the drift wraps. */
+const DECK_STRIDE = DECK_W + BLOCK_GAP;
 
 let seed = 20090103;
 const rnd = () => ((seed = (seed * 1103515245 + 12345) & 0x7fffffff) / 0x7fffffff);
@@ -140,7 +145,7 @@ const claim = (target: number, min: number) => {
       const q = SQUARES[idx];
       const near = MINE.some((m) => {
         const dx = Math.abs(SQUARES[m].x - q.x);
-        return Math.hypot(Math.min(dx, DECK_W + BLOCK_GAP - dx), SQUARES[m].y - q.y) < 110;
+        return Math.hypot(Math.min(dx, DECK_STRIDE - dx), SQUARES[m].y - q.y) < 110;
       });
       if (near) continue;
       return idx;
@@ -229,7 +234,9 @@ const RANK = 3;
 const NEARBY = 812;
 const CITY = "Vienna";
 
-const DIVIDERS = Array.from({ length: BLOCKS - 1 }, (_, i) => (i + 1) * (BLOCK_W + BLOCK_GAP) - BLOCK_GAP / 2);
+/* One per gap, including the trailing one at the deck seam, so the boundary
+   between two looped decks is drawn like every boundary inside a deck. */
+const DIVIDERS = Array.from({ length: BLOCKS }, (_, i) => (i + 1) * (BLOCK_W + BLOCK_GAP) - BLOCK_GAP / 2);
 
 ---
 
@@ -239,7 +246,7 @@ const DIVIDERS = Array.from({ length: BLOCKS - 1 }, (_, i) => (i + 1) * (BLOCK_W
       {[0, 1].map(() => (
         <svg
           class="mp-deck"
-          viewBox={`0 0 ${DECK_W} ${H}`}
+          viewBox={`0 0 ${DECK_STRIDE} ${H}`}
           role="img"
           aria-label="An endless field of confirmed payments, all public and unnamed, with one person's outputs highlighted after a leak"
         >
