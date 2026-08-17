@@ -1,0 +1,799 @@
+---
+/*
+ * The chain was never the private part.
+ *
+ * A field of transaction data, grouped into blocks and drifting without end,
+ * because that is the honest scale: every payment ever made, public, permanent
+ * and unnamed. The leak does not publish any of it. It was published the
+ * moment it confirmed. It publishes the one thing that was never on the chain
+ * — that these particular outputs are yours — and the chain supplies the rest,
+ * in both directions, for good.
+ *
+ * The drift is one CSS animation on a track holding the deck twice, so the
+ * loop is seamless and costs no script. Stage lives in a data attribute and
+ * every transition is CSS; with no JS it renders the final stage, which is the
+ * state the argument rests on.
+ *
+ * The stages run on a timer once the band is properly in view, not on scroll
+ * position: a leak is not something you scrub back and forth, and it should
+ * play at the speed the sentences read at rather than the speed the wheel
+ * turns. It plays once and does not reset, for the same reason.
+ */
+/* Geometry follows the block view in the mempool project: a block is a grid of
+   cells, every transaction is a square some whole number of cells wide, and the
+   big ones are placed first into the first slot that holds them so everything
+   smaller packs into what is left. That first-fit-largest-first order is what
+   fills a block edge to edge; a shelf packer leaves dead space under every
+   short square in a tall row. */
+const BLOCKS = 6;
+const CELL = 15;
+// Square: a block is as wide as it is tall, whatever the height becomes.
+const COLS = 24;
+const ROWS = 24;
+const PAD = 2;
+const BLOCK_W = COLS * CELL;
+const H = ROWS * CELL;
+const BLOCK_GAP = 22;
+const DECK_W = BLOCKS * BLOCK_W + (BLOCKS - 1) * BLOCK_GAP;
+
+let seed = 20090103;
+const rnd = () => ((seed = (seed * 1103515245 + 12345) & 0x7fffffff) / 0x7fffffff);
+const pick = <T,>(a: T[]) => a[Math.floor(rnd() * a.length)];
+
+const TONES = ["#1c1e26", "#22242e", "#282b36", "#2f323e", "#363a48"];
+
+/* The site's own protocol colours, taken from the hero float marks so the
+   mapping lives in one place and cannot drift: Lightning is the violet one and
+   Liquid the teal one, not the other way round.
+   What sits in a block is only ever the on-chain footprint. A channel open and
+   a peg-in are on the ledger; the invoice paid through that channel and the
+   blinded amount behind that peg-in never were. So a square on a rail carries
+   two identifiers, and the split between them is the section's whole argument
+   in miniature: the anchor was always public, the rest only the leak knows. */
+const RAILS = [
+  { name: "Bitcoin", c: "#f7931a", anchor: "Output" },
+  { name: "Liquid", c: "#22e1c9", anchor: "Peg-in", off: "Address" },
+  { name: "Lightning", c: "#8b5cf6", anchor: "Channel open", off: "Invoice" },
+];
+type Rail = (typeof RAILS)[number];
+
+type Sq = {
+  x: number; y: number; s: number; cells: number; tone: string;
+  mine?: boolean; early?: boolean; n?: number; hi?: string;
+  tw?: number; del?: number;
+  addr?: string; amt?: string; blk?: number; src?: string;
+  rail?: string; anchorLabel?: string; offLabel?: string; off?: string;
+};
+
+/* Blocks are full nearly all of the time, so exactly one in the deck comes in
+   light. Left to a per-block probability this is either invisible or happens
+   three times over, since the deck is generated once from a fixed seed. */
+const SHORT_BLOCK = 1 + Math.floor(rnd() * (BLOCKS - 1));
+
+const SQUARES: Sq[] = [];
+for (let b = 0; b < BLOCKS; b++) {
+  const ox = b * (BLOCK_W + BLOCK_GAP);
+  // Rows count up from the floor, so a short block leaves its gap at the top.
+  const rows = b === SHORT_BLOCK ? Math.round(ROWS * (0.62 + rnd() * 0.22)) : ROWS;
+  const occ: boolean[][] = Array.from({ length: rows }, () => Array(COLS).fill(false));
+
+  const put = (r: number, c: number, cells: number) => {
+    for (let y = r; y < r + cells; y++) for (let x = c; x < c + cells; x++) occ[y][x] = true;
+    const q: Sq = {
+      // Row 0 is the floor of the block, so pixel y counts down from the top.
+      x: ox + c * CELL + PAD,
+      y: (ROWS - r - cells) * CELL + PAD,
+      s: cells * CELL - PAD * 2,
+      cells,
+      tone: pick(TONES),
+    };
+    // A minority breathe, so the field looks alive rather than printed.
+    if (cells === 1 && rnd() > 0.972) { q.tw = Math.round(2600 + rnd() * 3400); q.del = Math.round(rnd() * 4000); }
+    SQUARES.push(q);
+  };
+
+  const free = (r: number, c: number, cells: number) => {
+    for (let y = r; y < r + cells; y++) for (let x = c; x < c + cells; x++) if (occ[y][x]) return false;
+    return true;
+  };
+  /* Mempool places largest-first into the lowest free slot, because it orders
+     by fee. With no fee to order by, that rule just stacks every big square
+     along the floor in one band. Scatter them instead and let the single-cell
+     pass close the gaps, which keeps the block just as full. */
+  const place = (cells: number) => {
+    for (let t = 0; t < 80; t++) {
+      const r = Math.floor(rnd() * (rows - cells + 1));
+      const c = Math.floor(rnd() * (COLS - cells + 1));
+      if (free(r, c, cells)) { put(r, c, cells); return true; }
+    }
+    for (let r = 0; r + cells <= rows; r++) {
+      for (let c = 0; c + cells <= COLS; c++) if (free(r, c, cells)) { put(r, c, cells); return true; }
+    }
+    return false;
+  };
+
+  // Composition varies per block so six of them do not read as one repeated tile.
+  const plan = [
+    { cells: 4, n: Math.floor(rnd() * 3) },
+    { cells: 3, n: 4 + Math.floor(rnd() * 6) },
+    { cells: 2, n: 62 + Math.floor(rnd() * 26) },
+  ];
+  for (const { cells, n } of plan) for (let k = 0; k < n; k++) if (!place(cells)) break;
+  // Whatever is still open is a single cell, which is most of a real block.
+  for (let r = 0; r < rows; r++) for (let c = 0; c < COLS; c++) if (!occ[r][c]) put(r, c, 1);
+}
+
+/* Yours, scattered through every block — made at different times, to
+   different people, from different wallets. There is no cluster to find.
+   Chosen from squares that are already big enough to read, never grown into
+   place: each square owns exactly its own cells, so resizing one after the
+   fact is what made them overlap their neighbours. */
+const MINE: number[] = [];
+const claim = (target: number, min: number) => {
+  for (let d = 0; d < SQUARES.length; d++) {
+    for (const idx of d === 0 ? [target] : [target + d, target - d]) {
+      if (idx < 0 || idx >= SQUARES.length) continue;
+      if (SQUARES[idx].mine || SQUARES[idx].cells < min) continue;
+      /* Two highlights side by side merge into one shape, so keep them apart.
+         Measured cyclically: the deck is rendered twice end to end, so a square
+         near its left edge is a neighbour of one near its right edge. */
+      const q = SQUARES[idx];
+      const near = MINE.some((m) => {
+        const dx = Math.abs(SQUARES[m].x - q.x);
+        return Math.hypot(Math.min(dx, DECK_W + BLOCK_GAP - dx), SQUARES[m].y - q.y) < 110;
+      });
+      if (near) continue;
+      return idx;
+    }
+  }
+  return -1;
+};
+for (let i = 0; i < 22; i++) {
+  const target = Math.round(((i + 0.5) / 22) * SQUARES.length + (rnd() - 0.5) * 40);
+  const idx = claim(target, MINE.length % 3 === 0 ? 3 : 2);
+  if (idx >= 0) { SQUARES[idx].mine = true; MINE.push(idx); }
+}
+MINE.sort((a, b) => a - b);
+/* Assigned by position, not by weighted random. A weighted pick over a fixed
+   seed is a single dice roll, and the one it rolled gave zero Lightning
+   squares, which means the invoice row could never be found. On-chain still
+   dominates at 14 of 22; the other two are guaranteed and spread apart.
+   The indices are chosen not to collide with the exchange-known ones below,
+   whose source is forced. */
+const railFor = (i: number): Rail =>
+  RAILS[i % 7 === 5 ? 2 : i % 5 === 1 ? 1 : 0];
+/* Where each output got its name from. Every one of them is also in the tax
+   tool's list, which is the point: hover around and the left badge keeps
+   changing while the right one never does. No single leak knew all of this.
+   Kept generic on purpose. Naming a company that has not lost anything is a
+   claim about that company, and none of these need to be real to be true. */
+const SOURCES = [
+  { s: "Exchange", w: 7 },
+  { s: "Merchant", w: 5 },
+  { s: "Broker", w: 4 },
+  { s: "Card issuer", w: 3 },
+  { s: "Block explorer", w: 3 },
+  { s: "ID check", w: 2 },
+  { s: "Courier", w: 2 },
+  { s: "Payroll", w: 2 },
+  { s: "Node host", w: 1 },
+];
+const JOINER = "Tax tool";
+const SOURCE_BAG = SOURCES.flatMap((r) => Array<string>(r.w).fill(r.s));
+
+/* Bech32 has no 1, b, i or o in it, so an address built from anything else
+   reads as fake to the only people who would check. */
+const B32 = "qpzry9x8gf2tvdw0s3jn54khce6mua7l".split("");
+const chunk = (n: number) => Array.from({ length: n }, () => pick(B32)).join("");
+
+MINE.forEach((i, n) => {
+  SQUARES[i].tw = undefined;
+  SQUARES[i].n = n;
+  const rail = railFor(n);
+  SQUARES[i].hi = rail.c;
+  SQUARES[i].rail = rail.name;
+  SQUARES[i].anchorLabel = rail.anchor;
+  SQUARES[i].offLabel = rail.off;
+  /* Lightning moves small amounts, so a channel is not carrying half a coin.
+     The rest can be any size. */
+  const btc = rail.name === "Lightning" ? 0.00002 + rnd() * 0.0038 : 0.0031 + rnd() * 0.86;
+  SQUARES[i].amt = btc.toFixed(8);
+  if (rail.name === "Lightning") {
+    // An invoice encodes its own amount, so the two have to agree.
+    SQUARES[i].off = `lnbc${Math.round(btc * 1e6)}u1\u2026${chunk(4)}`;
+  } else if (rail.name === "Liquid") {
+    // Confidential addresses are the blinded bech32m form, so lq1qq.
+    SQUARES[i].off = `lq1qq${chunk(3)}\u2026${chunk(4)}`;
+  }
+  /* Every one of these carries a different output and the same person. That is
+     the whole claim, so hovering any of them has to prove it individually. */
+  SQUARES[i].addr = `bc1q${chunk(4)}\u2026${chunk(4)}`;
+  SQUARES[i].blk = 481824 + Math.floor(rnd() * 39000);
+  // The handful one exchange already knew about.
+  if (n % 7 === 3) SQUARES[i].early = true;
+  // Those are the ones it paid out itself, so that is where their name came from.
+  SQUARES[i].src = SQUARES[i].early ? "Exchange" : pick(SOURCE_BAG);
+});
+
+/* What neither source had on its own. The exchange knew a name, the chain knew
+   the coins; only the join knows the total, and once you have totals for
+   everyone you have an ordering. That is the part worth making concrete: a
+   breach does not just expose you, it sorts you, and distance is a column like
+   any other. Numbers are the real sum of the outputs above, so anyone who adds
+   up what the tooltips say gets the same answer. */
+const TOTAL = MINE.reduce((t, i) => t + Number(SQUARES[i].amt), 0).toFixed(8);
+/* A named city rather than a radius. "Within 100 km" is a number you have to
+   convert into a feeling; "3rd of 812 in Vienna" is a place you can picture,
+   and picturing it is the entire point. */
+const RANK = 3;
+const NEARBY = 812;
+const CITY = "Vienna";
+
+const DIVIDERS = Array.from({ length: BLOCKS - 1 }, (_, i) => (i + 1) * (BLOCK_W + BLOCK_GAP) - BLOCK_GAP / 2);
+
+---
+
+<figure class="mp" data-goggles data-stage="2">
+  <div class="mp-band">
+    <div class="mp-track">
+      {[0, 1].map(() => (
+        <svg
+          class="mp-deck"
+          viewBox={`0 0 ${DECK_W} ${H}`}
+          role="img"
+          aria-label="An endless field of confirmed payments, all public and unnamed, with one person's outputs highlighted after a leak"
+        >
+          {DIVIDERS.map((x) => <line class="mp-div" x1={x} y1="0" x2={x} y2={H} />)}
+          {SQUARES.map((q) => (
+            <rect
+              class:list={["mp-sq", q.mine && "is-mine", q.early && "is-early", q.tw && "is-tw"]}
+              x={q.x} y={q.y} width={q.s} height={q.s} rx="1.6"
+              style={[
+                `--tone:${q.tone}`,
+                /* Where the square sits across the deck, 0 to 1. The stylesheet
+                   turns it into a delay, so how far the wake spreads can be
+                   tuned per breakpoint: a narrow screen shows a much thinner
+                   slice of the deck and needs a much tighter spread. */
+                `--i:${(q.x / DECK_W).toFixed(3)}`,
+                q.hi ? `--hi:${q.hi}` : "",
+                q.tw ? `--tw:${q.tw}ms; --del:${q.del}ms` : "",
+              ].filter(Boolean).join("; ")}
+              data-addr={q.addr}
+              data-amt={q.amt}
+              data-blk={q.blk ? q.blk.toLocaleString("en-US").replace(/,/g, "\u202f") : undefined}
+              data-src={q.src}
+              data-rail={q.rail}
+              data-anchorlabel={q.anchorLabel}
+              data-offlabel={q.offLabel}
+              data-off={q.off}
+            />
+          ))}
+        </svg>
+      ))}
+    </div>
+
+    <span class="mp-scan" aria-hidden="true"></span>
+
+    <!-- Filled and placed on hover. Mempool shows you a transaction when you
+         point at one; this shows you a person, from any square you pick. -->
+  </div>
+
+  <div class="mp-tip" hidden>
+    <div class="mp-tip-head">
+      <i></i><span data-f="rail"></span>
+      <b>matched</b>
+    <!-- Touch has no hover, so the panel needs a way out of it. -->
+    <button class="mp-tip-x" type="button" aria-label="Close">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12" /></svg>
+    </button>
+    </div>
+
+    <div class="mp-tip-body">
+      <!-- The person first. The chain data is the evidence, not the subject. -->
+      <section class="mp-tip-col mp-tip-who-col">
+        <div class="mp-tip-who">
+          <span class="mp-tip-face">
+            <svg viewBox="0 0 32 32" aria-hidden="true">
+              <circle cx="16" cy="11.5" r="5.6" />
+              <path d="M4.5 31c.6-6.4 5.6-10 11.5-10s10.9 3.6 11.5 10z" />
+            </svg>
+          </span>
+          <span class="mp-tip-who-t">
+            <b>Max Mustermann</b>
+            <em>born 14 March 1987</em>
+          </span>
+        </div>
+        <dl>
+          <dt>Address</dt><dd>Mustergasse 14/3, 1070 Vienna</dd>
+          <dt>Last seen</dt><dd>Beispielgasse 8/12, 1030 Vienna</dd>
+          <dt>Phone</dt><dd>+43&#8239;660&#8239;12&#8239;34&#8239;567</dd>
+          <dt>ID</dt><dd>AT&#8239;P&#8239;4821993</dd>
+          <dt>Hardware wallet</dt><dd>Yes</dd>
+        </dl>
+      </section>
+
+      <section class="mp-tip-col mp-tip-chain-col">
+        <dl>
+          <dt data-f="anchorlabel"></dt><dd data-f="addr"></dd>
+          <!-- Only the rails that have something off-chain to give away. -->
+          <dt data-f="offlabel" data-off></dt><dd data-f="off" data-off></dd>
+          <dt>Amount</dt><dd data-f="amt"></dd>
+        </dl>
+        <!-- Below the rule: what neither source held on its own. -->
+        <dl class="mp-tip-join">
+          <dt>Total held</dt><dd>&#8383;&#8239;{TOTAL}</dd>
+          <dt>Wealth rank</dt><dd>{RANK}rd of {NEARBY} in {CITY}</dd>
+        </dl>
+      </section>
+    </div>
+
+    <div class="mp-tip-foot">
+      <span>Leaked from</span>
+      <b data-f="src"></b><em>&amp;</em><b>{JOINER}</b>
+    </div>
+  </div>
+
+  <div class="mp-inner">
+    <p class="mp-note">
+      A tax tool is where the slices get joined. It has to see every exchange,
+      every wallet and every address at once, or it cannot total anything.
+      Hosted, that finished picture sits on someone else's server, and it only
+      has to fail once. Kassiber joins the same slices on your machine, so
+      there is no copy of it to lose.
+    </p>
+  </div>
+</figure>
+
+<style>
+  /* How far the wake spreads across the deck. Kept close to the scan duration
+     so the squares finish turning about when the line leaves. */
+  .mp { position: relative; margin: 0; --span: 520ms; }
+  /* The band runs edge to edge; the words stay on the page's measure. */
+  .mp-inner { max-width: 1240px; margin: 0 auto; padding: 0 32px; }
+
+  .mp-band {
+    position: relative;
+    overflow: hidden;
+    border-top: 1px solid rgba(255, 255, 255, 0.07);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+    background: #0b0b0e;
+  }
+  /* Full bleed has no edges of its own, so the data has to run off both sides
+     rather than stop at them. Painted over the top rather than masked: a mask
+     re-composites the whole drifting layer every frame, two gradients do not. */
+  .mp-band::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    pointer-events: none;
+    background: linear-gradient(90deg, #0b0b0e, transparent 8%, transparent 92%, #0b0b0e);
+  }
+
+  /* Two copies of the same deck, translated exactly one deck width: the loop
+     has no seam and the whole thing costs one compositor animation. */
+  .mp-track { display: flex; width: max-content; }
+  .mp.is-live .mp-track { animation: mp-drift 150s linear infinite; }
+  @keyframes mp-drift {
+    from { transform: translate3d(0, 0, 0); }
+    to { transform: translate3d(-50%, 0, 0); }
+  }
+  .mp-deck { display: block; height: 360px; width: auto; }
+
+  .mp-div { stroke: rgba(255, 255, 255, 0.05); stroke-width: 1; vector-effect: non-scaling-stroke; }
+
+  .mp-sq {
+    --lag: calc(var(--i, 0) * var(--span));
+    fill: var(--tone);
+    transform-box: fill-box;
+    transform-origin: 50% 50%;
+    transition:
+      fill 380ms ease var(--lag),
+      opacity 380ms ease var(--lag),
+      transform 380ms cubic-bezier(0.2, 0.7, 0.3, 1) var(--lag);
+  }
+
+  .mp.is-live[data-stage="0"] .mp-sq.is-tw {
+    animation: mp-breathe var(--tw) ease-in-out infinite alternate;
+    animation-delay: var(--del);
+  }
+  @keyframes mp-breathe { from { opacity: 0.45; } to { opacity: 1; } }
+
+  /* Goggles: everything that is not yours recedes, so the scatter of what is
+     reads instantly, and keeps reading as more of it drifts in. */
+  /* Half of what the field was a moment ago. It recedes rather than disappears,
+     so the colour is what separates your outputs from everyone else's traffic
+     rather than the darkness doing it. Losing the field entirely also loses the
+     sense of how much of it yours is buried in. */
+  .mp[data-stage="2"] .mp-sq { opacity: 0.5; }
+  /* A hit, not a fade. Each match overshoots hard the instant the line reaches
+     it and settles back, so the sweep reads as finding things one after another
+     rather than turning a dimmer up on the whole field. */
+  .mp[data-stage="2"] .mp-sq.is-mine {
+    /* No stroke. An SVG stroke straddles the edge, so half of it paints outside
+       the rect and every highlight ended up wider than the cell it owns. The
+       fill alone is the signal, and it lands exactly on the grid. */
+    animation: mp-hit 420ms cubic-bezier(0.2, 0.75, 0.3, 1) var(--lag) both;
+  }
+  /* Starts where the square already was, not from the dimmed state. Animating
+     up from 0.13 made every future highlight vanish for up to half a second
+     while the line was still on its way to it, so they blinked out and came
+     back instead of simply catching the light. */
+  @keyframes mp-hit {
+    from { opacity: 1; fill: var(--tone); transform: scale(1); }
+    34% { opacity: 1; fill: #fff; transform: scale(1.5); }
+    /* Settles back to its own size: the pop is the event, the colour is the
+       state, and afterwards it simply fills the cell like everything else. */
+    to { opacity: 1; fill: var(--hi); transform: scale(1); }
+  }
+
+  /* The line that finds them. It crosses the whole band; the squares turn in
+     its wake because their transition delay is their own x position. */
+  .mp-scan {
+    /* Width drives the travel too, so one keyframe set covers every breakpoint. */
+    --w: 150px;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: calc(var(--w) * -1);
+    z-index: 2;
+    width: var(--w);
+    pointer-events: none;
+    opacity: 0;
+    /* Nearly all trail, then a hard bright edge: it should read as a single
+       fast pass, not a glow drifting across. */
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgb(255 255 255 / 0.05) 70%,
+      rgb(255 255 255 / 0.22) 95%,
+      #fff
+    );
+  }
+  /* Keyed on the stage alone, not on is-live: scrolling back to a band that
+     has already been scanned must not scan it a second time. */
+  .mp[data-stage="2"] .mp-scan { animation: mp-scan 460ms cubic-bezier(0.4, 0, 0.25, 1) both; }
+  @keyframes mp-scan {
+    from { transform: translate3d(0, 0, 0); opacity: 0; }
+    8% { opacity: 1; }
+    88% { opacity: 1; }
+    to { transform: translate3d(calc(100vw + var(--w)), 0, 0); opacity: 0; }
+  }
+
+  /* The block view hands you a transaction when you point at one. This hands
+     you a person, assembled out of two breaches neither of which held all of
+     it. The person leads and the chain data sits beside them as evidence,
+     because the subject here is not the transaction. */
+  .mp-tip {
+    /* Pinned to the band's own origin so the placement maths is band-relative. */
+    position: absolute;
+    left: 0;
+    top: 0;
+    z-index: 4;
+    --k-border: oklch(1 0 0 / 10%);
+    --k-muted-fg: oklch(0.708 0 0);
+    --k-fg: oklch(0.985 0 0);
+    width: max-content;
+    border-radius: 10px;
+    border: 1px solid var(--k-border);
+    background: oklch(0.205 0 0 / 0.97);
+    backdrop-filter: blur(8px);
+    box-shadow: 0 18px 46px rgb(0 0 0 / 0.6), inset 0 1px 0 rgb(255 255 255 / 0.05);
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 140ms ease;
+  }
+  .mp-tip.is-on { opacity: 1; }
+
+  .mp-tip-head {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 7px 14px;
+    border-bottom: 1px solid var(--k-border);
+    background: oklch(1 0 0 / 3.5%);
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.04em;
+    color: var(--k-fg);
+  }
+  .mp-tip-head i { width: 8px; height: 8px; border-radius: 2px; }
+  .mp-tip-x {
+    display: none;
+    margin-left: 10px;
+    width: 26px;
+    height: 26px;
+    padding: 0;
+    border: 1px solid var(--k-border);
+    border-radius: 7px;
+    background: oklch(1 0 0 / 5%);
+    color: var(--k-fg);
+    cursor: pointer;
+  }
+  .mp-tip-x svg {
+    display: block;
+    width: 15px;
+    height: 15px;
+    margin: auto;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+  }
+  .mp-tip-head b {
+    margin-left: auto;
+    font-weight: 400;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--k-muted-fg);
+  }
+
+  .mp-tip-body { display: flex; align-items: stretch; }
+  .mp-tip-col { padding: 11px 14px 12px; }
+  /* One hairline instead of two section headings: the split is legible on its
+     own once the person is on one side and the ledger on the other. */
+  .mp-tip-chain-col { border-left: 1px solid var(--k-border); }
+
+  .mp-tip dl {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 5px 18px;
+    margin: 0;
+  }
+  .mp-tip dt { font-size: 12px; color: var(--k-muted-fg); white-space: nowrap; }
+  .mp-tip dd {
+    margin: 0;
+    text-align: right;
+    font-size: 12px;
+    color: var(--k-fg);
+    white-space: nowrap;
+  }
+  /* Chain values are machine output, so they are set like machine output. */
+  .mp-tip-chain-col dd { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+  .mp-tip-join {
+    margin-top: 9px;
+    padding-top: 9px;
+    border-top: 1px solid var(--k-border);
+  }
+
+  /* The photo is what stops this reading as a spreadsheet row. */
+  .mp-tip-who { display: flex; align-items: center; gap: 10px; margin-bottom: 11px; }
+  .mp-tip-face {
+    flex: none;
+    width: 38px;
+    height: 38px;
+    border-radius: 7px;
+    border: 1px solid var(--k-border);
+    background: oklch(0.26 0 0);
+    overflow: hidden;
+  }
+  .mp-tip-face svg { display: block; width: 100%; height: 100%; fill: oklch(0.46 0 0); }
+  .mp-tip-who-t { display: flex; flex-direction: column; gap: 1px; }
+  .mp-tip-who-t b { font-size: 14px; font-weight: 600; color: var(--k-fg); }
+  .mp-tip-who-t em { font-style: normal; font-size: 11.5px; color: var(--k-muted-fg); }
+
+  /* Plain text, not badges: two words do not need chrome around them, and a
+     pill that can render empty is a bug waiting to happen. */
+  .mp-tip-foot {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    padding: 8px 14px 9px;
+    border-top: 1px solid var(--k-border);
+    background: oklch(1 0 0 / 2%);
+    font-size: 11.5px;
+    color: var(--k-muted-fg);
+  }
+  .mp-tip-foot b { font-weight: 500; color: var(--k-fg); }
+  .mp-tip-foot em { font-style: normal; color: oklch(0.5 0 0); }
+
+  /* Only the squares that resolve to someone are pointable, and only once they
+     have been resolved. */
+  .mp-sq { pointer-events: none; }
+  .mp[data-stage="2"] .mp-sq.is-mine { pointer-events: auto; cursor: crosshair; }
+  /* Holding still while you read it. The drift would otherwise walk the square
+     out from under the pointer. */
+  .mp.is-holding .mp-track { animation-play-state: paused; }
+
+  /* One fixed paragraph. It used to advance beat by beat with the stages, so
+     the argument could only be read at the speed the animation chose and was
+     gone by the time you looked back at it. The field shows; this states. */
+  .mp-note {
+    margin: 20px 0 0;
+    max-width: 68ch;
+    font-size: 14px;
+    line-height: 1.55;
+    color: var(--fg-muted);
+  }
+
+  @media (max-width: 720px) {
+    .mp-inner { padding: 0 20px; }
+    .mp-deck { height: 250px; }
+    /* Only about a fifth of a deck is on screen here, so a wake measured across
+       the whole deck would land almost anywhere relative to the line. Keep it
+       short enough to read as direction and nothing more. */
+    .mp { --span: 200ms; }
+    .mp-scan { --w: 96px; }
+    .mp[data-stage="2"] .mp-scan { animation-duration: 360ms; }
+    /* No hover to work with, so the panel becomes a sheet: tapped open from a
+       square, centred over the page, and dismissed by its own button. The huge
+       spread shadow is the scrim, which saves a whole extra element. */
+    .mp-tip {
+      position: fixed;
+      left: 14px;
+      right: 14px;
+      top: 50%;
+      width: auto;
+      max-height: 82vh;
+      overflow-y: auto;
+      transform: translateY(-50%) !important;
+      z-index: 60;
+      pointer-events: auto;
+      box-shadow: 0 0 0 100vmax rgb(0 0 0 / 0.66), 0 18px 46px rgb(0 0 0 / 0.6);
+    }
+    .mp-tip-x { display: block; }
+    /* One column: side by side does not fit, and the person still leads. */
+    .mp-tip-body { flex-direction: column; }
+    .mp-tip-chain-col {
+      border-left: 0;
+      border-top: 1px solid var(--k-border);
+    }
+    .mp-tip dt, .mp-tip dd { font-size: 12.5px; }
+    .mp-note { font-size: 13px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .mp-sq { transition: none; }
+    .mp .mp-track { animation: none; }
+    /* The script never starts the timeline here, so there is nothing to sweep. */
+    .mp-scan { display: none; }
+    .mp[data-stage="2"] .mp-sq.is-mine { animation: none; opacity: 1; fill: var(--hi); }
+  }
+</style>
+
+<script>
+  for (const root of document.querySelectorAll<HTMLElement>("[data-goggles]")) {
+    const calm = matchMedia("(prefers-reduced-motion: reduce)");
+    /* Long enough to register the field as an ordinary block of traffic before
+       anything picks yours out of it. There is only one pass now: a first sweep
+       that lit a handful of squares was a beat the argument did not need. */
+    const HOLD = 2600;
+    /* How long the band has to stay in frame before the sweep is allowed to
+       fire. Someone scrolling straight past gets the slow drift and nothing
+       else: a bright line whipping across as the section flies by is exactly
+       the kind of motion that reads as the page shouting. */
+    const DWELL = 700;
+
+    const timers = new Set<number>();
+    const later = (fn: () => void, ms: number) => {
+      const id = setTimeout(fn, ms) as unknown as number;
+      timers.add(id);
+      return id;
+    };
+    const stopAll = () => { for (const id of timers) clearTimeout(id); timers.clear(); };
+
+    const run = () => later(() => { root.dataset.stage = "2"; }, HOLD);
+
+    // The end state, arrived at with no journey. Where reduced motion lives.
+    const settle = () => {
+      stopAll();
+      root.dataset.stage = "2";
+      root.classList.remove("is-live");
+    };
+
+    let played = false;
+    const arm = () => {
+      if (played || calm.matches) return;
+      played = true;
+      run();
+    };
+
+    const rewind = () => { root.dataset.stage = "0"; };
+
+    if (calm.matches) settle(); else rewind();
+
+    let dwell = 0;
+    new IntersectionObserver((entries) => {
+      for (const e of entries) {
+        // Drift only runs while it is on screen, and never under reduced motion.
+        root.classList.toggle("is-live", e.isIntersecting && !calm.matches);
+        /* Re-armed on every crossing. Scrolling past fast produces an enter and
+           an exit well inside DWELL, so the pending start is cleared and the
+           sequence never runs. */
+        clearTimeout(dwell);
+        if (!played && e.intersectionRatio >= 0.45) dwell = setTimeout(arm, DWELL) as unknown as number;
+      }
+    }, { threshold: [0, 0.45] }).observe(root);
+
+    /* Hover: point at any resolved output and it names the same person. The
+       drift pauses while the tooltip is up, because a square that walks out
+       from under the pointer makes the whole thing feel broken. */
+    const band = root.querySelector<HTMLElement>(".mp-band");
+    const tip = root.querySelector<HTMLElement>(".mp-tip");
+    const touch = !matchMedia("(hover: hover)").matches;
+    if (band && tip) {
+      let hot: Element | null = null;
+
+      const hide = () => {
+        if (!hot) return;
+        hot = null;
+        tip.classList.remove("is-on");
+        root.classList.remove("is-holding");
+        // Kept in the layout until it has faded, or it blinks out mid-transition.
+        setTimeout(() => { if (!hot) tip.hidden = true; }, 160);
+      };
+
+      const show = (sq: SVGRectElement) => {
+        if (hot === sq) return;
+        hot = sq;
+        for (const el of tip.querySelectorAll<HTMLElement>("[data-f]")) {
+          const v = sq.dataset[el.dataset.f as string] ?? "";
+          el.textContent = el.dataset.f === "amt" ? `\u20bf ${v}` : v;
+        }
+        // The off-chain row only exists for the rails that have one.
+        for (const el of tip.querySelectorAll<HTMLElement>("[data-off]")) el.hidden = !sq.dataset.off;
+        /* Never render a badge with nothing in it. If a square somehow has no
+           origin, the joiner still stands on its own. */
+        const origin = tip.querySelector<HTMLElement>('[data-f="src"]');
+        const amp = tip.querySelector<HTMLElement>(".mp-tip-foot em");
+        if (origin && amp) { const has = !!sq.dataset.src; origin.hidden = !has; amp.hidden = !has; }
+        const dot = tip.querySelector<HTMLElement>(".mp-tip-head i");
+        if (dot) dot.style.background = sq.style.getPropertyValue("--hi");
+        root.classList.add("is-holding");
+        tip.hidden = false;
+
+        /* On touch the panel is a centred sheet and CSS owns its position.
+           On a pointer it sits over the square that opened it. */
+        if (!touch) {
+          const host = (tip.offsetParent as HTMLElement) ?? root;
+          const h = host.getBoundingClientRect();
+          const b = band.getBoundingClientRect();
+          const r = sq.getBoundingClientRect();
+          const t = tip.getBoundingClientRect();
+          const gap = 10;
+          let x = r.left - h.left + r.width / 2 - t.width / 2;
+          let y = r.top - h.top - t.height - gap;
+          if (y < b.top - h.top + gap) y = r.bottom - h.top + gap;
+          x = Math.min(Math.max(b.left - h.left + gap, x), b.right - h.left - t.width - gap);
+          y = Math.min(Math.max(b.top - h.top + gap, y), b.bottom - h.top - t.height - gap);
+          tip.style.transform = `translate3d(${Math.round(x)}px, ${Math.round(y)}px, 0)`;
+        }
+        requestAnimationFrame(() => tip.classList.add("is-on"));
+      };
+
+      const at = (e: Event) => (e.target as Element)?.closest?.(".mp-sq.is-mine");
+      if (touch) {
+        // Tap to open, and an explicit close, because nothing here is hoverable.
+        band.addEventListener("click", (e) => { const sq = at(e); if (sq) show(sq as SVGRectElement); });
+        tip.querySelector(".mp-tip-x")?.addEventListener("click", hide);
+        /* Anywhere off the sheet dismisses it too. The scrim is a shadow rather
+           than an element, so it cannot take the tap itself. */
+        document.addEventListener("click", (e) => {
+          if (!hot || tip.contains(e.target as Node) || at(e)) return;
+          hide();
+        });
+      } else {
+        band.addEventListener("pointerover", (e) => {
+          const sq = at(e);
+          if (sq) show(sq as SVGRectElement); else hide();
+        });
+        band.addEventListener("pointerleave", hide);
+        // A tooltip left hanging over a section you have scrolled past is litter.
+        addEventListener("scroll", hide, { passive: true });
+      }
+      // Works on either input: a keyboard is a keyboard.
+      addEventListener("keydown", (e) => { if (e.key === "Escape") hide(); });
+    }
+
+    /* Toggling the OS setting mid-visit is honoured both ways: turning it on
+       stops everything on the final state, turning it off just lets the drift
+       resume. Nothing replays, because a leak that re-runs is a worse lie than
+       one you missed. */
+    calm.addEventListener("change", () => {
+      clearTimeout(dwell);
+      if (calm.matches) { settle(); return; }
+      const r = root.getBoundingClientRect();
+      root.classList.toggle("is-live", r.bottom > 0 && r.top < innerHeight);
+    });
+  }
+</script>

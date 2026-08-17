@@ -5,6 +5,7 @@ import HeroChatMock from "../components/HeroChatMock.astro";
 import SwapFlowMock from "../components/SwapFlowMock.astro";
 import AddConnectionMock from "../components/AddConnectionMock.astro";
 import TxStreamMock from "../components/TxStreamMock.astro";
+import LeakGoggles from "../components/LeakGoggles.astro";
 import TaxSheetMock from "../components/TaxSheetMock.astro";
 import AgentChatMock from "../components/AgentChatMock.astro";
 import { GITHUB_REPOSITORY_URL, SKILL_REPOSITORY_URL } from "../lib/site";
@@ -138,26 +139,6 @@ const SLIDES = [
     </div>
   </section>
 
-  <!-- ── Pairing ───────────────────────────────────────────────── -->
-  <section id="pairing" class="sec-git">
-    <div class="container git-inner">
-      <div class="git-visual">
-        <SwapFlowMock />
-      </div>
-
-      <div class="git-copy">
-        <div class="section-head" style="margin-bottom:0">
-          <h2>A move between your own wallets isn't a sale.</h2>
-          <p>
-            Naive tools book a peg-in as a disposal and tax you on a gain you
-            never made. Kassiber pairs both sides, across layers. Paste any
-            address or txid and it tells you if it's yours.
-          </p>
-        </div>
-      </div>
-    </div>
-  </section>
-
   <!-- ── Local-first ───────────────────────────────────────────── -->
   <section id="connections" class="sec-sov">
     <div class="container sov-inner">
@@ -183,6 +164,26 @@ const SLIDES = [
     </div>
   </section>
 
+  <!-- ── Pairing ───────────────────────────────────────────────── -->
+  <section id="pairing" class="sec-git">
+    <div class="container git-inner">
+      <div class="git-visual">
+        <SwapFlowMock />
+      </div>
+
+      <div class="git-copy">
+        <div class="section-head" style="margin-bottom:0">
+          <h2>A move between your own wallets isn't a sale.</h2>
+          <p>
+            Naive tools book a peg-in as a disposal and tax you on a gain you
+            never made. Kassiber pairs both sides, across layers. Paste any
+            address or txid and it tells you if it's yours.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <!-- ── Tax & reports ─────────────────────────────────────────── -->
   <section id="tax" class="sec-tax">
     <div class="container">
@@ -198,6 +199,24 @@ const SLIDES = [
 
       <TaxSheetMock />
     </div>
+  </section>
+
+  <!-- ── Why local-first, argued on its own ────────────────────── -->
+  <section id="privacy">
+    <div class="container">
+      <div class="section-head">
+        <h2>Your payments were always public. Your name was not.</h2>
+        <p>
+          Every coin you have ever received sits on a ledger anyone can read
+          and nobody can erase. Your name appears nowhere on it. The link
+          between that ledger and you exists only where someone has written
+          it down, which means it can only leak from there.
+        </p>
+      </div>
+    </div>
+
+    <!-- Outside the container: the field runs edge to edge. -->
+    <LeakGoggles />
   </section>
 
   <!-- ── Agents ────────────────────────────────────────────────── -->
@@ -337,12 +356,11 @@ const SLIDES = [
   <section id="download" class="sec-cta">
     <div class="container cta-inner">
       <h2 class="display cta-title">
-        Your Bitcoin deserves better than a SaaS.
+        Keep your books to yourself.
       </h2>
       <p class="cta-sub">
-        Every hosted tax tool is one database away from leaking the addresses,
-        balances, and net worth of everyone in it. Kassiber has no database to
-        leak.
+        Open source, and it runs entirely on your machine. No account, no
+        sign-up, nothing to log in to.
       </p>
       <div class="cta-actions">
         <a id="cta-download-btn" class="btn btn-primary btn-lg" href={RELEASES_URL}>
@@ -368,7 +386,9 @@ const SLIDES = [
   </section>
 
   <!-- ── FAQ ───────────────────────────────────────────────────── -->
-  <!-- Native <details>: no JS, no dependency, animated via ::details-content. -->
+  <!-- Native <details>: no JS, no dependency, animated via ::details-content.
+       A shared name makes them an exclusive accordion, so opening one closes
+       the rest. Browsers without it just allow more than one open at a time. -->
   <section id="faq" class="sec-faq">
     <div class="container">
       <div class="section-head faq-head">
@@ -376,7 +396,7 @@ const SLIDES = [
       </div>
 
       <div class="faq-list">
-        <details class="faq-item">
+        <details class="faq-item" name="faq">
           <summary>Can I try it without connecting my own wallets?</summary>
           <p>
             Yes, if you have Docker. One script spins up a throwaway regtest
@@ -388,7 +408,7 @@ const SLIDES = [
           </p>
         </details>
 
-        <details class="faq-item">
+        <details class="faq-item" name="faq">
           <summary>Do I need to run my own node?</summary>
           <p>
             No. Kassiber ships with default backends and syncs the moment you
@@ -399,7 +419,7 @@ const SLIDES = [
           </p>
         </details>
 
-        <details class="faq-item">
+        <details class="faq-item" name="faq">
           <summary>Does Kassiber replace my tax advisor?</summary>
           <p>
             No, and it is not built to. It computes the numbers and shows its
@@ -411,7 +431,7 @@ const SLIDES = [
           </p>
         </details>
 
-        <details class="faq-item">
+        <details class="faq-item" name="faq">
           <summary>What happens if I lose my passphrase?</summary>
           <p>
             Your books stay encrypted and nobody opens them again, including us.
@@ -420,7 +440,7 @@ const SLIDES = [
           </p>
         </details>
 
-        <details class="faq-item">
+        <details class="faq-item" name="faq">
           <summary>Can Kassiber spend my coins?</summary>
           <p>
             No. It never holds spending keys and only ever reads descriptors and
@@ -429,7 +449,7 @@ const SLIDES = [
           </p>
         </details>
 
-        <details class="faq-item">
+        <details class="faq-item" name="faq">
           <summary>I'm not in Austria. Is it still useful?</summary>
           <p>
             Yes, with one caveat. The books, the accounting standards, and the
@@ -843,6 +863,10 @@ const SLIDES = [
     padding: 96px 0;
     border-top: 1px solid var(--border);
   }
+  /* Banded by position, not by name. Hand-assigning the shade per section
+     means every reorder silently leaves two of a kind side by side, which is
+     exactly what happened when connections and pairing swapped. */
+  section:nth-of-type(even) { background: var(--bg-band); }
 
   .section-head {
     margin-bottom: 56px;
@@ -1358,7 +1382,6 @@ const SLIDES = [
   /* Bird's eye uses the plain left-aligned .section-head, like #tax and
      #screens. Centring is reserved for the framing sections. */
 
-  .sec-git { background: var(--bg-band); }
 
   .git-inner {
     display: grid;
@@ -1372,7 +1395,6 @@ const SLIDES = [
     align-items: stretch; gap: 20px;
   }
 
-  .sec-tax, .sec-open { background: var(--bg-band); }
 
   /* ── Tax & reports ────────────────────────────────────── */
   .sec-tax .section-head p a,
@@ -1623,7 +1645,6 @@ const SLIDES = [
   }
 
   /* ── FAQ ──────────────────────────────────────────────── */
-  .sec-faq { background: var(--bg-band); }
 
   .faq-head {
     text-align: center;
