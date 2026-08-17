@@ -101,11 +101,39 @@ const bars = MONTHS.map((x, i) => {
     <div class="msg you" data-at="1">What did I actually earn last year?</div>
 
     <div class="msg bot" data-at="2">
-      <div class="tool" data-tool data-dur="1500" data-out="1,284 transactions, 12 months">
+      {/* Three commands, because the first one does not work. Imports have
+          landed since the reports were last built, so the summary comes back
+          stale and says which command fixes it. The agent runs that, then asks
+          again. This is the documented behaviour rather than a dramatisation:
+          a stale report names `journals process` as its own next step, which is
+          what lets an agent recover without being told. */}
+      <div class="tool" data-tool data-dur="700" data-fail data-out="Stale since your last import · run journals process">
         <div class="trow">
           <span class="tdot" aria-hidden="true"></span>
           <span class="tbody">
             <span class="tact">Reading your book</span>
+            <code>kassiber reports summary</code>
+          </span>
+        </div>
+        <div class="tout" data-tout></div>
+      </div>
+
+      <div class="tool" data-tool data-dur="1400" data-out="Rebuilt 1,284 transactions">
+        <div class="trow">
+          <span class="tdot" aria-hidden="true"></span>
+          <span class="tbody">
+            <span class="tact">Rebuilding what the new imports changed</span>
+            <code>kassiber journals process</code>
+          </span>
+        </div>
+        <div class="tout" data-tout></div>
+      </div>
+
+      <div class="tool" data-tool data-dur="800" data-out="1,284 transactions, 12 months">
+        <div class="trow">
+          <span class="tdot" aria-hidden="true"></span>
+          <span class="tbody">
+            <span class="tact">Asking again</span>
             <code>kassiber reports summary</code>
           </span>
         </div>
@@ -225,6 +253,17 @@ const bars = MONTHS.map((x, i) => {
     </div>
 
   </div>
+
+  <!-- Where the question comes from. Typed rather than posted whole, because a
+       prompt that simply exists reads as a script, and watching one being
+       written is what makes the pane feel driven by someone. Decorative: the
+       real messages live in the log above, so this stays empty without JS. -->
+  <div class="composer" aria-hidden="true">
+    <span class="cline" data-composer></span>
+    <span class="csend" data-csend>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+    </span>
+  </div>
 </div>
 
 <script>
@@ -235,6 +274,8 @@ const bars = MONTHS.map((x, i) => {
     if (!log) continue;
     const msgs = [...chat.querySelectorAll<HTMLElement>(".msg")];
     const tools = [...chat.querySelectorAll<HTMLElement>("[data-tool]")];
+    const composer = chat.querySelector<HTMLElement>(".composer");
+    const cline = chat.querySelector<HTMLElement>("[data-composer]");
     const cards = [...chat.querySelectorAll<HTMLElement>("[data-card]")];
     /* The words are already spans, one per word, rendered by the component.
        Arming them is what hides them; every word keeps its place from the first
@@ -285,9 +326,11 @@ const bars = MONTHS.map((x, i) => {
 
     const reset = () => {
       chat.classList.remove("is-busy");
+      composer?.classList.remove("is-typing", "is-sending");
+      if (cline) cline.textContent = "";
       for (const m of msgs) m.classList.remove("is-in");
       for (const t of tools) {
-        t.classList.remove("is-run", "is-done");
+        t.classList.remove("is-run", "is-done", "is-fail");
         const out = t.querySelector<HTMLElement>("[data-tout]");
         if (out) out.textContent = "";
       }
@@ -306,7 +349,7 @@ const bars = MONTHS.map((x, i) => {
       reset();
       for (const m of msgs) m.classList.add("is-in");
       for (const t of tools) {
-        t.classList.add("is-done");
+        t.classList.add(t.hasAttribute("data-fail") ? "is-fail" : "is-done");
         const out = t.querySelector<HTMLElement>("[data-tout]");
         if (out) out.textContent = t.dataset.out ?? "";
       }
@@ -338,6 +381,31 @@ const bars = MONTHS.map((x, i) => {
       tick();
     };
 
+    /* Typed into the composer a character at a time, then sent. Pace varies a
+       little per character so it reads as someone writing rather than as a
+       fixed-rate ticker. */
+    const type = (text: string, done: () => void) => {
+      if (!composer || !cline) { done(); return; }
+      composer.classList.add("is-typing");
+      cline.textContent = "";
+      let i = 0;
+      const tick = () => {
+        cline.textContent = text.slice(0, ++i);
+        if (i < text.length) later(tick, 12 + Math.round((i * 7919) % 17));
+        else done();
+      };
+      tick();
+    };
+
+    // Clears the line and flashes the button, which is what "sent" looks like.
+    const send = () => {
+      if (!composer || !cline) return;
+      composer.classList.remove("is-typing");
+      composer.classList.add("is-sending");
+      cline.textContent = "";
+      later(() => composer.classList.remove("is-sending"), 260);
+    };
+
     type Step = { wait: number; run: (next: () => void) => void };
     const runSeq = (steps: Step[], i = 0) => {
       if (i >= steps.length) return;
@@ -353,25 +421,34 @@ const bars = MONTHS.map((x, i) => {
 
       asks.forEach((ask, k) => {
         const answer = msgs[msgs.indexOf(ask) + 1];
-        const tool = answer?.querySelector<HTMLElement>("[data-tool]");
-        const out = tool?.querySelector<HTMLElement>("[data-tout]");
+        const turnTools = answer ? [...answer.querySelectorAll<HTMLElement>("[data-tool]")] : [];
         const prose = answer?.querySelector<HTMLElement>("[data-stream]");
         const card = answer?.querySelector<HTMLElement>("[data-card]");
 
-        // The question lands. A first one arrives sooner than a follow-up.
-        steps.push({ wait: k === 0 ? 420 : 950, run: (n) => { ask.classList.add("is-in"); follow(); n(); } });
+        // Written into the composer first, one character at a time.
+        steps.push({ wait: k === 0 ? 420 : 700, run: (n) => type(ask.textContent ?? "", n) });
+        // Then sent, which is where it becomes a message in the log.
+        steps.push({ wait: 320, run: (n) => { send(); ask.classList.add("is-in"); follow(); n(); } });
         // It reaches for a command before it says anything.
-        steps.push({ wait: 460, run: (n) => { answer?.classList.add("is-in"); tool?.classList.add("is-run"); chat.classList.add("is-busy"); follow(); n(); } });
-        // Held for as long as that command's own work would take.
-        steps.push({
-          wait: Number(tool?.dataset.dur ?? 900),
-          run: (n) => {
-            tool?.classList.replace("is-run", "is-done");
-            if (out && tool) out.textContent = tool.dataset.out ?? "";
-            follow();
-            n();
-          },
+        steps.push({ wait: 420, run: (n) => { answer?.classList.add("is-in"); chat.classList.add("is-busy"); follow(); n(); } });
+
+        /* Each command in turn, held for as long as its own work would take. A
+           command that fails still reports, and the next one is the recovery. */
+        turnTools.forEach((tool, t) => {
+          const out = tool.querySelector<HTMLElement>("[data-tout]");
+          steps.push({ wait: t === 0 ? 0 : 340, run: (n) => { tool.classList.add("is-run"); follow(); n(); } });
+          steps.push({
+            wait: Number(tool.dataset.dur ?? 900),
+            run: (n) => {
+              tool.classList.remove("is-run");
+              tool.classList.add(tool.hasAttribute("data-fail") ? "is-fail" : "is-done");
+              if (out) out.textContent = tool.dataset.out ?? "";
+              follow();
+              n();
+            },
+          });
         });
+
         steps.push({ wait: 280, run: (n) => (prose ? stream(prose, n) : n()) });
         // The card, and any figure on it, once the sentence introducing it is out.
         steps.push({
@@ -840,6 +917,11 @@ const bars = MONTHS.map((x, i) => {
 
   .tool.is-done .tdot { background: var(--ok); }
 
+  /* Not an alarm. The command did its job by refusing and naming the fix, so it
+     reads as a step that still has to happen rather than as a failure. */
+  .tool.is-fail .tdot { background: var(--warn); }
+  .tool.is-fail .tout { color: var(--warn); }
+
   @keyframes toolrun {
     0%, 100% { opacity: 0.35; }
     50% { opacity: 1; }
@@ -899,12 +981,75 @@ const bars = MONTHS.map((x, i) => {
 
   [data-turn="6"] .replay { opacity: 1; pointer-events: auto; }
 
+  /* ── Composer ─────────────────────────────────────────── */
+  .composer {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 11px 14px;
+    border-top: 1px solid var(--border);
+    background: rgba(255, 255, 255, 0.02);
+  }
+
+  .cline {
+    flex: 1;
+    min-width: 0;
+    font-size: 13.5px;
+    line-height: 1.4;
+    color: var(--fg);
+  }
+
+  .cline:empty::before {
+    content: "Ask anything";
+    color: var(--fg-faint);
+  }
+
+  /* The caret sits on the line itself while it fills, so it tracks the text. */
+  .composer.is-typing .cline::after {
+    content: "";
+    display: inline-block;
+    width: 1.5px;
+    height: 1em;
+    margin-left: 1px;
+    vertical-align: -0.15em;
+    background: var(--fg);
+    animation: caret 1s steps(2, jump-none) infinite;
+  }
+
+  .csend {
+    display: grid;
+    flex: none;
+    place-items: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 7px;
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--fg-dim);
+    transition: background 160ms ease, color 160ms ease, transform 160ms ease;
+  }
+
+  .csend svg { width: 13px; height: 13px; }
+
+  /* Live once there is something to send, and a beat as it goes. */
+  .composer.is-typing .csend {
+    background: rgba(255, 255, 255, 0.14);
+    color: var(--fg);
+  }
+
+  .composer.is-sending .csend {
+    background: var(--ok);
+    color: #06120c;
+    transform: translateY(-1px) scale(1.06);
+  }
+
   @media (max-width: 820px) {
     .chat-log {
       height: 420px;
       overflow-y: hidden;
       padding: 14px;
     }
+
+    .cline { font-size: 13px; }
   }
 
   /* The script settles straight to the end state here, so everything that only
@@ -915,9 +1060,12 @@ const bars = MONTHS.map((x, i) => {
     .card.is-in .bar,
     .card.is-in .kv > div { animation: none; }
     [data-stream] span { opacity: 1; transition: none; }
-    [data-stream] span.tip::after,
-    .tool.is-run::after { display: none; }
+    [data-stream].is-armed span.tip::after,
+    .tool.is-run::after,
+    .composer.is-typing .cline::after { display: none; }
     .tool.is-run .tdot,
     .chat.is-busy .local { animation: none; }
+    /* Nothing is ever typed here, so the prompt stays as the resting hint. */
+    .csend { transition: none; }
   }
 </style>
