@@ -340,15 +340,26 @@ const DIVIDERS = Array.from({ length: BLOCKS }, (_, i) => (i + 1) * (BLOCK_W + B
 
   <div class="mp-inner">
     <p class="mp-note">
-      A tax tool is where the slices get joined. It has to see every exchange,
-      every wallet and every address at once, or it cannot total anything.
-      Hosted, that finished picture sits on someone else's server, and it only
-      has to fail once. Kassiber joins the same slices on your machine, so
-      there is no copy of it to lose.
+      Your whole history in one place: every account, every layer, every transfer
+      between them. Whatever you keep books for, that complete picture is what
+      makes the numbers useful, and it is also the only thing worth stealing. The
+      chain is already public. The picture says which of it is yours. Hosted, it
+      becomes a honeypot that only has to leak once.
+    </p>
+    <p class="mp-note">
+      If that picture has to exist, it belongs on your own infrastructure, under
+      your control. That is where Kassiber builds it, pairing both sides of every
+      move across on-chain, Lightning and Liquid. No copy goes anywhere else, so
+      there is nothing to leak.
     </p>
     <!-- Says it outright. A pulse can suggest something is alive; only words
-         say it can be pointed at. Retires itself the first time one opens. -->
-    <p class="mp-try" hidden><b data-hint></b> <span>to see who the leaks say it belongs to.</span></p>
+         say it can be pointed at. Retires itself the first time one opens.
+         One sentence, one tone: emphasising just the action split the line in
+         two shades and read as a rendering fault rather than as emphasis.
+         Names the payoff rather than the mechanic. What the panel holds is not
+         a label on one output, it is the total and the ranking that only the
+         join produces, so the invitation promises the inference. -->
+    <p class="mp-try" hidden><span data-hint></span> to see what leaked data adds up to.</p>
   </div>
 </figure>
 
@@ -481,7 +492,7 @@ const DIVIDERS = Array.from({ length: BLOCKS }, (_, i) => (i + 1) * (BLOCK_W + B
   }
 
   /* The site says small things in prose, not in floating chips, so this does
-     too. The action carries the emphasis and the rest stays quiet. */
+     too. The whole line stays quiet and evenly toned. */
   .mp-try {
     margin: 10px 0 0;
     font-size: 13.5px;
@@ -490,7 +501,6 @@ const DIVIDERS = Array.from({ length: BLOCKS }, (_, i) => (i + 1) * (BLOCK_W + B
     opacity: 0;
     transition: opacity 420ms ease;
   }
-  .mp-try b { font-weight: 500; color: var(--fg-muted); }
   .mp[data-stage="2"] .mp-try { opacity: 1; transition-delay: 900ms; }
   .mp.is-used .mp-try { opacity: 0; transition-delay: 0ms; }
 
