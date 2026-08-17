@@ -413,7 +413,19 @@ const DIVIDERS = Array.from({ length: BLOCKS - 1 }, (_, i) => (i + 1) * (BLOCK_W
     /* No stroke. An SVG stroke straddles the edge, so half of it paints outside
        the rect and every highlight ended up wider than the cell it owns. The
        fill alone is the signal, and it lands exactly on the grid. */
-    animation: mp-hit 420ms cubic-bezier(0.2, 0.75, 0.3, 1) var(--lag) both;
+    /* Two animations on one property: the later one owns transform once it
+       starts, and until then it contributes nothing, so the hit's own fill
+       holds. Both end and rest at scale(1), so the handover is invisible. */
+    animation:
+      mp-hit 420ms cubic-bezier(0.2, 0.75, 0.3, 1) var(--lag) both,
+      mp-invite 7s ease-in-out calc(1.4s + var(--i) * 5s) infinite;
+  }
+  /* The only clue that these can be pointed at. Mostly rest, one shallow beat,
+     and each one phased by its position so the field ripples rather than
+     blinking in unison. At 7% it should register without being nameable. */
+  @keyframes mp-invite {
+    0%, 74%, 100% { transform: scale(1); }
+    84% { transform: scale(1.07); }
   }
   /* Starts where the square already was, not from the dimmed state. Animating
      up from 0.13 made every future highlight vanish for up to half a second
@@ -594,6 +606,10 @@ const DIVIDERS = Array.from({ length: BLOCKS - 1 }, (_, i) => (i + 1) * (BLOCK_W
   /* Holding still while you read it. The drift would otherwise walk the square
      out from under the pointer. */
   .mp.is-holding .mp-track { animation-play-state: paused; }
+  /* Everything holds still while a panel is open, including the square the
+     panel is anchored to. Play state does not alter the animation list, so
+     nothing re-triggers when this comes and goes. */
+  .mp.is-holding .mp-sq.is-mine { animation-play-state: paused; }
 
   /* One fixed paragraph. It used to advance beat by beat with the stages, so
      the argument could only be read at the speed the animation chose and was
@@ -655,9 +671,9 @@ const DIVIDERS = Array.from({ length: BLOCKS - 1 }, (_, i) => (i + 1) * (BLOCK_W
   for (const root of document.querySelectorAll<HTMLElement>("[data-goggles]")) {
     const calm = matchMedia("(prefers-reduced-motion: reduce)");
     /* Long enough to register the field as an ordinary block of traffic before
-       anything picks yours out of it. There is only one pass now: a first sweep
-       that lit a handful of squares was a beat the argument did not need. */
-    const HOLD = 2600;
+       anything picks yours out of it, and no longer. Paired with DWELL below
+       this puts the sweep about 2.3s after the band settles in frame. */
+    const HOLD = 1600;
     /* How long the band has to stay in frame before the sweep is allowed to
        fire. Someone scrolling straight past gets the slow drift and nothing
        else: a bright line whipping across as the section flies by is exactly
