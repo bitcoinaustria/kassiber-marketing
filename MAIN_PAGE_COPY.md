@@ -127,7 +127,7 @@ $ ./scripts/integration-harness.sh demo-up
 
 - **Inspect it.** The code is on GitHub.
 - **Run it.** One script starts a throwaway regtest with demo books.
-- **Keep your exit.** Your ledger and database export whole.
+- **Keep your exit.** Export your ledger or the full database at any time.
 
 **License:** AGPL-3.0 licensed
 
@@ -221,7 +221,7 @@ Yes. Kassiber's books and generic exports work anywhere. The included filing pre
 
 Watch-only Bitcoin accounting across on-chain, Lightning, and Liquid. Your books stay on your machine.
 
-A Kassiber is a secret note passed under the guards' noses. Your books, kept the same way.
+A Kassiber is a secret note passed under the guards' noses.
 
 ## Product
 

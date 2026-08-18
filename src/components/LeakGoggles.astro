@@ -340,15 +340,11 @@ const DIVIDERS = Array.from({ length: BLOCKS }, (_, i) => (i + 1) * (BLOCK_W + B
 
   <div class="mp-inner">
     <p class="mock-disclaimer">Synthetic demonstration of on-chain identity clustering.</p>
-    <blockquote class="mp-quote">
-      <p>&ldquo;Privacy is the power to selectively reveal oneself to the world.&rdquo;</p>
-      <cite>Eric Hughes, A Cypherpunk&rsquo;s Manifesto, 1993</cite>
-    </blockquote>
     <p class="mp-note">
-      Your books are that history in one place: the most damaging file you own,
-      because a leaked history can't be rotated like a key. Hosted, it becomes a
-      honeypot that only has to leak once. Kassiber builds it on your machine.
-      What leaves, if anything, is your decision.
+      Your books are the most damaging file you own: a leaked history can't be
+      rotated like a key. Hosted, they become a honeypot that only has to leak
+      once. Kassiber builds them on your machine, and what leaves, if anything,
+      is your decision.
     </p>
     <!-- Says it outright. A pulse can suggest something is alive; only words
          say it can be pointed at. Retires itself the first time one opens.
@@ -644,30 +640,6 @@ const DIVIDERS = Array.from({ length: BLOCKS }, (_, i) => (i + 1) * (BLOCK_W + B
   /* One fixed paragraph. It used to advance beat by beat with the stages, so
      the argument could only be read at the speed the animation chose and was
      gone by the time you looked back at it. The field shows; this states. */
-  /* The section's grounding, not decoration: the sentence the whole page is
-     an implementation of, so it reads at body weight with a quiet citation. */
-  .mp-quote {
-    margin: 30px 0 0;
-    max-width: 58ch;
-  }
-
-  .mp-quote p {
-    margin: 0;
-    font-size: 19px;
-    line-height: 1.45;
-    letter-spacing: -0.005em;
-    color: var(--fg);
-    text-wrap: balance;
-  }
-
-  .mp-quote cite {
-    display: block;
-    margin-top: 7px;
-    font-size: 13px;
-    font-style: normal;
-    color: var(--fg-dim);
-  }
-
   .mp-note {
     margin: 20px 0 0;
     /* One short note carries the section's conclusion now, not a two-
