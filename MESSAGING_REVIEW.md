@@ -26,12 +26,15 @@ even when each one is good.
 
 > Don't trust. Audit. → See for yourself. → Keep your books to yourself. → Before you ask.
 
-Four punchline headings in a row. Each works alone; together they read like a
-slogan generator. Keep the two or three that carry real weight ("Don't trust.
-Audit." and "Your payments were always public. Your name was not." are the best
-lines on the page) and let the others be plain: "Screenshots", "Questions we
-expect", etc. A page where only the important lines punch is a page where the
-punches land.
+Four punchline headings in a row — but each one is captioning its visual, and by
+that measure they all earn their form: "See for yourself." sits on the
+screenshots, "Don't trust. Audit." on a terminal you can retype, "Before you
+ask." heads the FAQ. Don't flatten these; a heading like "Screenshots" would fit
+the visual less well, not better. The cadence problem is real but lives in the
+*accumulation*: by the fourth clipped imperative the register has stopped
+signaling emphasis. If anything gives, make it the CTA heading ("Keep your books
+to yourself." is the one not anchored to a demonstration), or break the rhythm
+earlier in the page so the ending run reads as a crescendo instead of a default.
 
 **Fragment captions in the screenshot strip:**
 
@@ -118,7 +121,49 @@ selling point being paid for as a support burden.
 
 ---
 
-## 3. Trust: what builds it, what leaks it
+## 3. Where the words and the visuals diverge
+
+The page's rule should be: the text claims exactly what the mock demonstrates.
+Judged that way, the bottom-of-page sections are fine and the gaps are elsewhere —
+and they run in both directions.
+
+**Hero — the visual outclaims the text.** The headline says "Private Bitcoin
+accounting"; the picture foregrounds an AI composer with a deliberately enlarged
+model name, and OpenCode floats among the protocol marks. The most prominent
+interactive element on first view is the one thing the hero copy never mentions.
+Either the text acknowledges the assistant in one honest sentence, or the
+composer cedes visual weight to the accounting.
+
+**History — the visual outclaims the text.** The animation's argument is
+classification: raw rows arrive at the bottom and resolve into a booked, compressed
+deck at the top. The heading claims only aggregation ("one timeline"). The mock is
+demonstrating something stronger than the words ask credit for — the heading could
+name the resolving, e.g. "Raw transactions in. A classified book out."
+
+**Tax — the prose underclaims the mock.** "Live formulas you can inspect" is the
+weak version of what the sheet is doing on screen: cycling through
+`=IF(ABS(E3-F3)<=Verify!$B$3,"OK",…)` — the export re-derives every gain and
+audits Kassiber's own figures. Only the aria-label states this. One visible
+sentence ("the workbook re-computes every number and checks it against Kassiber")
+would let the copy claim what the visual already proves.
+
+**Agents — the headline fits its own mock but clashes with its neighbors.** "The
+answer never leaves your machine" is true of what's shown: the mock's badge reads
+"Qwen3.6-35B · oMLX **local**". The contradiction comes from the caption ("Works
+with OpenCode, Claude Code, and Codex CLI" — two of which are remote) and from the
+hero's picker mock, which honestly shows remote dots on those providers. Two valid
+fixes: soften the headline ("On a local model, the answer never leaves your
+machine"), or keep it and scope the harness line instead ("with a local model, as
+shown; remote harnesses work too, with their tradeoffs"). Either way the page
+stops making the careful reader reconcile it.
+
+**Connections — the text outclaims the visual, mildly.** "Connect anything
+Bitcoin." over a finite roster. The "Missing yours? Open an issue" line already
+absorbs most of this; smallest gap on the page.
+
+---
+
+## 4. Trust: what builds it, what leaks it
 
 **Already strong — keep and protect:**
 
@@ -141,11 +186,12 @@ selling point being paid for as a support burden.
 1. **"Ask your books anything. The answer never leaves your machine."** Two
    sentences later: "Works with OpenCode, Claude Code, and Codex CLI." Claude Code
    and Codex are remote models, and the page's own model-picker mock marks them
-   with remote dots. The body already carries the honest version ("Run the agent
-   through oMLX or Ollama to keep your questions on your machine") — the headline
-   just overclaims it. Fix the headline, not the body: *"Ask your books anything.
-   On a local model, the answer never leaves your machine."* The careful reader
-   this page courts will notice the conditional either way; better it be yours.
+   with remote dots. The headline *does* fit the section's own mock (its badge
+   reads "Qwen3.6-35B · oMLX local") — the clash is with the caption and the hero
+   picker. So either soften the headline ("On a local model, the answer never
+   leaves your machine") or keep it and scope the caption to match what's shown.
+   The careful reader this page courts will notice the conditional either way;
+   better it be yours.
 
 2. **Hero absolutism vs. FAQ defaults.** The hero says "without uploading your
    history", the FAQ admits default backends see which addresses you query. These
@@ -172,7 +218,7 @@ selling point being paid for as a support burden.
 
 ---
 
-## 4. What's missing to understand the intent
+## 5. What's missing to understand the intent
 
 The page shows seven proofs and never states the case. Missing, roughly in order of
 importance:
@@ -210,7 +256,7 @@ importance:
 
 ---
 
-## 5. The honest, cohesive story
+## 6. The honest, cohesive story
 
 Everything above collapses into one narrative the page already half-tells. Spelled
 out:
@@ -250,7 +296,7 @@ Two ways to fix it, one cheap and one structural:
 
 ---
 
-## 6. Concrete line-level suggestions
+## 7. Concrete line-level suggestions
 
 Kept minimal; these are directions, not final copy.
 
@@ -260,10 +306,11 @@ Kept minimal; these are directions, not final copy.
 | Hero boundary | "Kassiber reads watch-only wallet data, never private keys. Local AI access through oMLX or Ollama stays read-only." | Drop sentence two here; move it to the agents section. |
 | Meta description | "Keep on-chain, Lightning, and Liquid **books**…" | Align with the hero's "one book". |
 | Connections H2 | "Connect anything Bitcoin." | "Connect what you already run." (keeps the hedge line honest) — or keep, accepting the wink. |
-| History H2 | "One timeline for your whole Bitcoin stack." | "One timeline across every layer." if the stack/sats pun is unintended. |
+| History H2 | "One timeline for your whole Bitcoin stack." | The mock demonstrates classification, not just aggregation — claim it: "Raw transactions in. A classified book out." (also resolves the stack/sats ambiguity). |
+| Tax prose | "The spreadsheet exports include live formulas you can inspect." | Claim what the mock shows: "The workbook re-computes every gain with its own formulas and checks it against Kassiber's figures." |
 | Tax section | (no caveat) | Add: "Kassiber is pre-alpha — the export exists so you and your advisor can check every number, not take ours." |
 | Privacy head | (no product tie-in) | Add one sentence: "Kassiber builds that picture on your machine only — and shows you what your wallets already give away." |
-| Agents H2 | "Ask your books anything. The answer never leaves your machine." | "Ask your books anything. On a local model, the answer never leaves your machine." |
+| Agents H2 or caption | "Ask your books anything. The answer never leaves your machine." | Either soften the headline ("On a local model, the answer never leaves your machine") or keep it and scope the caption: "Shown on a local model via oMLX. Remote harnesses (Claude Code, Codex CLI) work too — then your questions travel." |
 | Final CTA | "…works without an account or subscription." | Add the who/why: "Free and AGPL, built by Bitcoin Austria — a volunteer-run nonprofit with nothing to sell you." Link the name. |
 | Footer or About | — | "A Kassiber is a secret note passed under the guards' noses. Your books, kept the same way." |
 | FAQ | — | Add: "What does it cost?" / "Are my books encrypted?" / "Why does my OS warn me about the download?" / "Where do the EUR prices come from?" |
@@ -271,7 +318,7 @@ Kept minimal; these are directions, not final copy.
 
 ---
 
-## 7. What not to touch
+## 8. What not to touch
 
 - "A move between your own wallets isn't a sale." — the model for every other headline.
 - "Your payments were always public. Your name was not."
