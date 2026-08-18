@@ -4,7 +4,7 @@
 **Page metadata**
 
 - **Title:** Kassiber · Private Bitcoin Accounting
-- **Description:** Keep on-chain, Lightning, and Liquid books on your machine. Your wallet history stays off SaaS servers.
+- **Description:** Keep one book for on-chain, Lightning, and Liquid on your own machine. No account, no upload, no one else's server.
 
 <!-- Section: Navigation -->
 
@@ -16,14 +16,14 @@
 
 # Private Bitcoin accounting on your machine.
 
-Keep one book for on-chain, Lightning, and Liquid. Sync directly, match transfers, review wallet privacy, and export reports without uploading your history to a SaaS.
+One book for on-chain, Lightning, and Liquid, built and kept on your own computer. Moves between your wallets are matched, not taxed as sales, and reports export with the formulas that prove them.
 
 **Actions**
 
 - Download for macOS (changes to Windows or Linux when detected)
 - View source on GitHub
 
-Kassiber reads watch-only wallet data, never private keys. Local AI access through oMLX or Ollama stays read-only.
+Kassiber reads watch-only wallet data, never private keys. The built-in assistant can run entirely on local models.
 
 **Assistant prompt:** Ask anything
 
@@ -31,9 +31,9 @@ Kassiber reads watch-only wallet data, never private keys. Local AI access throu
 
 <!-- Section: Local-first. Anchor: connections -->
 
-## Connect anything Bitcoin.
+## Connect what you already run.
 
-Sync watch-only wallets, nodes, BTCPay, and exchange exports. Use your own Bitcoin Core, Electrum, Esplora, or Tor route so third parties do not learn which addresses you query.
+Sync watch-only wallets, nodes, BTCPay, and exchange exports. Use your own Bitcoin Core, Electrum, Esplora, or Tor route so third parties do not learn which addresses you query. Retired wallets count too: import the export of a wallet you left years ago and its history lands in the same book.
 
 Missing yours? [Open an issue](https://github.com/bitcoinaustria/kassiber/issues) or [send a PR](https://github.com/bitcoinaustria/kassiber/pulls).
 
@@ -47,7 +47,7 @@ Missing yours? [Open an issue](https://github.com/bitcoinaustria/kassiber/issues
 
 <!-- Section: Bird's eye: money in, money out, and the internal moves. Anchor: history -->
 
-## One timeline for your whole Bitcoin stack.
+## Raw transactions in. A classified book out.
 
 On-chain, Lightning, Liquid, BTCPay, and exchange activity appear in one searchable history. Each row keeps its source, status, and accounting treatment.
 
@@ -55,7 +55,7 @@ On-chain, Lightning, Liquid, BTCPay, and exchange activity appear in one searcha
 
 ## A move between your own wallets isn't a sale.
 
-Kassiber pairs transfers, channel opens, and Liquid pegs across layers instead of booking them as taxable sales.
+Kassiber pairs transfers, channel opens, and Liquid pegs across layers instead of booking them as taxable sales. That includes wallet migrations: the sweep into a new wallet pairs up like any other move, and your cost basis travels with the coins.
 
 **Swap example**
 
@@ -69,7 +69,7 @@ Kassiber pairs transfers, channel opens, and Liquid pegs across layers instead o
 
 ## Reports you can verify.
 
-Kassiber uses [RP2](https://github.com/eprbell/rp2) to compute FIFO, HIFO, or moving-average reports on your machine. The spreadsheet exports include live formulas you can inspect. Generic reports work anywhere; Kassiber includes an Austrian § 27b EStG preset.
+Kassiber uses [RP2](https://github.com/eprbell/rp2) to compute FIFO, HIFO, or moving-average reports on your machine. The spreadsheet exports re-compute every gain with their own formulas and check the result against Kassiber's figures. Generic reports work anywhere; Kassiber includes an Austrian § 27b EStG preset. Kassiber is pre-alpha. The export exists so you and your advisor can check every number, not take ours.
 
 **Report example**
 
@@ -92,15 +92,15 @@ Kassiber uses [RP2](https://github.com/eprbell/rp2) to compute FIFO, HIFO, or mo
 
 ## Your payments were always public. Your name was not.
 
-Bitcoin records every transaction without putting your name on the ledger. An exchange or another service can link your identity to an address and expose the rest of your history.
+Bitcoin records every transaction without putting your name on the ledger. An exchange or another service can link your identity to an address and expose the rest of your history. Kassiber builds the complete picture on your machine only, and shows you what your wallets already give away.
 
 **Demo label:** Synthetic demonstration of on-chain identity clustering.
 
 <!-- Section: Agents. Anchor: agents -->
 
-## Ask your books anything. The answer never leaves your machine.
+## Ask your books anything. On a local model, the answer never leaves your machine.
 
-Point your agent at Kassiber to inspect the book and explain what your wallets reveal. It can prepare a document you choose to share. Kassiber ships [the skill](https://github.com/bitcoinaustria/kassiber-skill) that teaches it the data model. Run the agent through oMLX or Ollama to keep your questions on your machine.
+Point your agent at Kassiber to inspect the book and explain what your wallets reveal. It can prepare a document you choose to share. Access is read-only: agents can inspect and prepare, never sign or broadcast. Kassiber ships [the skill](https://github.com/bitcoinaustria/kassiber-skill) that teaches it the data model. Run the agent through oMLX or Ollama to keep your questions on your machine.
 
 Works with OpenCode, Claude Code, and Codex CLI. Local models through oMLX or Ollama.
 
@@ -139,11 +139,11 @@ $ ./scripts/integration-harness.sh demo-up
 ## See for yourself.
 
 - Balance, cost basis, and price.
-- Flows by quarter.
+- Incoming, outgoing, and transfers, quarter by quarter.
 - Booked, priced, and marked taxable.
 - An L-BTC → BTC swap, paired as a move.
 - Liquid amounts hidden. Pairing still resolves.
-- Wallets and sources.
+- Every wallet and source feeds the same book.
 - Watch-only. Never keys.
 - Filing fields and lot audits.
 
@@ -151,7 +151,7 @@ $ ./scripts/integration-harness.sh demo-up
 
 ## Keep your books to yourself.
 
-Kassiber stores the database locally and works without an account or subscription.
+Kassiber stores the database locally and works without an account or subscription. Free and AGPL, built by Bitcoin Austria, a volunteer-run nonprofit with nothing to sell you.
 
 **Actions**
 
@@ -177,9 +177,17 @@ Yes, if you have Docker. The regtest script starts a disposable network with thi
 
 No. Kassiber syncs through default backends after installation. Those services can see the addresses you query, so use your own Bitcoin Core, Electrum, or Esplora when that matters. You can route each backend through your Tor proxy.
 
+**I've switched wallets over the years. Can Kassiber follow?**
+
+Yes. Import each wallet's export, even ones you retired long ago. Kassiber pairs the migrations as transfers, so history and cost basis stay continuous across every wallet you have used.
+
 **Does Kassiber replace my tax advisor?**
 
 No. Kassiber computes the numbers and exposes each calculation for you or your advisor to check. You remain responsible for filing. Kassiber is pre-alpha software and provides no tax or legal advice. Ask a professional about unusual cases.
+
+**Are my books encrypted?**
+
+Yes, when you set a passphrase. The database is encrypted with SQLCipher; only your passphrase opens it.
 
 **What happens if I lose my passphrase?**
 
@@ -188,6 +196,14 @@ Kassiber cannot recover your passphrase. Lose it and the encrypted books stay lo
 **Can Kassiber spend my coins?**
 
 No. Kassiber reads descriptors and watch-only addresses; it never holds spending keys. Connected agents can inspect the book. They cannot sign or broadcast transactions.
+
+**What does it cost?**
+
+Nothing. Kassiber is free and AGPL-3.0 licensed, built by Bitcoin Austria, a volunteer-run nonprofit funded by donations. There is no paid tier and nothing to upsell.
+
+**Why does my OS warn me about the download?**
+
+Pre-alpha builds are not yet code-signed, so macOS and Windows warn on first launch. The source is public if you would rather build it yourself.
 
 **I'm not in Austria. Is it still useful?**
 
@@ -198,6 +214,8 @@ Yes. Kassiber's books and generic exports work anywhere. The included filing pre
 **Kassiber**
 
 Watch-only Bitcoin accounting across on-chain, Lightning, and Liquid. Your books stay on your machine.
+
+A Kassiber is a secret note passed under the guards' noses. Your books, kept the same way.
 
 ## Product
 

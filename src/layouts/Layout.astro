@@ -18,7 +18,7 @@ interface Props {
 
 const {
   title = "Kassiber · Private Bitcoin Accounting",
-  description = "Keep on-chain, Lightning, and Liquid books on your machine. Your wallet history stays off SaaS servers.",
+  description = "Keep one book for on-chain, Lightning, and Liquid on your own machine. No account, no upload, no one else's server.",
   pageClass,
   image = "/og-cover.jpg",
 } = Astro.props;
@@ -91,6 +91,10 @@ const socialImage = new URL(image, base);
             <p>
               Watch-only Bitcoin accounting across on-chain, Lightning, and
               Liquid. Your books stay on your machine.
+            </p>
+            <p>
+              A Kassiber is a secret note passed under the guards' noses.
+              Your books, kept the same way.
             </p>
           </div>
           <nav class="footer-column" aria-label="Product links">

@@ -20,7 +20,7 @@ const SLIDES = [
   {
     file: "transactions-flow.webp",
     alt: "Transactions screen with quarterly flow chart of incoming, outgoing, and transfer volumes",
-    caption: "Flows by quarter.",
+    caption: "Incoming, outgoing, and transfers, quarter by quarter.",
   },
   {
     file: "transactions-book.webp",
@@ -40,7 +40,7 @@ const SLIDES = [
   {
     file: "wallets.webp",
     alt: "Wallets and sources screen with the assistant composer running a local oMLX model",
-    caption: "Wallets and sources.",
+    caption: "Every wallet and source feeds the same book.",
   },
   {
     file: "add-connection.webp",
@@ -84,9 +84,9 @@ const SLIDES = [
       </h1>
 
       <p class="hero-sub">
-        Keep one book for on-chain, Lightning, and Liquid. Sync directly,
-        match transfers, review wallet privacy, and export reports without
-        uploading your history to a SaaS.
+        One book for on-chain, Lightning, and Liquid, built and kept on your
+        own computer. Moves between your wallets are matched, not taxed as
+        sales, and reports export with the formulas that prove them.
       </p>
 
       <div class="hero-actions">
@@ -110,8 +110,8 @@ const SLIDES = [
       </div>
 
       <p class="hero-boundary">
-        Kassiber reads watch-only wallet data, never private keys. Local AI
-        access through oMLX or Ollama stays read-only.
+        Kassiber reads watch-only wallet data, never private keys. The
+        built-in assistant can run entirely on local models.
       </p>
 
       <div class="hero-preview">
@@ -135,11 +135,13 @@ const SLIDES = [
     <div class="container sov-inner">
       <div class="sov-copy">
         <div class="section-head" style="margin-bottom:0">
-          <h2>Connect anything Bitcoin.</h2>
+          <h2>Connect what you already run.</h2>
           <p>
             Sync watch-only wallets, nodes, BTCPay, and exchange exports.
             Use your own Bitcoin Core, Electrum, Esplora, or Tor route so
-            third parties do not learn which addresses you query.
+            third parties do not learn which addresses you query. Retired
+            wallets count too: import the export of a wallet you left years
+            ago and its history lands in the same book.
           </p>
         </div>
 
@@ -158,7 +160,7 @@ const SLIDES = [
   <section id="history">
     <div class="container">
       <div class="section-head">
-        <h2>One timeline for your whole Bitcoin stack.</h2>
+        <h2>Raw transactions in. A classified book out.</h2>
         <p>
           On-chain, Lightning, Liquid, BTCPay, and exchange activity appear
           in one searchable history. Each row keeps its source, status, and
@@ -181,7 +183,9 @@ const SLIDES = [
           <h2>A move between your own wallets isn't a sale.</h2>
           <p>
             Kassiber pairs transfers, channel opens, and Liquid pegs across
-            layers instead of booking them as taxable sales.
+            layers instead of booking them as taxable sales. That includes
+            wallet migrations: the sweep into a new wallet pairs up like any
+            other move, and your cost basis travels with the coins.
           </p>
         </div>
       </div>
@@ -194,7 +198,7 @@ const SLIDES = [
       <div class="section-head">
         <h2>Reports you can verify.</h2>
         <p>
-          Kassiber uses <a href="https://github.com/eprbell/rp2" target="_blank" rel="noopener noreferrer">RP2</a> to compute FIFO, HIFO, or moving-average reports on your machine. The spreadsheet exports include live formulas you can inspect. Generic reports work anywhere; Kassiber includes an Austrian § 27b EStG preset.
+          Kassiber uses <a href="https://github.com/eprbell/rp2" target="_blank" rel="noopener noreferrer">RP2</a> to compute FIFO, HIFO, or moving-average reports on your machine. The spreadsheet exports re-compute every gain with their own formulas and check the result against Kassiber's figures. Generic reports work anywhere; Kassiber includes an Austrian § 27b EStG preset. Kassiber is pre-alpha. The export exists so you and your advisor can check every number, not take ours.
         </p>
       </div>
 
@@ -210,7 +214,9 @@ const SLIDES = [
         <p>
           Bitcoin records every transaction without putting your name on the
           ledger. An exchange or another service can link your identity to an
-          address and expose the rest of your history.
+          address and expose the rest of your history. Kassiber builds the
+          complete picture on your machine only, and shows you what your
+          wallets already give away.
         </p>
       </div>
     </div>
@@ -223,11 +229,12 @@ const SLIDES = [
     <div class="container agents-detail">
       <div class="agents-copy">
         <div class="section-head" style="margin-bottom:0">
-          <h2>Ask your books anything. The answer never leaves your machine.</h2>
+          <h2>Ask your books anything. On a local model, the answer never leaves your machine.</h2>
           <p>
             Point your agent at Kassiber to inspect the book and explain what
             your wallets reveal. It can prepare a document you choose to share.
-            Kassiber ships <a href={SKILL_REPOSITORY_URL} target="_blank" rel="noopener noreferrer">the skill</a> that
+            Access is read-only: agents can inspect and prepare, never sign or
+            broadcast. Kassiber ships <a href={SKILL_REPOSITORY_URL} target="_blank" rel="noopener noreferrer">the skill</a> that
             teaches it the data model. Run the agent through oMLX or Ollama to
             keep your questions on your machine.
           </p>
@@ -362,7 +369,9 @@ const SLIDES = [
         Keep your books to yourself.
       </h2>
       <p class="cta-sub">
-        Kassiber stores the database locally and works without an account or subscription.
+        Kassiber stores the database locally and works without an account or
+        subscription. Free and AGPL, built by Bitcoin Austria, a volunteer-run
+        nonprofit with nothing to sell you.
       </p>
       <div class="cta-actions">
         <a id="cta-download-btn" class="btn btn-primary btn-lg" href={RELEASES_URL}>
@@ -419,12 +428,29 @@ const SLIDES = [
         </details>
 
         <details class="faq-item" name="faq">
+          <summary>I've switched wallets over the years. Can Kassiber follow?</summary>
+          <p>
+            Yes. Import each wallet's export, even ones you retired long ago.
+            Kassiber pairs the migrations as transfers, so history and cost
+            basis stay continuous across every wallet you have used.
+          </p>
+        </details>
+
+        <details class="faq-item" name="faq">
           <summary>Does Kassiber replace my tax advisor?</summary>
           <p>
             No. Kassiber computes the numbers and exposes each calculation for
             you or your advisor to check. You remain responsible for filing.
             Kassiber is pre-alpha software and provides no tax or legal advice.
             Ask a professional about unusual cases.
+          </p>
+        </details>
+
+        <details class="faq-item" name="faq">
+          <summary>Are my books encrypted?</summary>
+          <p>
+            Yes, when you set a passphrase. The database is encrypted with
+            SQLCipher; only your passphrase opens it.
           </p>
         </details>
 
@@ -442,6 +468,24 @@ const SLIDES = [
             No. Kassiber reads descriptors and watch-only addresses; it never
             holds spending keys. Connected agents can inspect the book. They
             cannot sign or broadcast transactions.
+          </p>
+        </details>
+
+        <details class="faq-item" name="faq">
+          <summary>What does it cost?</summary>
+          <p>
+            Nothing. Kassiber is free and AGPL-3.0 licensed, built by Bitcoin
+            Austria, a volunteer-run nonprofit funded by donations. There is
+            no paid tier and nothing to upsell.
+          </p>
+        </details>
+
+        <details class="faq-item" name="faq">
+          <summary>Why does my OS warn me about the download?</summary>
+          <p>
+            Pre-alpha builds are not yet code-signed, so macOS and Windows
+            warn on first launch. The source is public if you would rather
+            build it yourself.
           </p>
         </details>
 
