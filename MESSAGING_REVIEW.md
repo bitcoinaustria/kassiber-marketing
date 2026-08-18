@@ -221,7 +221,7 @@ same engine applied to the most familiar event.
    the feature.
 
 4. **No funding story.** A privacy product with no visible business model makes
-   people ask what the catch is. The actual answer — built by a volunteer-run,
+   people ask what the catch is. The actual answer — built by a,
    donation-funded, Bitcoin-only nonprofit with nothing to sell — is the strongest
    trust asset the project has, and it appears only as a footer credit.
 
@@ -298,8 +298,7 @@ out:
 > data exports without lock-in. Ask it questions — on a local model, even the
 > questions stay home.
 >
-> **It's pre-alpha, and it's built by Bitcoin Austria** — a volunteer-run,
-> Bitcoin-only nonprofit with nothing to sell you. A Kassiber is a note passed
+> **It's pre-alpha, and it's built by Bitcoin Austria** — a Bitcoin-only nonprofit with nothing to sell you. A Kassiber is a note passed
 > under the guards' noses. That's the design goal.
 
 The current page has all four beats but in proof-first order, with beat 1 (the
@@ -343,7 +342,7 @@ is applied instead). For the agents fix, option A (softened headline) was chosen
 | Privacy head | (no product tie-in) | Add one sentence: "Kassiber builds that picture on your machine only — and shows you what your wallets already give away." |
 | Privacy note | "…that complete picture is what makes the numbers useful, and it is also the only thing worth stealing." | "…that complete picture is what makes the numbers useful. It is also the theft that does the most damage: a stolen key costs you one wallet, a stolen picture gives away all of them at once — every address, every amount, every counterparty. And unlike keys it can't be rotated: coins move to new addresses, a leaked history never stops being true." |
 | Agents H2 or caption | "Ask your books anything. The answer never leaves your machine." | Either soften the headline ("On a local model, the answer never leaves your machine") or keep it and scope the caption: "Shown on a local model via oMLX. Remote harnesses (Claude Code, Codex CLI) work too — then your questions travel." |
-| Final CTA | "…works without an account or subscription." | Add the who/why: "Free and AGPL, built by Bitcoin Austria — a volunteer-run nonprofit with nothing to sell you." Link the name. |
+| Final CTA | "…works without an account or subscription." | Add the who/why: "Free and AGPL, built by Bitcoin Austria — a nonprofit with nothing to sell you." Link the name. |
 | Footer or About | — | "A Kassiber is a secret note passed under the guards' noses. Your books, kept the same way." |
 | FAQ | — | Add: "What does it cost?" / "Are my books encrypted?" / "Why does my OS warn me about the download?" / "Where do the EUR prices come from?" / "I've switched wallets over the years. Can Kassiber reconstruct that?" → "Yes. Import each wallet's export, even retired ones. Migrations pair as transfers, so history and cost basis stay continuous." |
 | FAQ demo | "Yes, if you have Docker." | If a bundled demo book exists, lead with it; if not, consider building one — this answer is the onboarding gap talking. |

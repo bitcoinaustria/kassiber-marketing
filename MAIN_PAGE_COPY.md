@@ -201,7 +201,7 @@ No. Kassiber reads descriptors and watch-only addresses; it never holds spending
 
 **What does it cost?**
 
-Nothing. Kassiber is free and AGPL-3.0 licensed, built by Bitcoin Austria, a volunteer-run nonprofit funded by donations. There is no paid tier and nothing to upsell.
+Nothing. Kassiber is free and AGPL-3.0 licensed, built by [Bitcoin Austria](https://bitcoin-austria.at), a nonprofit based in Austria. There is no paid tier and nothing to upsell.
 
 **Why does my OS warn me about the download?**
 
