@@ -339,6 +339,7 @@ const DIVIDERS = Array.from({ length: BLOCKS }, (_, i) => (i + 1) * (BLOCK_W + B
   </div>
 
   <div class="mp-inner">
+    <p class="mock-disclaimer">Synthetic demonstration of on-chain identity clustering.</p>
     <p class="mp-note">
       Your whole history in one place: every account, every layer, every transfer
       between them. Whatever you keep books for, that complete picture is what
@@ -652,6 +653,13 @@ const DIVIDERS = Array.from({ length: BLOCKS }, (_, i) => (i + 1) * (BLOCK_W + B
     font-size: 14px;
     line-height: 1.55;
     color: var(--fg-muted);
+  }
+
+  .mock-disclaimer {
+    margin: 14px 0 0;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--fg-faint);
   }
 
   @media (max-width: 720px) {

@@ -106,6 +106,7 @@ const STATES = [
     <span>Verify</span>
     <span>Control</span>
   </div>
+  <p class="mock-disclaimer">Illustrative demo data for auditable verification.</p>
 </div>
 
 <script>
@@ -141,7 +142,6 @@ const STATES = [
   /* Spreadsheet chrome on the site's own dark tokens: gridlines, mono
      figures, a formula bar, the workbook's tab strip. No window around it. */
   .sheet {
-    max-width: 828px;
     min-height: 352px;
     display: grid;
     grid-template-rows: auto 1fr auto;
@@ -363,6 +363,13 @@ const STATES = [
     padding: 6px 9px 7px;
     border-radius: 5px 5px 0 0;
     white-space: nowrap;
+  }
+
+  .mock-disclaimer {
+    margin-top: 10px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--fg-faint);
   }
 
   .sheet-tab-active {
