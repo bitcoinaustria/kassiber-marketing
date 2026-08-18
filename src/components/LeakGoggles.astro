@@ -286,7 +286,9 @@ const DIVIDERS = Array.from({ length: BLOCKS }, (_, i) => (i + 1) * (BLOCK_W + B
   <div class="mp-tip" hidden>
     <div class="mp-tip-head">
       <i></i><span data-f="rail"></span>
-      <b>matched</b>
+      <!-- The fake-person label lives on the fake person, not in a caption
+           floating elsewhere on the page. -->
+      <b>synthetic data</b>
     <!-- Touch has no hover, so the panel needs a way out of it. -->
     <button class="mp-tip-x" type="button" aria-label="Close">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12" /></svg>
@@ -339,28 +341,12 @@ const DIVIDERS = Array.from({ length: BLOCKS }, (_, i) => (i + 1) * (BLOCK_W + B
   </div>
 
   <div class="mp-inner">
-    <p class="mock-disclaimer">Synthetic demonstration of on-chain identity clustering.</p>
     <p class="mp-note">
-      Your whole history in one place: every account, every layer, every transfer
-      between them. Whatever you keep books for, that complete picture is what
-      makes the numbers useful, and it is also the only thing worth stealing. The
-      chain is already public. The picture says which of it is yours. Hosted, it
-      becomes a honeypot that only has to leak once.
+      Your books are the most damaging file you own: a leaked history can't be
+      rotated like a key. Hosted, they become a honeypot that only has to leak
+      once. Kassiber builds them on your machine, and what leaves, if anything,
+      is your decision.
     </p>
-    <p class="mp-note">
-      If that picture has to exist, it belongs on your own infrastructure, under
-      your control. That is where Kassiber builds it, pairing both sides of every
-      move across on-chain, Lightning and Liquid. No copy goes anywhere else, so
-      there is nothing to leak.
-    </p>
-    <!-- Says it outright. A pulse can suggest something is alive; only words
-         say it can be pointed at. Retires itself the first time one opens.
-         One sentence, one tone: emphasising just the action split the line in
-         two shades and read as a rendering fault rather than as emphasis.
-         Names the payoff rather than the mechanic. What the panel holds is not
-         a label on one output, it is the total and the ranking that only the
-         join produces, so the invitation promises the inference. -->
-    <p class="mp-try" hidden><span data-hint></span> to see what leaked data adds up to.</p>
   </div>
 </figure>
 
@@ -492,19 +478,6 @@ const DIVIDERS = Array.from({ length: BLOCKS }, (_, i) => (i + 1) * (BLOCK_W + B
     to { transform: translate3d(calc(100vw + var(--w)), 0, 0); opacity: 0; }
   }
 
-  /* The site says small things in prose, not in floating chips, so this does
-     too. The whole line stays quiet and evenly toned. */
-  .mp-try {
-    margin: 10px 0 0;
-    font-size: 13.5px;
-    line-height: 1.5;
-    color: var(--fg-dim);
-    opacity: 0;
-    transition: opacity 420ms ease;
-  }
-  .mp[data-stage="2"] .mp-try { opacity: 1; transition-delay: 900ms; }
-  .mp.is-used .mp-try { opacity: 0; transition-delay: 0ms; }
-
   /* The block view hands you a transaction when you point at one. This hands
      you a person, assembled out of two breaches neither of which held all of
      it. The person leads and the chain data sits beside them as evidence,
@@ -515,15 +488,18 @@ const DIVIDERS = Array.from({ length: BLOCKS }, (_, i) => (i + 1) * (BLOCK_W + B
     left: 0;
     top: 0;
     z-index: 4;
-    --k-border: oklch(1 0 0 / 10%);
-    --k-muted-fg: oklch(0.708 0 0);
-    --k-fg: oklch(0.985 0 0);
+    /* The site's own card idiom, not the app's tokens: unlike the other mocks
+       this panel is not a screenshot of Kassiber, and dressed as one it read
+       as a stray piece of foreign UI on the band. */
+    --k-border: var(--border-strong);
+    --k-muted-fg: var(--fg-dim);
+    --k-fg: var(--fg);
     width: max-content;
-    border-radius: 10px;
+    border-radius: var(--radius);
     border: 1px solid var(--k-border);
-    background: oklch(0.205 0 0 / 0.97);
+    background: rgb(17 17 19 / 0.97);
     backdrop-filter: blur(8px);
-    box-shadow: 0 18px 46px rgb(0 0 0 / 0.6), inset 0 1px 0 rgb(255 255 255 / 0.05);
+    box-shadow: 0 16px 40px rgb(0 0 0 / 0.55);
     pointer-events: none;
     opacity: 0;
     transition: opacity 140ms ease;
@@ -533,13 +509,12 @@ const DIVIDERS = Array.from({ length: BLOCKS }, (_, i) => (i + 1) * (BLOCK_W + B
   .mp-tip-head {
     display: flex;
     align-items: center;
-    gap: 7px;
-    padding: 7px 14px;
-    border-bottom: 1px solid var(--k-border);
-    background: oklch(1 0 0 / 3.5%);
-    font-family: var(--font-mono);
-    font-size: 10px;
-    letter-spacing: 0.04em;
+    gap: 8px;
+    padding: 8px 14px;
+    border-bottom: 1px solid var(--border);
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: -0.01em;
     color: var(--k-fg);
   }
   .mp-tip-head i { width: 8px; height: 8px; border-radius: 2px; }
@@ -568,16 +543,17 @@ const DIVIDERS = Array.from({ length: BLOCKS }, (_, i) => (i + 1) * (BLOCK_W + B
   .mp-tip-head b {
     margin-left: auto;
     font-weight: 400;
+    font-size: 10px;
     text-transform: uppercase;
-    letter-spacing: 0.14em;
-    color: var(--k-muted-fg);
+    letter-spacing: 0.12em;
+    color: var(--fg-faint);
   }
 
   .mp-tip-body { display: flex; align-items: stretch; }
-  .mp-tip-col { padding: 11px 14px 12px; }
+  .mp-tip-col { padding: 12px 14px; }
   /* One hairline instead of two section headings: the split is legible on its
      own once the person is on one side and the ledger on the other. */
-  .mp-tip-chain-col { border-left: 1px solid var(--k-border); }
+  .mp-tip-chain-col { border-left: 1px solid var(--border); }
 
   .mp-tip dl {
     display: grid;
@@ -598,7 +574,7 @@ const DIVIDERS = Array.from({ length: BLOCKS }, (_, i) => (i + 1) * (BLOCK_W + B
   .mp-tip-join {
     margin-top: 9px;
     padding-top: 9px;
-    border-top: 1px solid var(--k-border);
+    border-top: 1px solid var(--border);
   }
 
   /* The photo is what stops this reading as a spreadsheet row. */
@@ -607,12 +583,12 @@ const DIVIDERS = Array.from({ length: BLOCKS }, (_, i) => (i + 1) * (BLOCK_W + B
     flex: none;
     width: 38px;
     height: 38px;
-    border-radius: 7px;
-    border: 1px solid var(--k-border);
-    background: oklch(0.26 0 0);
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: rgb(255 255 255 / 0.06);
     overflow: hidden;
   }
-  .mp-tip-face svg { display: block; width: 100%; height: 100%; fill: oklch(0.46 0 0); }
+  .mp-tip-face svg { display: block; width: 100%; height: 100%; fill: var(--fg-faint); }
   .mp-tip-who-t { display: flex; flex-direction: column; gap: 1px; }
   .mp-tip-who-t b { font-size: 14px; font-weight: 600; color: var(--k-fg); }
   .mp-tip-who-t em { font-style: normal; font-size: 11.5px; color: var(--k-muted-fg); }
@@ -624,13 +600,12 @@ const DIVIDERS = Array.from({ length: BLOCKS }, (_, i) => (i + 1) * (BLOCK_W + B
     align-items: baseline;
     gap: 6px;
     padding: 8px 14px 9px;
-    border-top: 1px solid var(--k-border);
-    background: oklch(1 0 0 / 2%);
+    border-top: 1px solid var(--border);
     font-size: 11.5px;
     color: var(--k-muted-fg);
   }
   .mp-tip-foot b { font-weight: 500; color: var(--k-fg); }
-  .mp-tip-foot em { font-style: normal; color: oklch(0.5 0 0); }
+  .mp-tip-foot em { font-style: normal; color: var(--fg-faint); }
 
   /* Only the squares that resolve to someone are pointable, and only once they
      have been resolved. */
@@ -649,17 +624,13 @@ const DIVIDERS = Array.from({ length: BLOCKS }, (_, i) => (i + 1) * (BLOCK_W + B
      gone by the time you looked back at it. The field shows; this states. */
   .mp-note {
     margin: 20px 0 0;
-    max-width: 68ch;
-    font-size: 14px;
+    /* One short note carries the section's conclusion now, not a two-
+       paragraph essay: body size rather than footnote size, and a measure
+       that wraps it into two to three even lines. */
+    max-width: 58ch;
+    font-size: 16px;
     line-height: 1.55;
     color: var(--fg-muted);
-  }
-
-  .mock-disclaimer {
-    margin: 14px 0 0;
-    font-family: var(--font-mono);
-    font-size: 11px;
-    color: var(--fg-faint);
   }
 
   @media (max-width: 720px) {
@@ -692,7 +663,6 @@ const DIVIDERS = Array.from({ length: BLOCKS }, (_, i) => (i + 1) * (BLOCK_W + B
        four cell square cannot grow more than 14% before it touches a
        neighbour. */
     .mp-sq.is-mine { --pulse: 1.14; }
-    .mp-try { font-size: 13px; }
 
     .mp-tip-x { display: block; }
     /* One column: side by side does not fit, and the person still leads. */
@@ -702,7 +672,7 @@ const DIVIDERS = Array.from({ length: BLOCKS }, (_, i) => (i + 1) * (BLOCK_W + B
       border-top: 1px solid var(--k-border);
     }
     .mp-tip dt, .mp-tip dd { font-size: 12.5px; }
-    .mp-note { font-size: 13px; }
+    .mp-note { font-size: 14px; }
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -735,7 +705,9 @@ const DIVIDERS = Array.from({ length: BLOCKS }, (_, i) => (i + 1) * (BLOCK_W + B
     };
     const stopAll = () => { for (const id of timers) clearTimeout(id); timers.clear(); };
 
-    const run = () => later(() => { root.dataset.stage = "2"; }, HOLD);
+    // Assigned once the panel wiring below exists; fires when the scan does.
+    let onScan: (() => void) | null = null;
+    const run = () => later(() => { root.dataset.stage = "2"; onScan?.(); }, HOLD);
 
     // The end state, arrived at with no journey. Where reduced motion lives.
     const settle = () => {
@@ -789,7 +761,7 @@ const DIVIDERS = Array.from({ length: BLOCKS }, (_, i) => (i + 1) * (BLOCK_W + B
       const show = (sq: SVGRectElement) => {
         if (hot === sq) return;
         hot = sq;
-        root.classList.add("is-used");
+        used = true;
         for (const el of tip.querySelectorAll<HTMLElement>("[data-f]")) {
           const v = sq.dataset[el.dataset.f as string] ?? "";
           el.textContent = el.dataset.f === "amt" ? `\u20bf ${v}` : v;
@@ -842,12 +814,35 @@ const DIVIDERS = Array.from({ length: BLOCKS }, (_, i) => (i + 1) * (BLOCK_W + B
         return best;
       };
 
-      const hint = root.querySelector<HTMLElement>(".mp-try");
-      const label = hint?.querySelector("[data-hint]");
-      if (hint && label) {
-        label.textContent = touch ? "Tap any coloured square" : "Hover any coloured square";
-        hint.hidden = false;
+      /* The hint used to say it in words. The band demonstrates it once
+         instead: a moment after the scan resolves the squares, the panel
+         opens on one of them by itself, holds long enough to read, and
+         leaves. The squares' own pulse carries the affordance from there.
+         Pointer devices only, because a sheet that opens itself on a phone
+         is an ambush, not a demonstration. */
+      let used = false;
+      if (!touch) {
+        onScan = () => later(() => {
+          if (hot || used || calm.matches || !root.classList.contains("is-live")) return;
+          // The square nearest centre with room around it for the panel.
+          const mid = innerWidth / 2;
+          let best: SVGRectElement | null = null;
+          let bestD = Infinity;
+          for (const sq of root.querySelectorAll<SVGRectElement>(".mp-sq.is-mine")) {
+            const r = sq.getBoundingClientRect();
+            if (!r.width || r.left < 80 || r.right > innerWidth - 80) continue;
+            const d = Math.abs((r.left + r.right) / 2 - mid);
+            if (d < bestD) { bestD = d; best = sq; }
+          }
+          if (!best) return;
+          const sq = best;
+          show(sq);
+          // The demo is not the reader using it.
+          used = false;
+          later(() => { if (hot === sq) hide(); }, 3800);
+        }, 2400);
       }
+
       if (touch) {
         // Tap to open, and an explicit close, because nothing here is hoverable.
         band.addEventListener("click", (e) => {
