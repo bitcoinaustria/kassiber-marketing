@@ -23,8 +23,6 @@ Keep one book for on-chain, Lightning, and Liquid. Sync directly, match transfer
 - Download for macOS (changes to Windows or Linux when detected)
 - View source on GitHub
 
-Kassiber reads watch-only wallet data, never private keys. Local AI access through oMLX or Ollama stays read-only.
-
 **Assistant prompt:** Ask anything
 
 **Selected model:** omlx · Qwen3.6-35B-A3B-4bit
