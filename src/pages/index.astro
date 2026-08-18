@@ -110,8 +110,7 @@ const SLIDES = [
       </div>
 
       <p class="hero-boundary">
-        Kassiber reads watch-only wallet data, never private keys. The
-        built-in assistant can run entirely on local models.
+        Watch-only. Kassiber never sees your private keys.
       </p>
 
       <div class="hero-preview">
@@ -198,7 +197,7 @@ const SLIDES = [
       <div class="section-head">
         <h2>Reports you can verify.</h2>
         <p>
-          Kassiber uses <a href="https://github.com/eprbell/rp2" target="_blank" rel="noopener noreferrer">RP2</a> to compute FIFO, HIFO, or moving-average reports on your machine. The spreadsheet exports re-compute every gain with their own formulas and check the result against Kassiber's figures. Generic reports work anywhere; Kassiber includes an Austrian § 27b EStG preset. Kassiber is pre-alpha. The export exists so you and your advisor can check every number, not take ours.
+          Kassiber uses <a href="https://github.com/eprbell/rp2" target="_blank" rel="noopener noreferrer">RP2</a> to compute FIFO, HIFO, or moving-average reports on your machine. It's pre-alpha, so the export re-computes every gain with its own formulas and checks the result against Kassiber's figures: you and your advisor verify the numbers, not take ours. Generic reports work anywhere; an Austrian § 27b EStG preset is included.
         </p>
       </div>
 
@@ -214,9 +213,8 @@ const SLIDES = [
         <p>
           Bitcoin records every transaction without putting your name on the
           ledger. An exchange or another service can link your identity to an
-          address and expose the rest of your history. Kassiber builds the
-          complete picture on your machine only, and shows you what your
-          wallets already give away.
+          address and expose the rest of your history. Kassiber shows you
+          what your wallets already give away, before anyone else does.
         </p>
       </div>
     </div>
@@ -232,17 +230,15 @@ const SLIDES = [
           <h2>Ask your books anything. On a local model, the answer never leaves your machine.</h2>
           <p>
             Point your agent at Kassiber to inspect the book and explain what
-            your wallets reveal. It can prepare a document you choose to share.
-            Access is read-only: agents can inspect and prepare, never sign or
-            broadcast. Kassiber ships <a href={SKILL_REPOSITORY_URL} target="_blank" rel="noopener noreferrer">the skill</a> that
-            teaches it the data model. Run the agent through oMLX or Ollama to
-            keep your questions on your machine.
+            your wallets reveal. It can read and prepare, never sign or
+            broadcast. Run it through oMLX or Ollama and your questions stay
+            on your machine.
           </p>
         </div>
 
         <p class="section-note">
-          Works with OpenCode, Claude Code, and Codex CLI. Local models through
-          oMLX or Ollama.
+          Works with OpenCode, Claude Code, and Codex CLI via <a href={SKILL_REPOSITORY_URL} target="_blank" rel="noopener noreferrer">the Kassiber skill</a>.
+          Local models through oMLX or Ollama.
         </p>
       </div>
 

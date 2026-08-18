@@ -23,7 +23,7 @@ One book for on-chain, Lightning, and Liquid, built and kept on your own compute
 - Download for macOS (changes to Windows or Linux when detected)
 - View source on GitHub
 
-Kassiber reads watch-only wallet data, never private keys. The built-in assistant can run entirely on local models.
+Watch-only. Kassiber never sees your private keys.
 
 **Assistant prompt:** Ask anything
 
@@ -69,7 +69,7 @@ Kassiber pairs transfers, channel opens, and Liquid pegs across layers instead o
 
 ## Reports you can verify.
 
-Kassiber uses [RP2](https://github.com/eprbell/rp2) to compute FIFO, HIFO, or moving-average reports on your machine. The spreadsheet exports re-compute every gain with their own formulas and check the result against Kassiber's figures. Generic reports work anywhere; Kassiber includes an Austrian § 27b EStG preset. Kassiber is pre-alpha. The export exists so you and your advisor can check every number, not take ours.
+Kassiber uses [RP2](https://github.com/eprbell/rp2) to compute FIFO, HIFO, or moving-average reports on your machine. It's pre-alpha, so the export re-computes every gain with its own formulas and checks the result against Kassiber's figures: you and your advisor verify the numbers, not take ours. Generic reports work anywhere; an Austrian § 27b EStG preset is included.
 
 **Report example**
 
@@ -86,13 +86,13 @@ Kassiber uses [RP2](https://github.com/eprbell/rp2) to compute FIFO, HIFO, or mo
 - Tax due · 27.5% § 27b EStG
 - Workbook tabs: Overview, Portfolio, Capital Summary, Disposals, Verify, Control
 
-**Demo label:** Illustrative demo data for auditable verification.
+**Demo label:** Illustrative demo data.
 
 <!-- Section: Privacy scoring. Anchor: privacy -->
 
 ## Your payments were always public. Your name was not.
 
-Bitcoin records every transaction without putting your name on the ledger. An exchange or another service can link your identity to an address and expose the rest of your history. Kassiber builds the complete picture on your machine only, and shows you what your wallets already give away.
+Bitcoin records every transaction without putting your name on the ledger. An exchange or another service can link your identity to an address and expose the rest of your history. Kassiber shows you what your wallets already give away, before anyone else does.
 
 **Demo label:** Synthetic demonstration of on-chain identity clustering.
 
@@ -100,9 +100,9 @@ Bitcoin records every transaction without putting your name on the ledger. An ex
 
 ## Ask your books anything. On a local model, the answer never leaves your machine.
 
-Point your agent at Kassiber to inspect the book and explain what your wallets reveal. It can prepare a document you choose to share. Access is read-only: agents can inspect and prepare, never sign or broadcast. Kassiber ships [the skill](https://github.com/bitcoinaustria/kassiber-skill) that teaches it the data model. Run the agent through oMLX or Ollama to keep your questions on your machine.
+Point your agent at Kassiber to inspect the book and explain what your wallets reveal. It can read and prepare, never sign or broadcast. Run it through oMLX or Ollama and your questions stay on your machine.
 
-Works with OpenCode, Claude Code, and Codex CLI. Local models through oMLX or Ollama.
+Works with OpenCode, Claude Code, and Codex CLI via [the Kassiber skill](https://github.com/bitcoinaustria/kassiber-skill). Local models through oMLX or Ollama.
 
 **Agent examples**
 
@@ -231,4 +231,4 @@ A Kassiber is a secret note passed under the guards' noses. Your books, kept the
 - Security
 - Imprint
 
-AGPL-3.0 open source · Built and maintained by Bitcoin Austria
+AGPL-3.0 open source · Built and maintained by Bitcoin Austria · llms.txt

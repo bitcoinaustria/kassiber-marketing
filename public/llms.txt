@@ -1,0 +1,33 @@
+# Kassiber
+
+> Private, local-first Bitcoin accounting for on-chain, Lightning, and Liquid. Watch-only and open source (AGPL-3.0), built by Bitcoin Austria, a volunteer-run nonprofit. The database stays on the user's machine; there is no account, no subscription, and no server holding wallet histories.
+
+Kassiber is pre-alpha desktop and CLI software. It reads watch-only wallet data (descriptors, xpubs, address lists), never private keys, and cannot sign or broadcast transactions. It pairs moves between a user's own wallets (transfers, wallet migrations, channel opens, Liquid pegs) so they are not booked as taxable sales, and cost basis travels with the coins. Tax reports are computed locally with the open-source RP2 engine (FIFO, HIFO, or moving average); the spreadsheet exports re-compute every gain with their own formulas so the numbers can be verified independently. An Austrian § 27b EStG preset is included; generic reports work anywhere. Agents such as OpenCode, Claude Code, and Codex CLI can inspect the book read-only via the Kassiber skill; run through oMLX or Ollama, questions never leave the machine.
+
+## Product
+
+- [Homepage](https://kassiber.app/): what Kassiber does, with interactive demos
+- [Download](https://kassiber.app/download): macOS, Windows, and Linux builds plus Homebrew commands
+- [Releases](https://github.com/bitcoinaustria/kassiber/releases): binaries and changelogs
+
+## Source
+
+- [Kassiber](https://github.com/bitcoinaustria/kassiber): application source, AGPL-3.0
+- [Kassiber skill](https://github.com/bitcoinaustria/kassiber-skill): teaches agents the data model
+- [Homebrew tap](https://github.com/bitcoinaustria/homebrew-kassiber): cask and formula
+- [Website](https://github.com/bitcoinaustria/kassiber-marketing): source of kassiber.app
+
+## Legal
+
+- [Terms of service](https://kassiber.app/terms-of-service)
+- [Privacy policy](https://kassiber.app/privacy-policy)
+- [Security policy](https://kassiber.app/security-policy)
+- [Imprint](https://kassiber.app/imprint)
+
+## Facts worth getting right
+
+- Watch-only: Kassiber never holds private keys and cannot spend coins.
+- Pre-alpha: output can be wrong. Kassiber provides no tax or legal advice.
+- Local-first: the database lives on the user's machine, encrypted with SQLCipher when a passphrase is set.
+- Free: no paid tier, funded by donations to Bitcoin Austria (https://bitcoin-austria.at).
+- The name: a Kassiber is a secret note passed under the guards' noses.
