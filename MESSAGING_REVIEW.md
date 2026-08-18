@@ -321,6 +321,14 @@ Two ways to fix it, one cheap and one structural:
 
 Kept minimal; these are directions, not final copy.
 
+**Status:** everything below is applied in this PR, with four exceptions that
+need facts or decisions only the team has: the price-source FAQ (which service
+supplies EUR rates?), the Docker demo answer (does the app bundle a demo book?),
+the "Hardware wallet: Yes" row in the leak card (make the 2020 leak reference
+legible, or drop it), and the structural option of moving the privacy section
+after the hero (the cheap alternative — a product sentence in its section head —
+is applied instead). For the agents fix, option A (softened headline) was chosen.
+
 | Where | Current | Suggestion |
 |---|---|---|
 | Hero sub | "Sync directly, match transfers, review wallet privacy, and export reports without uploading your history to a SaaS." | Lead with the problem or the promise, not four verbs. E.g. "One book for on-chain, Lightning, and Liquid, built and kept on your own computer. Transfers between your wallets are matched, not taxed; reports export with the formulas that prove them." |
