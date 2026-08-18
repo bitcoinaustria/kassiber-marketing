@@ -1,6 +1,6 @@
 # Kassiber
 
-> Private, local-first Bitcoin accounting for on-chain, Lightning, and Liquid. Watch-only and open source (AGPL-3.0), built by Bitcoin Austria, a volunteer-run nonprofit. The database stays on the user's machine; there is no account, no subscription, and no server holding wallet histories.
+> Private, local-first Bitcoin accounting for on-chain, Lightning, and Liquid: an alternative to hosted accounting services for people and organisations that want their books in order without handing them to anyone. Watch-only and open source (AGPL-3.0), built by Bitcoin Austria, a volunteer-run nonprofit. The database stays on the user's machine; there is no account, no subscription, and no server holding wallet histories.
 
 Kassiber is pre-alpha desktop and CLI software. It reads watch-only wallet data (descriptors, xpubs, address lists), never private keys, and cannot sign or broadcast transactions. It pairs moves between a user's own wallets (transfers, wallet migrations, channel opens, Liquid pegs) so they are not booked as taxable sales, and cost basis travels with the coins. Tax reports are computed locally with the open-source RP2 engine (FIFO, HIFO, or moving average); the spreadsheet exports re-compute every gain with their own formulas so the numbers can be verified independently. An Austrian § 27b EStG preset is included; generic reports work anywhere. Agents such as OpenCode, Claude Code, and Codex CLI can inspect the book read-only via the Kassiber skill; run through oMLX or Ollama, questions never leave the machine.
 
