@@ -161,6 +161,20 @@ stops making the careful reader reconcile it.
 Bitcoin." over a finite roster. The "Missing yours? Open an issue" line already
 absorbs most of this; smallest gap on the page.
 
+**Connections and pairing — the visuals claim a use case the text never names:
+wallet migrations.** The Add-connection dialog lists migration artifacts ("Address
+list — a flat list of addresses, e.g. a pre-HD Core keypool", old Samourai /
+Specter / Sparrow exports) — things you import because you *used* to run them. And
+the pairing section's headline is the migration story in miniature: sweeping an
+old wallet into its successor is the most relatable "move between your own wallets"
+a bitcoiner ever makes, and the one where carried-over cost basis matters most.
+Neither section says it. Say it in both halves, where each is already shown:
+connections gets "retired wallets count too — import the export of a wallet you
+left years ago and its history lands in the same book"; pairing gets "that
+includes the big one: sweeping an old wallet into its successor — the move pairs
+up, and your cost basis travels with the coins." No new section needed; it's the
+same engine applied to the most familiar event.
+
 ---
 
 ## 4. Trust: what builds it, what leaks it
@@ -215,6 +229,13 @@ absorbs most of this; smallest gap on the page.
    will throw a scary warning the page never prepared the visitor for. A one-line
    FAQ ("Why does macOS warn me about the download?") converts a trust-destroying
    surprise into more of the "we'd rather tell you" posture.
+
+6. **"…it is also the only thing worth stealing."** (privacy note) The skeptical
+   reader immediately thinks: keys. The honest, stronger claim is that the picture
+   is the *most damaging* theft, not the most tempting one — a stolen key costs
+   one wallet, a stolen picture gives away every wallet, amount, and counterparty
+   at once, and unlike keys it can't be rotated. Coins move to new addresses; a
+   leaked history never stops being true.
 
 ---
 
@@ -306,14 +327,17 @@ Kept minimal; these are directions, not final copy.
 | Hero boundary | "Kassiber reads watch-only wallet data, never private keys. Local AI access through oMLX or Ollama stays read-only." | Drop sentence two here; move it to the agents section. |
 | Meta description | "Keep on-chain, Lightning, and Liquid **books**…" | Align with the hero's "one book". |
 | Connections H2 | "Connect anything Bitcoin." | "Connect what you already run." (keeps the hedge line honest) — or keep, accepting the wink. |
+| Connections body | (ends with the Tor sentence) | Add: "Retired wallets count too — import the export of a wallet you left years ago and its history lands in the same book." (the dialog mock already shows the artifacts) |
 | History H2 | "One timeline for your whole Bitcoin stack." | The mock demonstrates classification, not just aggregation — claim it: "Raw transactions in. A classified book out." (also resolves the stack/sats ambiguity). |
 | Tax prose | "The spreadsheet exports include live formulas you can inspect." | Claim what the mock shows: "The workbook re-computes every gain with its own formulas and checks it against Kassiber's figures." |
 | Tax section | (no caveat) | Add: "Kassiber is pre-alpha — the export exists so you and your advisor can check every number, not take ours." |
+| Pairing body | "Kassiber pairs transfers, channel opens, and Liquid pegs across layers instead of booking them as taxable sales." | Add: "That includes the big one: sweeping an old wallet into its successor. The move pairs up, and your cost basis travels with the coins." |
 | Privacy head | (no product tie-in) | Add one sentence: "Kassiber builds that picture on your machine only — and shows you what your wallets already give away." |
+| Privacy note | "…that complete picture is what makes the numbers useful, and it is also the only thing worth stealing." | "…that complete picture is what makes the numbers useful. It is also the theft that does the most damage: a stolen key costs you one wallet, a stolen picture gives away all of them at once — every address, every amount, every counterparty. And unlike keys it can't be rotated: coins move to new addresses, a leaked history never stops being true." |
 | Agents H2 or caption | "Ask your books anything. The answer never leaves your machine." | Either soften the headline ("On a local model, the answer never leaves your machine") or keep it and scope the caption: "Shown on a local model via oMLX. Remote harnesses (Claude Code, Codex CLI) work too — then your questions travel." |
 | Final CTA | "…works without an account or subscription." | Add the who/why: "Free and AGPL, built by Bitcoin Austria — a volunteer-run nonprofit with nothing to sell you." Link the name. |
 | Footer or About | — | "A Kassiber is a secret note passed under the guards' noses. Your books, kept the same way." |
-| FAQ | — | Add: "What does it cost?" / "Are my books encrypted?" / "Why does my OS warn me about the download?" / "Where do the EUR prices come from?" |
+| FAQ | — | Add: "What does it cost?" / "Are my books encrypted?" / "Why does my OS warn me about the download?" / "Where do the EUR prices come from?" / "I've switched wallets over the years. Can Kassiber reconstruct that?" → "Yes. Import each wallet's export, even retired ones. Migrations pair as transfers, so history and cost basis stay continuous." |
 | FAQ demo | "Yes, if you have Docker." | If a bundled demo book exists, lead with it; if not, consider building one — this answer is the onboarding gap talking. |
 
 ---
