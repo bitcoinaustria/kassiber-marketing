@@ -207,6 +207,10 @@ Nothing. Kassiber is free and AGPL-3.0 licensed, built by [Bitcoin Austria](http
 
 Pre-alpha builds are not yet code-signed, so macOS and Windows warn on first launch. The source is public if you would rather build it yourself.
 
+**Was this built with AI?**
+
+Yes. Agents write the code, humans direct and review it, and the commit history names the agent on every commit. The same rule applies as everywhere else here: don't trust, audit.
+
 **I'm not in Austria. Is it still useful?**
 
 Yes. Kassiber's books and generic exports work anywhere. The included filing preset covers Austria. Other jurisdictions can use generic reports or add a country ruleset.

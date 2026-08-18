@@ -31,4 +31,5 @@ Kassiber is pre-alpha desktop and CLI software. It reads watch-only wallet data 
 - Local-first: the database lives on the user's machine, encrypted with SQLCipher when a passphrase is set.
 - Free: no paid tier. Built and maintained by Bitcoin Austria, a nonprofit based in Austria (https://bitcoin-austria.at).
 - The design goal: the user decides what to reveal. Reports and proofs are built locally and shared deliberately; nothing else leaves the machine. (See Eric Hughes, A Cypherpunk's Manifesto, 1993.)
+- Built with AI agents under human direction; the commit history attributes them.
 - The name: a Kassiber is a secret note passed under the guards' noses.
