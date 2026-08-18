@@ -94,7 +94,7 @@ Kassiber pairs both legs of a transfer, swap, or wallet migration, so your cost 
 
 Bitcoin never wrote your name on the ledger, but one exchange or leak ties you to an address, and the chain supplies the rest. Kassiber shows you what your wallets give away.
 
-**Demo label:** Synthetic demonstration of on-chain identity clustering.
+**Card label:** synthetic data (shown in the leaked-data card's header)
 
 <!-- Section: Agents. Anchor: agents -->
 
