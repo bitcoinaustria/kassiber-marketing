@@ -94,7 +94,7 @@ Kassiber pairs both legs of a transfer, swap, or wallet migration, so your cost 
 
 Bitcoin never wrote your name on the ledger, but one exchange or leak ties you to an address, and the chain supplies the rest. Kassiber shows you what your wallets give away.
 
-**Demo label:** Synthetic demonstration of on-chain identity clustering.
+**Card label:** synthetic data (shown in the leaked-data card's header)
 
 <!-- Section: Agents. Anchor: agents -->
 
@@ -127,7 +127,7 @@ $ ./scripts/integration-harness.sh demo-up
 
 - **Inspect it.** The code is on GitHub.
 - **Run it.** One script starts a throwaway regtest with demo books.
-- **Keep your exit.** Your ledger and database export whole.
+- **Keep your exit.** Export your ledger or the full database at any time.
 
 **License:** AGPL-3.0 licensed
 
@@ -207,6 +207,10 @@ Nothing. Kassiber is free and AGPL-3.0 licensed, built by [Bitcoin Austria](http
 
 Pre-alpha builds are not yet code-signed, so macOS and Windows warn on first launch. The source is public if you would rather build it yourself.
 
+**Was this built with AI?**
+
+Yes. Agents write the code, humans direct and review it, and the commit history names the agent on every commit. The same rule applies as everywhere else here: don't trust, audit.
+
 **I'm not in Austria. Is it still useful?**
 
 Yes. Kassiber's books and generic exports work anywhere. The included filing preset covers Austria. Other jurisdictions can use generic reports or add a country ruleset.
@@ -216,8 +220,6 @@ Yes. Kassiber's books and generic exports work anywhere. The included filing pre
 **Kassiber**
 
 Watch-only Bitcoin accounting across on-chain, Lightning, and Liquid. Your books stay on your machine.
-
-A Kassiber is a secret note passed under the guards' noses. Your books, kept the same way.
 
 ## Product
 
