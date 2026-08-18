@@ -221,8 +221,6 @@ Yes. Kassiber's books and generic exports work anywhere. The included filing pre
 
 Watch-only Bitcoin accounting across on-chain, Lightning, and Liquid. Your books stay on your machine.
 
-A Kassiber is a secret note passed under the guards' noses.
-
 ## Product
 
 - Download
