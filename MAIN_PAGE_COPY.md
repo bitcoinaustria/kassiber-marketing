@@ -114,6 +114,8 @@ Works with OpenCode, Claude Code, and Codex CLI via [the Kassiber skill](https:/
 
 ## Don't trust. Audit.
 
+Cypherpunks write code.
+
 ```console
 $ gh repo fork bitcoinaustria/kassiber --clone
 ✓ Cloned kassiber into ./kassiber

@@ -245,6 +245,7 @@ const SLIDES = [
     <div class="container">
       <div class="section-head open-head">
         <h2>Don't trust. Audit.</h2>
+        <p>Cypherpunks write code.</p>
       </div>
 
       <div class="open-grid">
@@ -1456,6 +1457,12 @@ const SLIDES = [
   .open-head {
     text-align: center;
     margin: 0 auto 56px;
+  }
+
+  /* The head is centered; the body copy's 560px box has to center with it. */
+  .open-head p {
+    margin-left: auto;
+    margin-right: auto;
   }
 
   .open-grid {
