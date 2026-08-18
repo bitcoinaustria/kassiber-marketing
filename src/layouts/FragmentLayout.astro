@@ -1,0 +1,103 @@
+---
+import "@fontsource/dm-sans/latin-400.css";
+import "@fontsource/dm-sans/latin-500.css";
+import "@fontsource/dm-sans/latin-600.css";
+import "@fontsource/jetbrains-mono/latin-400.css";
+import "@fontsource/jetbrains-mono/latin-500.css";
+
+interface Props {
+  title: string;
+  transparent?: boolean;
+}
+
+const { title, transparent = false } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en" class:list={{ transparent }}>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex" />
+    <title>{title}</title>
+  </head>
+  <body>
+    <slot />
+    <script>
+      const reportHeight = () => {
+        window.parent.postMessage(
+          {
+            type: "kassiber-fragment-height",
+            height: document.documentElement.scrollHeight,
+          },
+          window.location.origin,
+        );
+      };
+
+      new ResizeObserver(reportHeight).observe(document.body);
+      addEventListener("load", reportHeight, { once: true });
+      reportHeight();
+    </script>
+  </body>
+</html>
+
+<style is:global>
+  :root {
+    color-scheme: dark;
+    --bg: #09090b;
+    --bg-elev: #0c0c0e;
+    --bg-band: #0c0c10;
+    --bg-card: #111113;
+    --fg: #fafafa;
+    --fg-muted: #c4c4cc;
+    --fg-dim: #898993;
+    --fg-faint: #7f7f89;
+    --border: rgba(255, 255, 255, 0.08);
+    --border-strong: rgba(255, 255, 255, 0.14);
+    --accent: #ff3341;
+    --accent-dim: rgb(255 51 65 / 0.15);
+    --ok: oklch(0.72 0.16 150);
+    --warn: oklch(0.76 0.15 75);
+    --font-sans: "DM Sans", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+    --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, monospace;
+    --radius: 12px;
+    --radius-sm: 8px;
+    --radius-lg: 16px;
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  html,
+  body {
+    min-height: 100%;
+    overflow: hidden;
+    background: var(--bg);
+    color: var(--fg);
+    font-family: var(--font-sans);
+    font-feature-settings: "ss01", "ss02";
+    -webkit-font-smoothing: antialiased;
+    line-height: 1.5;
+  }
+
+  html.transparent,
+  html.transparent body {
+    background: transparent;
+  }
+
+  button {
+    border: 0;
+    background: none;
+    color: inherit;
+    font: inherit;
+  }
+
+  img,
+  svg {
+    display: block;
+    max-width: 100%;
+  }
+</style>

@@ -1,0 +1,14 @@
+---
+interface Props {
+  className: string;
+  src: string;
+  title: string;
+}
+
+const { className, src, title } = Astro.props;
+---
+
+<iframe class={className} data-fragment-src={src} {title} loading="lazy" hidden></iframe>
+<noscript>
+  <iframe class={className} src={src} {title} loading="lazy"></iframe>
+</noscript>
