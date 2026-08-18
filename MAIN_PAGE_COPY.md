@@ -33,7 +33,7 @@ Kassiber reads watch-only wallet data, never private keys. Local AI access throu
 
 ## Connect anything Bitcoin.
 
-Sync watch-only wallets, nodes, BTCPay, and exchange exports. Use your own Bitcoin Core, Electrum, Esplora, or Tor route so third parties do not learn which addresses you query.
+Sync watch-only wallets, nodes, BTCPay, and exchange exports. Use your own Bitcoin Core, Electrum, Esplora, or Tor route so third parties do not learn which addresses you query. Retired wallets count too: import the export of a wallet you left years ago and its history lands in the same book.
 
 Missing yours? [Open an issue](https://github.com/bitcoinaustria/kassiber/issues) or [send a PR](https://github.com/bitcoinaustria/kassiber/pulls).
 
@@ -55,7 +55,7 @@ On-chain, Lightning, Liquid, BTCPay, and exchange activity appear in one searcha
 
 ## A move between your own wallets isn't a sale.
 
-Kassiber pairs transfers, channel opens, and Liquid pegs across layers instead of booking them as taxable sales.
+Kassiber pairs transfers, channel opens, and Liquid pegs across layers instead of booking them as taxable sales. That includes wallet migrations: the sweep into a new wallet pairs up like any other move, and your cost basis travels with the coins.
 
 **Swap example**
 
@@ -176,6 +176,10 @@ Yes, if you have Docker. The regtest script starts a disposable network with thi
 **Do I need to run my own node?**
 
 No. Kassiber syncs through default backends after installation. Those services can see the addresses you query, so use your own Bitcoin Core, Electrum, or Esplora when that matters. You can route each backend through your Tor proxy.
+
+**I've switched wallets over the years. Can Kassiber follow?**
+
+Yes. Import each wallet's export, even ones you retired long ago. Kassiber pairs the migrations as transfers, so history and cost basis stay continuous across every wallet you have used.
 
 **Does Kassiber replace my tax advisor?**
 
