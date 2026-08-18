@@ -16,7 +16,7 @@
 
 # Private Bitcoin accounting on your machine.
 
-One book for on-chain, Lightning, and Liquid, built and kept on your own computer. Moves between your wallets are matched, not taxed as sales, and reports export with the formulas that prove them.
+One book for on-chain, Lightning, and Liquid. Transfers between your own wallets are matched, not taxed, and reports carry the formulas that prove them.
 
 **Actions**
 
@@ -33,7 +33,7 @@ Watch-only. Kassiber never sees your private keys.
 
 ## Connect what you already run.
 
-Sync watch-only wallets, nodes, BTCPay, and exchange exports. Use your own Bitcoin Core, Electrum, Esplora, or Tor route so third parties do not learn which addresses you query. Retired wallets count too: import the export of a wallet you left years ago and its history lands in the same book.
+Sync wallets, nodes, BTCPay, and exchange exports through your own node or Tor, so nobody learns which addresses you query. Wallets you retired years ago count too.
 
 Missing yours? [Open an issue](https://github.com/bitcoinaustria/kassiber/issues) or [send a PR](https://github.com/bitcoinaustria/kassiber/pulls).
 
@@ -49,13 +49,13 @@ Missing yours? [Open an issue](https://github.com/bitcoinaustria/kassiber/issues
 
 ## Raw transactions in. A classified book out.
 
-On-chain, Lightning, Liquid, BTCPay, and exchange activity appear in one searchable history. Each row keeps its source, status, and accounting treatment.
+Everything lands in one searchable history, each row with its source and its accounting treatment.
 
 <!-- Section: Pairing. Anchor: pairing -->
 
 ## A move between your own wallets isn't a sale.
 
-Kassiber pairs transfers, channel opens, and Liquid pegs across layers instead of booking them as taxable sales. That includes wallet migrations: the sweep into a new wallet pairs up like any other move, and your cost basis travels with the coins.
+Kassiber pairs both legs of a transfer, swap, or wallet migration, so your cost basis travels with the coins.
 
 **Swap example**
 
@@ -69,7 +69,7 @@ Kassiber pairs transfers, channel opens, and Liquid pegs across layers instead o
 
 ## Reports you can verify.
 
-Kassiber uses [RP2](https://github.com/eprbell/rp2) to compute FIFO, HIFO, or moving-average reports on your machine. It's pre-alpha, so the export re-computes every gain with its own formulas and checks the result against Kassiber's figures: you and your advisor verify the numbers, not take ours. Generic reports work anywhere; an Austrian § 27b EStG preset is included.
+[RP2](https://github.com/eprbell/rp2) computes FIFO, HIFO, or moving-average reports locally. The export re-derives every gain and checks it against Kassiber, for you and your advisor to verify. An Austrian § 27b EStG preset is included.
 
 **Report example**
 
@@ -92,7 +92,7 @@ Kassiber uses [RP2](https://github.com/eprbell/rp2) to compute FIFO, HIFO, or mo
 
 ## Your payments were always public. Your name was not.
 
-Bitcoin records every transaction without putting your name on the ledger. An exchange or another service can link your identity to an address and expose the rest of your history. Kassiber shows you what your wallets already give away, before anyone else does.
+Bitcoin never wrote your name on the ledger, but one exchange or leak ties you to an address, and the chain supplies the rest. Kassiber shows you what your wallets give away.
 
 **Demo label:** Synthetic demonstration of on-chain identity clustering.
 
@@ -100,9 +100,9 @@ Bitcoin records every transaction without putting your name on the ledger. An ex
 
 ## Ask your books anything. On a local model, the answer never leaves your machine.
 
-Point your agent at Kassiber to inspect the book and explain what your wallets reveal. It can read and prepare, never sign or broadcast. Run it through oMLX or Ollama and your questions stay on your machine.
+Point your agent at the book. It reads and prepares, never signs or broadcasts.
 
-Works with OpenCode, Claude Code, and Codex CLI via [the Kassiber skill](https://github.com/bitcoinaustria/kassiber-skill). Local models through oMLX or Ollama.
+Works with OpenCode, Claude Code, and Codex CLI via [the Kassiber skill](https://github.com/bitcoinaustria/kassiber-skill); local models through oMLX or Ollama.
 
 **Agent examples**
 
@@ -123,9 +123,9 @@ $ ./scripts/integration-harness.sh demo-up
 ✓ regtest up · 13 wallets · demo books seeded
 ```
 
-- **Inspect it.** Read the code on GitHub or point your agent at it.
-- **Run it.** One script spins up a throwaway regtest with demo books.
-- **Keep your exit.** Export your raw ledger or database without vendor lock-in.
+- **Inspect it.** The code is on GitHub.
+- **Run it.** One script starts a throwaway regtest with demo books.
+- **Keep your exit.** Your ledger and database export whole.
 
 **License:** AGPL-3.0 licensed
 
@@ -151,7 +151,7 @@ $ ./scripts/integration-harness.sh demo-up
 
 ## Keep your books to yourself.
 
-Kassiber stores the database locally and works without an account or subscription. Free and AGPL, built by Bitcoin Austria, a volunteer-run nonprofit with nothing to sell you.
+No account, no subscription, no company. Free and AGPL, built by the nonprofit Bitcoin Austria.
 
 **Actions**
 
