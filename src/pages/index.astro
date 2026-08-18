@@ -84,9 +84,9 @@ const SLIDES = [
       </h1>
 
       <p class="hero-sub">
-        One book for on-chain, Lightning, and Liquid, built and kept on your
-        own computer. Moves between your wallets are matched, not taxed as
-        sales, and reports export with the formulas that prove them.
+        One book for on-chain, Lightning, and Liquid. Transfers between your
+        own wallets are matched, not taxed, and reports carry the formulas
+        that prove them.
       </p>
 
       <div class="hero-actions">
@@ -110,8 +110,7 @@ const SLIDES = [
       </div>
 
       <p class="hero-boundary">
-        Kassiber reads watch-only wallet data, never private keys. The
-        built-in assistant can run entirely on local models.
+        Watch-only. Kassiber never sees your private keys.
       </p>
 
       <div class="hero-preview">
@@ -137,11 +136,9 @@ const SLIDES = [
         <div class="section-head" style="margin-bottom:0">
           <h2>Connect what you already run.</h2>
           <p>
-            Sync watch-only wallets, nodes, BTCPay, and exchange exports.
-            Use your own Bitcoin Core, Electrum, Esplora, or Tor route so
-            third parties do not learn which addresses you query. Retired
-            wallets count too: import the export of a wallet you left years
-            ago and its history lands in the same book.
+            Sync wallets, nodes, BTCPay, and exchange exports through your
+            own node or Tor, so nobody learns which addresses you query.
+            Wallets you retired years ago count too.
           </p>
         </div>
 
@@ -162,9 +159,8 @@ const SLIDES = [
       <div class="section-head">
         <h2>Raw transactions in. A classified book out.</h2>
         <p>
-          On-chain, Lightning, Liquid, BTCPay, and exchange activity appear
-          in one searchable history. Each row keeps its source, status, and
-          accounting treatment.
+          Everything lands in one searchable history, each row with its
+          source and its accounting treatment.
         </p>
       </div>
       <TxStreamMock />
@@ -182,10 +178,8 @@ const SLIDES = [
         <div class="section-head" style="margin-bottom:0">
           <h2>A move between your own wallets isn't a sale.</h2>
           <p>
-            Kassiber pairs transfers, channel opens, and Liquid pegs across
-            layers instead of booking them as taxable sales. That includes
-            wallet migrations: the sweep into a new wallet pairs up like any
-            other move, and your cost basis travels with the coins.
+            Kassiber pairs both legs of a transfer, swap, or wallet
+            migration, so your cost basis travels with the coins.
           </p>
         </div>
       </div>
@@ -198,7 +192,7 @@ const SLIDES = [
       <div class="section-head">
         <h2>Reports you can verify.</h2>
         <p>
-          Kassiber uses <a href="https://github.com/eprbell/rp2" target="_blank" rel="noopener noreferrer">RP2</a> to compute FIFO, HIFO, or moving-average reports on your machine. The spreadsheet exports re-compute every gain with their own formulas and check the result against Kassiber's figures. Generic reports work anywhere; Kassiber includes an Austrian § 27b EStG preset. Kassiber is pre-alpha. The export exists so you and your advisor can check every number, not take ours.
+          <a href="https://github.com/eprbell/rp2" target="_blank" rel="noopener noreferrer">RP2</a> computes FIFO, HIFO, or moving-average reports locally. The export re-derives every gain and checks it against Kassiber, for you and your advisor to verify. An Austrian § 27b EStG preset is included.
         </p>
       </div>
 
@@ -212,11 +206,9 @@ const SLIDES = [
       <div class="section-head">
         <h2>Your payments were always public. Your name was not.</h2>
         <p>
-          Bitcoin records every transaction without putting your name on the
-          ledger. An exchange or another service can link your identity to an
-          address and expose the rest of your history. Kassiber builds the
-          complete picture on your machine only, and shows you what your
-          wallets already give away.
+          Bitcoin never wrote your name on the ledger, but one exchange or
+          leak ties you to an address, and the chain supplies the rest.
+          Kassiber shows you what your wallets give away.
         </p>
       </div>
     </div>
@@ -231,18 +223,14 @@ const SLIDES = [
         <div class="section-head" style="margin-bottom:0">
           <h2>Ask your books anything. On a local model, the answer never leaves your machine.</h2>
           <p>
-            Point your agent at Kassiber to inspect the book and explain what
-            your wallets reveal. It can prepare a document you choose to share.
-            Access is read-only: agents can inspect and prepare, never sign or
-            broadcast. Kassiber ships <a href={SKILL_REPOSITORY_URL} target="_blank" rel="noopener noreferrer">the skill</a> that
-            teaches it the data model. Run the agent through oMLX or Ollama to
-            keep your questions on your machine.
+            Point your agent at the book. It reads and prepares, never signs
+            or broadcasts.
           </p>
         </div>
 
         <p class="section-note">
-          Works with OpenCode, Claude Code, and Codex CLI. Local models through
-          oMLX or Ollama.
+          Works with OpenCode, Claude Code, and Codex CLI via <a href={SKILL_REPOSITORY_URL} target="_blank" rel="noopener noreferrer">the Kassiber skill</a>;
+          local models through oMLX or Ollama.
         </p>
       </div>
 
@@ -257,6 +245,7 @@ const SLIDES = [
     <div class="container">
       <div class="section-head open-head">
         <h2>Don't trust. Audit.</h2>
+        <p>Cypherpunks write code.</p>
       </div>
 
       <div class="open-grid">
@@ -281,15 +270,15 @@ const SLIDES = [
             <ul class="open-pitch-list">
               <li>
                 <span class="open-pitch-mark" aria-hidden="true"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>
-                <span><strong>Inspect it.</strong> Read the code on GitHub or point your agent at it.</span>
+                <span><strong>Inspect it.</strong> The code is on GitHub.</span>
               </li>
               <li>
                 <span class="open-pitch-mark" aria-hidden="true"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>
-                <span><strong>Run it.</strong> One script spins up a throwaway regtest with demo books.</span>
+                <span><strong>Run it.</strong> One script starts a throwaway regtest with demo books.</span>
               </li>
               <li>
                 <span class="open-pitch-mark" aria-hidden="true"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>
-                <span><strong>Keep your exit.</strong> Export your raw ledger or database without vendor lock-in.</span>
+                <span><strong>Keep your exit.</strong> Your ledger and database export whole.</span>
               </li>
             </ul>
           </div>
@@ -369,9 +358,8 @@ const SLIDES = [
         Keep your books to yourself.
       </h2>
       <p class="cta-sub">
-        Kassiber stores the database locally and works without an account or
-        subscription. Free and AGPL, built by Bitcoin Austria, a volunteer-run
-        nonprofit with nothing to sell you.
+        No account, no subscription, no company. Free and AGPL, built by the
+        nonprofit Bitcoin Austria.
       </p>
       <div class="cta-actions">
         <a id="cta-download-btn" class="btn btn-primary btn-lg" href={RELEASES_URL}>
@@ -474,9 +462,10 @@ const SLIDES = [
         <details class="faq-item" name="faq">
           <summary>What does it cost?</summary>
           <p>
-            Nothing. Kassiber is free and AGPL-3.0 licensed, built by Bitcoin
-            Austria, a volunteer-run nonprofit funded by donations. There is
-            no paid tier and nothing to upsell.
+            Nothing. Kassiber is free and AGPL-3.0 licensed, built by
+            <a href="https://bitcoin-austria.at" target="_blank" rel="noopener noreferrer">Bitcoin Austria</a>,
+            a nonprofit based in Austria. There is no paid tier and nothing
+            to upsell.
           </p>
         </details>
 
@@ -922,10 +911,14 @@ const SLIDES = [
 
   .section-head p {
     color: var(--fg-muted);
-    font-size: 20px;
+    /* Bodies are one to two sentences since the copy halving: a step up in
+       size and a narrower measure wrap them into two even lines instead of
+       one long line with an orphan tail. */
+    font-size: 21px;
     line-height: 1.55;
-    max-width: 620px;
+    max-width: 560px;
     letter-spacing: -0.005em;
+    text-wrap: balance;
   }
 
   /* ── Hero ─────────────────────────────────────────────────── */
@@ -988,6 +981,8 @@ const SLIDES = [
     margin: 0 auto 36px;
     letter-spacing: -0.005em;
     line-height: 1.55;
+    /* Centered and short: even lines, no orphan word. */
+    text-wrap: balance;
   }
 
   .hero-actions {
@@ -1446,6 +1441,7 @@ const SLIDES = [
 
   /* ── Tax & reports ────────────────────────────────────── */
   .sec-tax .section-head p a,
+  .faq-item p a,
   .section-note a {
     color: var(--fg);
     text-decoration: underline;
@@ -1455,6 +1451,7 @@ const SLIDES = [
   }
 
   .sec-tax .section-head p a:hover,
+  .faq-item p a:hover,
   .section-note a:hover {
     text-decoration-color: var(--fg);
   }
@@ -1463,6 +1460,12 @@ const SLIDES = [
   .open-head {
     text-align: center;
     margin: 0 auto 56px;
+  }
+
+  /* The head is centered; the body copy's 560px box has to center with it. */
+  .open-head p {
+    margin-left: auto;
+    margin-right: auto;
   }
 
   .open-grid {
@@ -1628,6 +1631,7 @@ const SLIDES = [
     margin: 20px auto 36px;
     line-height: 1.55;
     letter-spacing: -0.005em;
+    text-wrap: balance;
   }
   .cta-actions {
     display: flex; gap: 10px;
