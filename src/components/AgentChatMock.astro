@@ -59,6 +59,9 @@ const SAY = {
 };
 const words = (s: string) => s.split(" ");
 
+// Full month names for the chart's native hover tooltips.
+const NAMES = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
 // Chart geometry mirrors the app's grouped transaction-overview bars.
 const W = 320;
 const H = 94;
@@ -84,18 +87,22 @@ const bars = MONTHS.map((x, i) => {
 ---
 
 <div class="chat" data-turn="0">
-  <!-- Which harness, which model, and where it runs. The section is about
-       agents, so the panel says which one is holding the wheel. -->
+  <!-- Which harness is holding the wheel. The privacy claim lives in each
+       answer's provenance line, not up here. -->
   <div class="chat-head">
+    <span class="lights" aria-hidden="true"><i></i><i></i><i></i></span>
     <span class="harness">opencode</span>
-    <span class="head-right">
-      <span class="model">Qwen3.6-35B · oMLX<i class="local">local</i></span>
-      <!-- In the bar rather than floating over it: pinned to the corner it
-           landed on the model badge, and over a card once one arrived. -->
-      <button class="replay" type="button" data-replay>Replay</button>
-    </span>
+    <!-- In the bar rather than floating over it: its slot is held from the
+         start, so arriving at the end moves nothing. -->
+    <button class="replay" type="button" data-replay>Replay</button>
   </div>
 
+  <!-- Every visual decision below mirrors ui-tauri's assistant thread
+       (ChatMessage, ChatToolCall, tool.tsx): neutral rounded user bubbles,
+       plain full-width assistant text, tool calls in a left rail under a
+       "Tool usage" label, result facts as small labeled tiles, and a muted
+       provenance line under each answer. The mock should look like a
+       screenshot of the product, not like a website's idea of a chat. -->
   <div class="chat-log" data-log>
     <!-- ── 1 · the year at a glance ─────────────────────────── -->
     <div class="msg you" data-at="1">What did I actually earn last year?</div>
@@ -107,46 +114,43 @@ const bars = MONTHS.map((x, i) => {
           again. This is the documented behaviour rather than a dramatisation:
           a stale report names `journals process` as its own next step, which is
           what lets an agent recover without being told. */}
-      <div class="tool" data-tool data-dur="700" data-fail data-out="Stale since your last import · run journals process">
-        <div class="trow">
-          <span class="tdot" aria-hidden="true"></span>
-          <span class="tbody">
-            <span class="tact">Reading your book</span>
-            <code>kassiber reports summary</code>
-          </span>
-        </div>
-        <div class="tout" data-tout></div>
-      </div>
+      <div class="tools">
+        <span class="tools-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>Tool usage<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></span>
+        <div class="rail">
+          <div class="tool" data-tool data-dur="700" data-fail data-out="Stale since your last import · run journals process">
+            <div class="trow">
+              <span class="tmark" aria-hidden="true"></span>
+              <code>kassiber reports summary</code>
+              <span class="tstate" aria-hidden="true"></span>
+            </div>
+            <div class="tout" data-tout></div>
+          </div>
 
-      <div class="tool" data-tool data-dur="1400" data-out="Rebuilt 1,284 transactions">
-        <div class="trow">
-          <span class="tdot" aria-hidden="true"></span>
-          <span class="tbody">
-            <span class="tact">Rebuilding what the new imports changed</span>
-            <code>kassiber journals process</code>
-          </span>
-        </div>
-        <div class="tout" data-tout></div>
-      </div>
+          <div class="tool" data-tool data-dur="1400" data-out="Rebuilt 1,284 transactions">
+            <div class="trow">
+              <span class="tmark" aria-hidden="true"></span>
+              <code>kassiber journals process</code>
+              <span class="tstate" aria-hidden="true"></span>
+            </div>
+            <div class="tout" data-tout></div>
+          </div>
 
-      <div class="tool" data-tool data-dur="800" data-out="1,284 transactions, 12 months">
-        <div class="trow">
-          <span class="tdot" aria-hidden="true"></span>
-          <span class="tbody">
-            <span class="tact">Asking again</span>
-            <code>kassiber reports summary</code>
-          </span>
+          <div class="tool" data-tool data-dur="800" data-out="1,284 transactions, 12 months">
+            <div class="trow">
+              <span class="tmark" aria-hidden="true"></span>
+              <code>kassiber reports summary</code>
+              <span class="tstate" aria-hidden="true"></span>
+            </div>
+            <div class="tout" data-tout></div>
+          </div>
         </div>
-        <div class="tout" data-tout></div>
       </div>
 
       <p data-stream>{words(SAY.year).map((w) => <span>{`${w} `}</span>)}</p>
 
-      <div class="card" data-card>
-        <div class="chart-head">
-          <span>Transaction activity</span>
-          <span>2025 · count</span>
-        </div>
+      {/* The chart is the one payload the app would render as a widget, so it
+          keeps a tile border. The prose above each payload is its caption. */}
+      <div class="card tile" data-card>
         <svg
           class="spark"
           viewBox={`0 0 ${W} ${H}`}
@@ -158,21 +162,20 @@ const bars = MONTHS.map((x, i) => {
           <line x1="0" y1={BASE} x2={W} y2={BASE} class="axis" />
           {/* Delay per month, so the year fills in left to right rather than
               appearing at once. Each series is nudged a little further so the
-              sweep has some depth instead of moving as one block. */}
+              sweep has some depth instead of moving as one block.
+              One group per month: hovering it lifts that month out of the year
+              and the browser's own tooltip names the figures, so the chart
+              rewards a second look after the show is over. */}
           {bars.map((b, i) => (
-            <rect x={b.x} y={BASE - b.incomingHeight} width={b.width} height={b.incomingHeight} rx="1.5" class="bar incoming" style={`--bd:${i * 38}ms`} />
-          ))}
-          {bars.map((b, i) => (
-            <rect x={b.x + b.width + 1} y={BASE} width={b.width} height={b.outgoingHeight} rx="1.5" class="bar outgoing" style={`--bd:${i * 38 + 20}ms`} />
-          ))}
-          {bars.map((b, i) => (
-            <rect x={b.x + (b.width + 1) * 2} y={BASE - b.transferHeight} width={b.width} height={b.transferHeight} rx="1.5" class="bar transfer" style={`--bd:${i * 38 + 40}ms`} />
-          ))}
-          {bars.map((b, i) => (
-            <rect x={b.x + (b.width + 1) * 3} y={BASE - b.swapHeight} width={b.width} height={b.swapHeight} rx="1.5" class="bar swap" style={`--bd:${i * 38 + 80}ms`} />
-          ))}
-          {bars.map((b) => (
-            <text x={b.x + slot / 2 - 2} y={H - 2} class="mo">{b.m}</text>
+            <g class="mgrp">
+              <title>{`${NAMES[i]} · ${b.incoming} in · ${b.outgoing} out · ${b.transfers} transfers${b.swaps ? ` · ${b.swaps} swap${b.swaps > 1 ? "s" : ""}` : ""}`}</title>
+              <rect class="hit" x={b.x - 2} y="0" width={slot} height={H} />
+              <rect x={b.x} y={BASE - b.incomingHeight} width={b.width} height={b.incomingHeight} rx="1.5" class="bar incoming" style={`--bd:${i * 38}ms`} />
+              <rect x={b.x + b.width + 1} y={BASE} width={b.width} height={b.outgoingHeight} rx="1.5" class="bar outgoing" style={`--bd:${i * 38 + 20}ms`} />
+              <rect x={b.x + (b.width + 1) * 2} y={BASE - b.transferHeight} width={b.width} height={b.transferHeight} rx="1.5" class="bar transfer" style={`--bd:${i * 38 + 40}ms`} />
+              <rect x={b.x + (b.width + 1) * 3} y={BASE - b.swapHeight} width={b.width} height={b.swapHeight} rx="1.5" class="bar swap" style={`--bd:${i * 38 + 80}ms`} />
+              <text x={b.x + slot / 2 - 2} y={H - 2} class="mo">{b.m}</text>
+            </g>
           ))}
         </svg>
         <div class="legend">
@@ -182,60 +185,66 @@ const bars = MONTHS.map((x, i) => {
           <span><i class="dot swap"></i>Swaps</span>
         </div>
       </div>
+
+      {/* The line the app signs every answer with. It is the privacy claim in
+          the product's own words, so it earns its place in all three turns. */}
+      <p class="prov" data-prov>3 local tools · journals refreshed · local model</p>
     </div>
 
     <!-- ── 2 · what the books say about you ─────────────────── -->
     <div class="msg you" data-at="3">Which of my wallets leak the most about me?</div>
 
     <div class="msg bot" data-at="4">
-      <div class="tool" data-tool data-dur="1100" data-out="3 things worth fixing">
-        <div class="trow">
-          <span class="tdot" aria-hidden="true"></span>
-          <span class="tbody">
-            <span class="tact">Checking what your wallets reveal</span>
-            <code>kassiber reports privacy-hygiene</code>
-          </span>
+      <div class="tools">
+        <span class="tools-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>Tool usage<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></span>
+        <div class="rail">
+          <div class="tool" data-tool data-dur="1100" data-out="3 things worth fixing">
+            <div class="trow">
+              <span class="tmark" aria-hidden="true"></span>
+              <code>kassiber reports privacy-hygiene</code>
+              <span class="tstate" aria-hidden="true"></span>
+            </div>
+            <div class="tout" data-tout></div>
+          </div>
         </div>
-        <div class="tout" data-tout></div>
       </div>
 
       <p data-stream>{words(SAY.privacy).map((w) => <span>{`${w} `}</span>)}</p>
 
+      {/* Findings as the app's deterministic-fact tiles: uppercase source
+          label over a plain figure, no surrounding card. */}
       <div class="card" data-card>
-        <div class="card-top">
-          <span class="card-name">Privacy hygiene</span>
-          <span class="amt">3 findings</span>
-        </div>
         <dl class="kv">
           <div><dt>Reused addresses</dt><dd class="hot" data-count="14" data-suffix=" outputs">14 outputs</dd></div>
           <div><dt>Merged inputs</dt><dd data-count="2" data-suffix=" wallets">2 wallets</dd></div>
           <div><dt>Round-number withdrawals</dt><dd data-count="6">6</dd></div>
         </dl>
       </div>
+
+      <p class="prov" data-prov>1 local tool · local model</p>
     </div>
 
     <!-- ── 3 · the document a bank asks for, built here ─────── -->
     <div class="msg you" data-at="5">My bank wants proof of where the coins came from. Build it.</div>
 
     <div class="msg bot" data-at="6">
-      <div class="tool" data-tool data-dur="2400" data-out="41 pages, ready to send">
-        <div class="trow">
-          <span class="tdot" aria-hidden="true"></span>
-          <span class="tbody">
-            <span class="tact">Building the file for your bank</span>
-            <code>kassiber reports export-source-funds-bundle --file source-of-funds.zip</code>
-          </span>
+      <div class="tools">
+        <span class="tools-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>Tool usage<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></span>
+        <div class="rail">
+          <div class="tool" data-tool data-dur="2400" data-out="41 pages, ready to send">
+            <div class="trow">
+              <span class="tmark" aria-hidden="true"></span>
+              <code>kassiber reports export-source-funds-bundle --file source-of-funds.zip</code>
+              <span class="tstate" aria-hidden="true"></span>
+            </div>
+            <div class="tout" data-tout></div>
+          </div>
         </div>
-        <div class="tout" data-tout></div>
       </div>
 
       <p data-stream>{words(SAY.funds).map((w) => <span>{`${w} `}</span>)}</p>
 
-      <div class="card" data-card>
-        <div class="card-top">
-          <span class="card-name">Source of funds · case bank-2025</span>
-          <span class="amt" data-count="4.21830000" data-decimals="8" data-suffix="&#8239;₿">4.21830000&#8239;₿</span>
-        </div>
+      <div class="card tile fit" data-card>
         <div class="attach">
           <span class="clip" aria-hidden="true">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21.4 11.05 12.25 20.2a5.5 5.5 0 0 1-7.78-7.78l8.49-8.48a3.67 3.67 0 1 1 5.18 5.18l-8.48 8.49a1.83 1.83 0 0 1-2.6-2.6l7.79-7.78"/></svg>
@@ -245,11 +254,9 @@ const bars = MONTHS.map((x, i) => {
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>
           </span>
         </div>
-        <div class="card-foot">
-          <span>every lot traced to its origin</span>
-          <span>built here, sent by you</span>
-        </div>
       </div>
+
+      <p class="prov" data-prov>1 local tool · local model</p>
     </div>
 
   </div>
@@ -276,7 +283,8 @@ const bars = MONTHS.map((x, i) => {
     const tools = [...chat.querySelectorAll<HTMLElement>("[data-tool]")];
     const composer = chat.querySelector<HTMLElement>(".composer");
     const cline = chat.querySelector<HTMLElement>("[data-composer]");
-    const cards = [...chat.querySelectorAll<HTMLElement>("[data-card]")];
+    // Provenance lines reveal on the same beat as the payload they sign.
+    const cards = [...chat.querySelectorAll<HTMLElement>("[data-card], [data-prov]")];
     /* The words are already spans, one per word, rendered by the component.
        Arming them is what hides them; every word keeps its place from the first
        frame and only its opacity changes, so nothing reflows as the sentence
@@ -325,22 +333,24 @@ const bars = MONTHS.map((x, i) => {
     const follow = () => log.scrollTo({ top: log.scrollHeight, behavior: "auto" });
 
     const reset = () => {
-      chat.classList.remove("is-busy");
       composer?.classList.remove("is-typing", "is-sending");
       if (cline) cline.textContent = "";
-      for (const m of msgs) m.classList.remove("is-in");
+      for (const m of msgs) m.classList.remove("is-in", "is-thinking");
       for (const t of tools) {
         t.classList.remove("is-run", "is-done", "is-fail");
         const out = t.querySelector<HTMLElement>("[data-tout]");
         if (out) out.textContent = "";
       }
+      for (const g of chat.querySelectorAll<HTMLElement>(".tools")) g.classList.remove("has-run");
       for (const c of cards) c.classList.remove("is-in");
-      for (const spans of proses.values()) {
+      for (const [p, spans] of proses) {
+        p.classList.remove("is-live");
         for (const s of spans) s.classList.remove("on", "tip");
       }
       for (const el of counters) el.textContent = countText(el, 0);
       chat.dataset.turn = "0";
-      log.scrollTop = 0;
+      // Instant, not smooth: a replay should start at the top, not sail there.
+      log.scrollTo({ top: 0, behavior: "instant" });
     };
 
     // The end state, arrived at with no journey. Where reduced motion lives.
@@ -353,8 +363,10 @@ const bars = MONTHS.map((x, i) => {
         const out = t.querySelector<HTMLElement>("[data-tout]");
         if (out) out.textContent = t.dataset.out ?? "";
       }
+      for (const g of chat.querySelectorAll<HTMLElement>(".tools")) g.classList.add("has-run");
       for (const c of cards) c.classList.add("is-in");
-      for (const spans of proses.values()) {
+      for (const [p, spans] of proses) {
+        p.classList.add("is-live");
         for (const s of spans) s.classList.add("on");
       }
       for (const el of counters) el.textContent = countText(el, Number(el.dataset.count));
@@ -365,6 +377,7 @@ const bars = MONTHS.map((x, i) => {
     /* A word at a time, because that is what generated text looks like. Fast
        enough to read as output rather than as a typewriter effect. */
     const stream = (p: HTMLElement, done: () => void) => {
+      p.classList.add("is-live");
       const spans = proses.get(p) ?? [];
       let i = 0;
       const tick = () => {
@@ -423,20 +436,25 @@ const bars = MONTHS.map((x, i) => {
         const answer = msgs[msgs.indexOf(ask) + 1];
         const turnTools = answer ? [...answer.querySelectorAll<HTMLElement>("[data-tool]")] : [];
         const prose = answer?.querySelector<HTMLElement>("[data-stream]");
-        const card = answer?.querySelector<HTMLElement>("[data-card]");
+        const payloads = answer ? [...answer.querySelectorAll<HTMLElement>("[data-card], [data-prov]")] : [];
 
         // Written into the composer first, one character at a time.
         steps.push({ wait: k === 0 ? 420 : 700, run: (n) => type(ask.textContent ?? "", n) });
         // Then sent, which is where it becomes a message in the log.
         steps.push({ wait: 320, run: (n) => { send(); ask.classList.add("is-in"); follow(); n(); } });
-        // It reaches for a command before it says anything.
-        steps.push({ wait: 420, run: (n) => { answer?.classList.add("is-in"); chat.classList.add("is-busy"); follow(); n(); } });
+        // It thinks before it reaches for a command: a blinking cursor with
+        // nothing behind it yet, which is what deciding looks like.
+        steps.push({ wait: 420, run: (n) => { answer?.classList.add("is-in", "is-thinking"); follow(); n(); } });
 
         /* Each command in turn, held for as long as its own work would take. A
-           command that fails still reports, and the next one is the recovery. */
+           command that fails still reports, and the next one is the recovery.
+           Commands appear one by one as they are run, never as a stack laid
+           out in advance: an agent that shows its plan up front reads as a
+           script, one that reaches for the next command only after the last
+           one answered reads as something deciding. */
         turnTools.forEach((tool, t) => {
           const out = tool.querySelector<HTMLElement>("[data-tout]");
-          steps.push({ wait: t === 0 ? 0 : 340, run: (n) => { tool.classList.add("is-run"); follow(); n(); } });
+          steps.push({ wait: t === 0 ? 620 : 340, run: (n) => { if (t === 0) answer?.classList.remove("is-thinking"); tool.closest(".tools")?.classList.add("has-run"); tool.classList.add("is-run"); follow(); n(); } });
           steps.push({
             wait: Number(tool.dataset.dur ?? 900),
             run: (n) => {
@@ -450,18 +468,19 @@ const bars = MONTHS.map((x, i) => {
         });
 
         steps.push({ wait: 280, run: (n) => (prose ? stream(prose, n) : n()) });
-        // The card, and any figure on it, once the sentence introducing it is out.
+        // The payloads, and any figure on them, once the sentence introducing
+        // them is out.
         steps.push({
           wait: 200,
           run: (n) => {
-            card?.classList.add("is-in");
-            if (card) for (const el of card.querySelectorAll<HTMLElement>("[data-count]")) countUp(el);
+            for (const c of payloads) {
+              c.classList.add("is-in");
+              for (const el of c.querySelectorAll<HTMLElement>("[data-count]")) countUp(el);
+            }
             follow();
             n();
           },
         });
-        // Idle again until the next question, so the badge only breathes on work.
-        steps.push({ wait: 260, run: (n) => { chat.classList.remove("is-busy"); n(); } });
         if (k === asks.length - 1) {
           steps.push({ wait: 0, run: (n) => { chat.dataset.turn = "6"; n(); } });
         }
@@ -470,7 +489,9 @@ const bars = MONTHS.map((x, i) => {
       runSeq(steps);
     };
 
-    chat.querySelector("[data-replay]")?.addEventListener("click", play);
+    // Replay honours the OS motion setting too: for reduced motion it simply
+    // restores the finished conversation instead of animating through it.
+    chat.querySelector("[data-replay]")?.addEventListener("click", REDUCED ? settle : play);
 
     if (REDUCED) {
       settle();
@@ -509,6 +530,10 @@ const bars = MONTHS.map((x, i) => {
     height: 452px;
     overflow-y: auto;
     padding: 18px;
+    /* Every arrival glides the pane down instead of snapping it: reset opts
+       out explicitly, and streaming words never change scrollHeight because
+       they are laid out before they fade in. */
+    scroll-behavior: smooth;
     scrollbar-color: rgba(255, 255, 255, 0.14) transparent;
     scrollbar-width: thin;
   }
@@ -532,25 +557,63 @@ const bars = MONTHS.map((x, i) => {
   }
 
   @keyframes msgIn {
-    from { opacity: 0; transform: translateY(6px); }
+    from { opacity: 0; transform: translateY(8px) scale(0.985); }
     to { opacity: 1; transform: none; }
   }
 
+  /* The beat between the question landing and the first command going out:
+     the app's ChatLoader, a spinner in a muted pill with a label. While it
+     shows, the turn has no visible children, so the pill is the whole turn. */
+  .bot.is-in.is-thinking {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    width: fit-content;
+    padding: 5px 12px 5px 10px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.06);
+  }
+
+  .bot.is-thinking::before {
+    content: "";
+    flex: none;
+    width: 12px;
+    height: 12px;
+    border-radius: 999px;
+    border: 1.5px solid rgba(255, 255, 255, 0.16);
+    border-top-color: var(--fg-muted);
+    animation: spin 0.8s linear infinite;
+  }
+
+  .bot.is-thinking::after {
+    content: "Generating";
+    font-size: 12px;
+    color: var(--fg-dim);
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  /* The user's bubble exactly as the app draws it: neutral secondary fill,
+     uniform 16px radius, no border, no tail, no accent. */
   .you {
     align-self: flex-end;
-    max-width: 84%;
-    padding: 9px 13px;
-    border-radius: 14px 14px 4px 14px;
-    background: rgba(255, 255, 255, 0.07);
+    max-width: 82%;
+    padding: 10px 12px;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.08);
     color: var(--fg);
     font-size: 14px;
     line-height: 1.45;
     letter-spacing: -0.005em;
   }
 
+  /* The assistant exactly as the app draws it: no avatar, no bubble, plain
+     full-width text. The work products around it carry the structure. */
   .bot {
-    align-self: flex-start;
-    max-width: 96%;
+    align-self: stretch;
+    max-width: 100%;
   }
 
   .bot p {
@@ -566,12 +629,25 @@ const bars = MONTHS.map((x, i) => {
      down the pane. Appending text did both.
      Only hidden once the script has taken charge: without it the sentence has
      to read normally rather than be invisible forever. */
+  /* Armed prose stays out of the layout entirely until its stream starts:
+     a paragraph of invisible words still takes up space, and that phantom
+     gap under the loader was what made the thinking beat feel wrong. Once
+     live, the words are all laid out before any of them shows, so nothing
+     reflows while the sentence arrives. */
+  [data-stream].is-armed { display: none; }
+
+  [data-stream].is-live { display: block; }
+
   [data-stream].is-armed span {
     opacity: 0;
-    transition: opacity 240ms ease;
+    filter: blur(4px);
+    transition: opacity 240ms ease, filter 300ms ease;
   }
 
-  [data-stream].is-armed span.on { opacity: 1; }
+  [data-stream].is-armed span.on {
+    opacity: 1;
+    filter: none;
+  }
 
   /* Rides the leading edge, so the eye has somewhere to sit while it fills. */
   [data-stream].is-armed span.tip::after {
@@ -590,34 +666,35 @@ const bars = MONTHS.map((x, i) => {
     50% { opacity: 0; }
   }
 
-  /* ── Answer cards ─────────────────────────────────────── */
-  /* Lands after the sentence that introduces it, so the answer arrives in the
-     order it was written rather than all at once. */
-  .card {
-    display: none;
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    background: rgba(255, 255, 255, 0.02);
-    padding: 13px 14px;
-  }
+  /* ── Answer payloads ──────────────────────────────────── */
+  /* Land after the sentence that introduces them, so the answer arrives in
+     the order it was written rather than all at once. The base carries no
+     chrome; only .tile draws the app's bordered widget frame. */
+  .card { display: none; }
 
   .card.is-in {
     display: block;
     animation: msgIn 0.3s ease both;
   }
 
-  .card-top {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 10px;
-    margin-bottom: 11px;
+  .card.tile {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.02);
+    padding: 12px 13px;
   }
 
-  .card-name {
-    font-size: 13px;
-    font-weight: 600;
-    letter-spacing: -0.01em;
+  .card.fit { width: fit-content; }
+
+  /* The line the app signs every answer with. */
+  .prov { display: none; }
+
+  .prov.is-in {
+    display: block;
+    margin: 8px 0 0;
+    font-size: 11.5px;
+    color: var(--fg-faint);
+    animation: msgIn 0.3s ease both;
   }
 
   .download-icon {
@@ -634,41 +711,49 @@ const bars = MONTHS.map((x, i) => {
     height: 14px;
   }
 
+  /* One nod once the file exists: the arrow dips and flashes ready-green,
+     which is all "yours to take" needs. */
+  .card.is-in .download-icon {
+    animation: dlPop 0.7s ease 0.9s 1;
+  }
+
+  @keyframes dlPop {
+    0%, 100% { transform: none; color: var(--fg-dim); }
+    40% { transform: translateY(2px) scale(1.15); color: var(--ok); }
+  }
+
+  /* The app's deterministic-fact tiles: a grid of small bordered tiles, each
+     with an uppercase source label over a plain figure. */
+  .kv {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 8px;
+  }
+
   .kv > div {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: 12px;
-    padding: 5px 0;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.02);
+    padding: 8px 11px 9px;
   }
 
   .kv dt {
-    font-size: 13px;
+    margin-bottom: 3px;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
     color: var(--fg-dim);
   }
 
   .kv dd {
-    font-family: var(--font-mono);
     font-size: 14px;
+    font-weight: 500;
     color: var(--fg);
     font-variant-numeric: tabular-nums;
   }
 
-  .kv dd.hot {
-    color: var(--warn);
-    font-weight: 500;
-  }
-
-  .card-foot {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 4px 8px;
-    margin-top: 11px;
-    padding-top: 10px;
-    border-top: 1px solid rgba(255, 255, 255, 0.06);
-    font-size: 11.5px;
-    color: var(--fg-faint);
-  }
+  .kv dd.hot { color: var(--warn); }
 
   .file {
     font-family: var(--font-mono);
@@ -676,20 +761,6 @@ const bars = MONTHS.map((x, i) => {
   }
 
   /* ── Monthly chart ────────────────────────────────────── */
-  .chart-head {
-    display: flex;
-    justify-content: space-between;
-    gap: 12px;
-    margin-bottom: 8px;
-    font-size: 11px;
-    color: var(--fg-dim);
-  }
-
-  .chart-head span:first-child {
-    color: var(--fg);
-    font-weight: 600;
-  }
-
   .spark {
     width: 100%;
     height: auto;
@@ -705,6 +776,14 @@ const bars = MONTHS.map((x, i) => {
     stroke: rgba(255, 255, 255, 0.28);
     stroke-width: 1.5;
   }
+
+  /* After the show, the chart still answers questions: hovering a month lifts
+     it out of the year, and the group's <title> names its figures. */
+  .mgrp { transition: opacity 160ms ease; }
+
+  .spark:hover .mgrp:not(:hover) { opacity: 0.35; }
+
+  .hit { fill: transparent; }
 
   .bar.incoming { fill: oklch(0.56 0.16 150); }
   .bar.outgoing { fill: var(--accent); }
@@ -767,22 +846,11 @@ const bars = MONTHS.map((x, i) => {
   .dot.transfer { background: oklch(0.56 0.04 260); }
   .dot.swap { background: oklch(0.62 0.16 246); }
 
-  /* ── Transaction card ─────────────────────────────────── */
-  .amt {
-    flex: none;
-    font-family: var(--font-mono);
-    font-size: 12.5px;
-    color: var(--fg);
-    font-variant-numeric: tabular-nums;
-  }
-
+  /* ── File attachment ──────────────────────────────────── */
   .attach {
     display: flex;
     align-items: center;
     gap: 8px;
-    margin-top: 2px;
-    padding-top: 10px;
-    border-top: 1px solid rgba(255, 255, 255, 0.06);
     font-size: 12px;
   }
 
@@ -809,10 +877,13 @@ const bars = MONTHS.map((x, i) => {
   }
 
   /* ── Harness and model ────────────────────────────────── */
+  /* Lights left, harness centred, replay right — the same window chrome as
+     the open-source section's terminal. Equal 1fr flanks keep the title on
+     the true centre line. */
   .chat-head {
-    display: flex;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
     align-items: center;
-    justify-content: space-between;
     gap: 12px;
     padding: 9px 14px;
     border-bottom: 1px solid var(--border);
@@ -822,135 +893,165 @@ const bars = MONTHS.map((x, i) => {
     color: var(--fg-dim);
   }
 
+  .lights {
+    display: flex;
+    gap: 6px;
+    justify-self: start;
+  }
+
+  /* Greyed out, matching the open-source section's terminal below. */
+  .lights i {
+    width: 10px;
+    height: 10px;
+    border-radius: 999px;
+    background: #2a2a30;
+  }
+
   .chat-head .harness { color: var(--fg-muted); }
 
-  .chat-head .model {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-
-  .chat-head .head-right {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-
-  /* Same emerald the app's model picker uses for a model that runs here. It
-     breathes while the model is working, which is the only sign that the
-     thinking is happening on this machine rather than in a data centre. */
-  .chat-head .local {
-    font-style: normal;
-    padding: 1px 6px;
-    border-radius: 999px;
-    background: rgba(16, 185, 129, 0.14);
-    color: oklch(0.78 0.14 165);
-  }
-
-  .chat.is-busy .local {
-    animation: badge 1.7s ease-in-out infinite;
-  }
-
-  @keyframes badge {
-    0%, 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
-    50% { box-shadow: 0 0 13px 1px rgba(16, 185, 129, 0.45); }
-  }
-
   /* ── Tool calls ───────────────────────────────────────── */
-  /* The command, in the syntax the CLI actually takes. Long lines wrap rather
-     than truncate: a flag that matters is not worth hiding behind an ellipsis. */
-  /* A bordered block, not loose grey text. Three of these stacked as bare
-     monospace lines read as debug spill; boxed, they read as the agent's work. */
-  .tool {
+  /* The app's AssistantRound: a "Tool usage" label, then every call in a
+     left-ruled rail. The group only exists once its first command runs —
+     idle grey blocks waiting their turn were the tell that the whole
+     exchange was scripted. */
+  .tools { display: none; }
+
+  /* A class set by the script rather than :has(), which older engines would
+     silently drop — leaving the agent's work invisible forever. */
+  .tools.has-run {
+    display: block;
     margin-bottom: 10px;
+    animation: msgIn 0.3s ease both;
+  }
+
+  /* The app's ChainOfThoughtHeader: wrench, label, and the chevron of an
+     opened disclosure, all on one line. */
+  .tools-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 5px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--fg-dim);
+  }
+
+  .tools-label svg {
+    width: 12px;
+    height: 12px;
+    flex: none;
+  }
+
+  .tools-label .chev {
+    color: var(--fg-faint);
+    transform: rotate(180deg);
+  }
+
+  .rail {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    border-left: 1px solid var(--border);
+    padding-left: 10px;
+  }
+
+  .tool { display: none; }
+
+  .tool.is-run,
+  .tool.is-done,
+  .tool.is-fail {
+    display: block;
+    animation: msgIn 0.3s ease both;
+  }
+
+  /* The app's Tool element: rounded-md, muted fill, mono command in the
+     header row. One line, truncated with an ellipsis, exactly as the app's
+     ToolHeader draws it — mark, command, and badge stay level. */
+  .tool {
     border: 1px solid var(--border);
-    border-radius: 8px;
-    background: rgba(255, 255, 255, 0.025);
-    font-family: var(--font-mono);
-    font-size: 11.5px;
-    line-height: 1.55;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.02);
     overflow: hidden;
   }
 
   .trow {
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     gap: 8px;
-    padding: 8px 10px;
+    padding: 6px 9px;
   }
 
-  /* Plain words first, the command underneath. Someone who does not care what a
-     flag is still follows the story; someone who does can check the syntax. */
-  .tbody {
-    display: flex;
+  .trow code {
+    flex: 1;
     min-width: 0;
-    flex-direction: column;
-    gap: 2px;
-  }
-
-  .tact {
-    font-family: var(--font-sans);
-    font-size: 12.5px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    line-height: 1.5;
     color: var(--fg-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
-  .tbody code {
-    font-size: 10.5px;
-    color: var(--fg-faint);
-    overflow-wrap: anywhere;
-  }
-
-  .tdot {
+  /* State icon: a ring while the command is out, a check or a warning after. */
+  .tmark {
+    display: grid;
+    place-items: center;
     flex: none;
-    width: 6px;
-    height: 6px;
-    margin-top: 6px;
+    width: 12px;
+    height: 12px;
     border-radius: 999px;
-    background: var(--fg-faint);
+    font-size: 10px;
+    line-height: 1;
   }
 
-  /* Running, then done. The colour carries it, so nothing spins. */
-  .tool.is-run .tdot {
-    background: var(--warn);
-    animation: toolrun 1.1s ease-in-out infinite;
+  .tool.is-run .tmark {
+    border: 1.5px solid rgba(255, 255, 255, 0.16);
+    border-top-color: var(--fg-muted);
+    animation: spin 0.8s linear infinite;
   }
 
-  .tool.is-done .tdot { background: var(--ok); }
+  .tool.is-done .tmark::before {
+    content: "✓";
+    color: var(--ok);
+  }
 
-  /* Not an alarm. The command did its job by refusing and naming the fix, so it
-     reads as a step that still has to happen rather than as a failure. */
-  .tool.is-fail .tdot { background: var(--warn); }
+  .tool.is-fail .tmark::before {
+    content: "!";
+    color: var(--warn);
+    font-weight: 700;
+  }
+
+  /* Uppercase state chip, the app's ToolHeader badge. */
+  .tstate {
+    flex: none;
+    padding: 1px 6px;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.06);
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--fg-dim);
+  }
+
+  .tool.is-run .tstate::before { content: "running"; }
+  .tool.is-done .tstate::before { content: "done"; }
+  .tool.is-fail .tstate::before { content: "stale"; }
+
+  /* Not an alarm. The command did its job by refusing and naming the fix, so
+     it reads as a step that still has to happen rather than as a failure. */
+  .tool.is-fail .tstate {
+    background: color-mix(in oklab, var(--warn) 14%, transparent);
+    color: var(--warn);
+  }
+
   .tool.is-fail .tout { color: var(--warn); }
-
-  @keyframes toolrun {
-    0%, 100% { opacity: 0.35; }
-    50% { opacity: 1; }
-  }
-
-  /* A line crossing the block while the command is out. Clipped by the block's
-     own overflow, so it needs no wrapper of its own. */
-  .tool {
-    position: relative;
-  }
-
-  .tool.is-run::after {
-    content: "";
-    position: absolute;
-    inset: auto 0 0 0;
-    height: 1px;
-    background: linear-gradient(90deg, transparent, var(--warn), transparent);
-    animation: toolsweep 1.25s linear infinite;
-  }
-
-  @keyframes toolsweep {
-    from { transform: translateX(-100%); }
-    to { transform: translateX(100%); }
-  }
 
   /* Below the rule: what came back, so the command and its result are one
      object rather than two stray lines. */
   .tout {
-    padding: 6px 10px 7px 24px;
+    padding: 6px 9px;
     border-top: 1px solid var(--border);
     background: rgba(255, 255, 255, 0.02);
     font-family: var(--font-sans);
@@ -964,6 +1065,7 @@ const bars = MONTHS.map((x, i) => {
   /* Its slot in the bar is held from the start, so arriving at the end moves
      nothing. Unreachable until then, rather than merely invisible. */
   .replay {
+    justify-self: end;
     font-family: var(--font-mono);
     font-size: 11px;
     color: var(--fg-faint);
@@ -986,14 +1088,20 @@ const bars = MONTHS.map((x, i) => {
     display: flex;
     align-items: center;
     gap: 10px;
-    padding: 11px 14px;
+    padding: 10px 12px;
     border-top: 1px solid var(--border);
     background: rgba(255, 255, 255, 0.02);
   }
 
+  /* An input field, not a caption: the pill is what makes the bottom edge read
+     as the place messages come from. */
   .cline {
     flex: 1;
     min-width: 0;
+    padding: 7px 13px;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.04);
     font-size: 13.5px;
     line-height: 1.4;
     color: var(--fg);
@@ -1020,9 +1128,9 @@ const bars = MONTHS.map((x, i) => {
     display: grid;
     flex: none;
     place-items: center;
-    width: 24px;
-    height: 24px;
-    border-radius: 7px;
+    width: 26px;
+    height: 26px;
+    border-radius: 999px;
     background: rgba(255, 255, 255, 0.06);
     color: var(--fg-dim);
     transition: background 160ms ease, color 160ms ease, transform 160ms ease;
@@ -1052,19 +1160,36 @@ const bars = MONTHS.map((x, i) => {
     .cline { font-size: 13px; }
   }
 
+
   /* The script settles straight to the end state here, so everything that only
      exists to show arrival is switched off rather than left mid-flight. */
   @media (prefers-reduced-motion: reduce) {
+    .chat-log { scroll-behavior: auto; }
     .msg.is-in,
     .card.is-in,
     .card.is-in .bar,
-    .card.is-in .kv > div { animation: none; }
-    [data-stream] span { opacity: 1; transition: none; }
+    .card.is-in .kv > div,
+    .card.is-in .download-icon,
+    .prov.is-in,
+    .tools.has-run,
+    .tool.is-run,
+    .tool.is-done,
+    .tool.is-fail { animation: none; }
+    .mgrp { transition: none; }
+    [data-stream] span { opacity: 1; filter: none; transition: none; }
     [data-stream].is-armed span.tip::after,
-    .tool.is-run::after,
     .composer.is-typing .cline::after { display: none; }
-    .tool.is-run .tdot,
-    .chat.is-busy .local { animation: none; }
+    .tool.is-run .tmark,
+    .bot.is-thinking::before { animation: none; }
+    /* The pane settles on the last turn, and phones cannot scroll it back.
+       With no motion to contain, the cap has no job: let the whole
+       conversation stand open so all of it can be read. */
+    @media (max-width: 820px) {
+      .chat-log {
+        height: auto;
+        overflow-y: visible;
+      }
+    }
     /* Nothing is ever typed here, so the prompt stays as the resting hint. */
     .csend { transition: none; }
   }
