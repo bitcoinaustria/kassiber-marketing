@@ -6,11 +6,12 @@ import { readFile, writeFile } from "node:fs/promises";
 // broken og:image URLs whenever the build env sets nothing.
 const site = process.env.SITE_URL ?? "https://kassiber.app";
 
-// The homepage's first fold is fully covered by home-critical.css. Keep the
-// rest out of the render path, but inline font-face declarations so cached
-// fonts are available at first paint. Noscript still receives full styles.
-const deferHomepageStyles = {
-  name: "defer-homepage-styles",
+// The homepage's first fold is covered by home-critical.css. Inline font-face
+// declarations with optional display so the typeface cannot swap after paint,
+// but load the full page stylesheet normally: the inline demos need it before
+// they can be laid out.
+const optimizeHomepageStyles = {
+  name: "optimize-homepage-styles",
   hooks: {
     "astro:build:done": async ({ dir }) => {
       const path = new URL("index.html", dir);
@@ -39,11 +40,7 @@ const deferHomepageStyles = {
         /<link rel="stylesheet" href="([^"]+)">/g,
         (_, href) => fontStylesheets.has(href)
           ? ""
-          : `<template data-deferred-style><link rel="stylesheet" href="${href}"${href.includes("/index.") ? " data-home-style" : ""}></template><noscript><link rel="stylesheet" href="${href}"></noscript>`,
-      );
-      html = html.replace(
-        "</head>",
-        `<script>addEventListener("DOMContentLoaded",()=>{let done=false;const apply=()=>{if(done)return;done=true;for(const t of document.querySelectorAll("template[data-deferred-style]")){const l=t.content.firstElementChild;l.fetchPriority="low";if(l.hasAttribute("data-home-style"))l.addEventListener("load",()=>document.documentElement.classList.add("home-ready"),{once:true});t.replaceWith(l)}};setTimeout(apply,3500);addEventListener("scroll",apply,{once:true,passive:true});addEventListener("pointerdown",apply,{once:true});addEventListener("keydown",apply,{once:true})},{once:true})</script></head>`,
+          : `<link rel="stylesheet" href="${href}">`,
       );
       await writeFile(path, html);
     },
@@ -52,7 +49,7 @@ const deferHomepageStyles = {
 
 export default defineConfig({
   site,
-  integrations: [deferHomepageStyles],
+  integrations: [optimizeHomepageStyles],
   build: {
     inlineStylesheets: "never",
   },

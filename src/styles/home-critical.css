@@ -10,8 +10,6 @@
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, monospace;
 }
 
-[data-fragment-src][hidden] { display: none !important; }
-
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html { color-scheme: dark; }
 body {
@@ -87,7 +85,7 @@ img, svg { display: block; max-width: 100%; }
 }
 .nav-stars svg { flex-shrink: 0; color: var(--warn); }
 
-section { position: relative; padding: 96px 0; border-top: 1px solid var(--border); }
+.main > section { position: relative; padding: 96px 0; border-top: 1px solid var(--border); }
 .hero { position: relative; overflow: hidden; padding: 72px 0 60px; border-top: 0; }
 .hero-links { position: absolute; inset: 0; z-index: 1; width: 100%; height: 100%; pointer-events: none; }
 .hero-inner { position: relative; z-index: 2; text-align: center; }
@@ -141,17 +139,10 @@ html:not([data-platform]) .dl-icon--apple { display: block; }
 .hero-float-mark.hf-liquid { top: 30%; right: 5%; transform: rotate(-5deg); }
 .hero-float-mark.hf-btcpay { top: 52%; left: 6%; transform: rotate(3deg); }
 .hero-preview { position: relative; container-type: inline-size; max-width: 1180px; margin: 0 auto; }
-.hero-chat-frame {
+.hero-chat {
   --dock-travel: clamp(0px, calc(1460px - 100vh), 620px);
-  position: absolute;
-  top: 0;
   right: -3%;
-  bottom: 0;
-  z-index: 2;
-  width: 100%;
-  height: 100%;
-  border: 0;
-  animation-name: heroChatFrameDock;
+  animation-name: heroChatDock;
   animation-duration: 1ms;
   animation-timing-function: linear;
   animation-fill-mode: both;
@@ -159,9 +150,9 @@ html:not([data-platform]) .dl-icon--apple { display: block; }
   animation-range: 0 var(--dock-travel);
 }
 @supports not (animation-timeline: scroll(root block)) {
-  .hero-chat-frame { animation: none; transform: translateY(0); }
+  .hero-chat { animation: none; transform: translateY(0); }
 }
-@keyframes heroChatFrameDock {
+@keyframes heroChatDock {
   from { transform: translateY(calc(-1 * var(--dock-travel))); }
   to { transform: translateY(0); }
 }
@@ -180,8 +171,6 @@ html:not([data-platform]) .dl-icon--apple { display: block; }
   object-fit: cover;
   object-position: center top;
 }
-html:not(.home-ready) .hero-chat { display: none; }
-
 @media (max-width: 1180px) {
   .hero-float-mark { width: 76px; height: 76px; border-radius: 20px; }
   .hero-float-mark img { width: 42px; height: 42px; }
@@ -215,7 +204,7 @@ html:not(.home-ready) .hero-chat { display: none; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .hero-chat-frame { animation: none; transform: none; }
+  .hero-chat { animation: none; transform: none; }
 }
 
 @media (max-width: 560px) {
