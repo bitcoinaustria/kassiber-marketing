@@ -706,6 +706,16 @@ const SLIDES = [
     );
   }
 
+  // Narrow screens stack the cards above and below the copy, so a line
+  // between the two groups would run straight through the headline. Pair
+  // only cards that sit in the same band; wide layouts have the room.
+  function canPair(a: Element, b: Element) {
+    if (window.matchMedia("(min-width: 768px)").matches) return true;
+    const ra = a.getBoundingClientRect();
+    const rb = b.getBoundingClientRect();
+    return Math.abs(ra.top + ra.height / 2 - (rb.top + rb.height / 2)) < 160;
+  }
+
   // Value moves between the real Bitcoin connections. OpenCode is the
   // observer — it only ever polls them (see report/query below).
   function fire(hero: HTMLElement, svg: SVGSVGElement) {
@@ -713,9 +723,9 @@ const SLIDES = [
     if (marks.length < 2) return;
 
     const i = Math.floor(Math.random() * marks.length);
-    let j = Math.floor(Math.random() * (marks.length - 1));
-    if (j >= i) j++;
-    transfer(hero, svg, marks[i], marks[j]);
+    const partners = marks.filter((m, k) => k !== i && canPair(marks[i], m));
+    if (!partners.length) return;
+    transfer(hero, svg, marks[i], partners[Math.floor(Math.random() * partners.length)]);
   }
 
   // OpenCode is an LLM agent: it polls one or two connections per round.
@@ -725,7 +735,7 @@ const SLIDES = [
     const oc = hero.querySelector<HTMLElement>(".hf-opencode");
     if (!oc || getComputedStyle(oc).display === "none") return;
     const others = visibleMarks(hero)
-      .filter((m) => m !== oc)
+      .filter((m) => m !== oc && canPair(oc, m))
       .sort(() => Math.random() - 0.5);
     const n = Math.random() < 0.4 ? 2 : 1;
     others.slice(0, n).forEach((m, k) => setTimeout(() => query(hero, svg, oc, m), k * 2000));
@@ -973,9 +983,6 @@ const SLIDES = [
     dispose(dur + 400, grad, base);
   }
 
-  // On narrow screens the cards frame the text, so every line would cut
-  // straight through the copy — no network there, the cards just float.
-  const wideEnough = window.matchMedia("(min-width: 768px)");
   if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
     document.querySelectorAll<HTMLElement>(".hero").forEach((hero) => {
       const svg = hero.querySelector<SVGSVGElement>(".hero-links");
@@ -987,7 +994,7 @@ const SLIDES = [
       }).observe(hero);
       const tick = () => {
         // Roughly every fifth event is an OpenCode poll round.
-        if (visible && wideEnough.matches) (Math.random() < 0.2 ? report : fire)(hero, svg);
+        if (visible) (Math.random() < 0.2 ? report : fire)(hero, svg);
         setTimeout(tick, 1100 + Math.random() * 2000);
       };
       setTimeout(tick, Math.random() * 1200);
