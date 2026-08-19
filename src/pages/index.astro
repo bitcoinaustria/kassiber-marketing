@@ -934,38 +934,11 @@ const SLIDES = [
         }, (dur * (i + 1)) / (r.length - 1));
       });
 
-      const dot = el("circle", { class: "hl-dot", r: "4.5", fill: cb, style: `--glow: ${cb}` });
-      svg.appendChild(dot);
-      const len = (base as SVGPathElement).getTotalLength();
-      const t0 = performance.now();
-      const step = (now: number) => {
-        const t = Math.min(1, (now - t0) / dur);
-        const p = (base as SVGPathElement).getPointAtLength(t * len);
-        dot.setAttribute("cx", String(p.x));
-        dot.setAttribute("cy", String(p.y));
-        dot.setAttribute("opacity", String(Math.min(1, 6 * Math.min(t, 1 - t))));
-        if (t < 1) requestAnimationFrame(step);
-        else {
-          glow(b, 700);
-          // Settlement: the preimage races back along the route.
-          const settle = el("circle", { class: "hl-dot", r: "3", fill: "#ffffff", style: `--glow: ${cb}` });
-          svg.appendChild(settle);
-          const s0 = performance.now();
-          const back = (now2: number) => {
-            const t2 = Math.min(1, (now2 - s0) / 340);
-            const p2b = (base as SVGPathElement).getPointAtLength((1 - t2) * len);
-            settle.setAttribute("cx", String(p2b.x));
-            settle.setAttribute("cy", String(p2b.y));
-            settle.setAttribute("opacity", String(0.9 * (1 - t2 * 0.5)));
-            if (t2 < 1) requestAnimationFrame(back);
-            else glow(a, 500);
-          };
-          requestAnimationFrame(back);
-          dispose(300, settle);
-        }
-      };
-      requestAnimationFrame(step);
-      dispose(dur + 700, grad, base, dot);
+      // Delivery and settlement read from the glows alone: receiver first,
+      // then the sender as the preimage makes it back.
+      setTimeout(() => glow(b, 700), dur);
+      setTimeout(() => glow(a, 500), dur + 340);
+      dispose(dur + 700, grad, base);
     };
 
     // The mesh fades in while the sender is pathfinding, out once settled.
@@ -1037,23 +1010,9 @@ const SLIDES = [
       { duration: dur + 400, easing: "linear" },
     );
 
-    const dot = el("circle", { class: "hl-dot", r: "4.5", fill: cb, style: `--glow: ${cb}` });
-    svg.appendChild(dot);
     glow(a, 700);
-    const len = (base as SVGPathElement).getTotalLength();
-    const t0 = performance.now();
-    const ease = (t: number) => (t < 0.5 ? 2 * t * t : 1 - (-2 * t + 2) ** 2 / 2);
-    const step = (now: number) => {
-      const t = Math.min(1, (now - t0) / dur);
-      const p = (base as SVGPathElement).getPointAtLength(ease(t) * len);
-      dot.setAttribute("cx", String(p.x));
-      dot.setAttribute("cy", String(p.y));
-      dot.setAttribute("opacity", String(Math.min(1, 6 * Math.min(t, 1 - t))));
-      if (t < 1) requestAnimationFrame(step);
-      else glow(b, 700);
-    };
-    requestAnimationFrame(step);
-    dispose(dur + 400, grad, base, dot);
+    setTimeout(() => glow(b, 700), dur);
+    dispose(dur + 400, grad, base);
   }
 
   if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
