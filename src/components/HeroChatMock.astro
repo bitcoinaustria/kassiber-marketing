@@ -31,7 +31,7 @@ import ModelPickerMock from "./ModelPickerMock.astro";
       <details class="hero-chat-picker">
         <summary class="hero-chat-model">
           <svg class="hero-chat-model-mark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="16" height="16" x="4" y="4" rx="2" /><rect width="6" height="6" x="9" y="9" rx="1" /><path d="M15 2v2" /><path d="M15 20v2" /><path d="M2 15h2" /><path d="M2 9h2" /><path d="M20 15h2" /><path d="M20 9h2" /><path d="M9 2v2" /><path d="M9 20v2" /></svg>
-          <span class="hero-chat-model-label">omlx · Qwen3.6-35B-A3B-4bit</span>
+          <span class="hero-chat-model-label">OpenCode · Qwen3.6-35B-A3B-4bit</span>
           <svg class="hero-chat-model-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6" /></svg>
         </summary>
         <div class="hero-chat-pop">
@@ -72,57 +72,14 @@ import ModelPickerMock from "./ModelPickerMock.astro";
    */
   .hero-chat {
     --zoom: 1.75;
-
-    /*
-     * Scroll-driven dock. The composer's resting place is below the fold, so it
-     * starts lifted by --dock-travel, holds that on-screen position while the
-     * page scrolls under it, then settles into the spot the app really docks it.
-     *
-     * The trick is that the animation range and the translate distance are the
-     * same length: over those pixels of scroll the element moves down the
-     * document at exactly the rate the document moves up, so it looks pinned to
-     * the viewport, then simply stops.
-     *
-     * --dock-travel is how far the resting position sits below the fold. It
-     * tracks viewport height (the shorter the window, the further it has to
-     * travel) and clamps to 0 on tall windows, where the dock is already in the
-     * first view and nothing should move. The 1460px is the resting bottom edge
-     * at desktop widths, measured; the fluid h1 makes it drift a little with
-     * width, so it is biased to overshoot — floating slightly high is harmless,
-     * starting below the fold defeats the point.
-     */
-    --dock-travel: clamp(0px, calc(1460px - 100vh), 620px);
-
     position: absolute;
-    /* Deliberately past the screenshot's right edge so it reads as floating
-       over the page rather than living inside the window. */
-    right: -3%;
+    right: 0;
     bottom: 2.6%;
     width: calc(29% * var(--zoom));
     z-index: 2;
     font-size: calc(0.86cqw * var(--zoom));
     line-height: 1;
     pointer-events: none;
-    /* Firefox needs a non-zero duration for scroll-driven animations. */
-    animation: heroChatDock 1ms linear both;
-    animation-timeline: scroll(root block);
-    animation-range: 0 var(--dock-travel);
-  }
-
-  @supports not (animation-timeline: scroll(root block)) {
-    .hero-chat {
-      animation: none;
-      transform: translateY(0);
-    }
-  }
-
-  @keyframes heroChatDock {
-    from {
-      transform: translateY(calc(-1 * var(--dock-travel)));
-    }
-    to {
-      transform: translateY(0);
-    }
   }
 
   /*
@@ -151,7 +108,7 @@ import ModelPickerMock from "./ModelPickerMock.astro";
   }
 
   .hero-chat-picker summary:focus-visible {
-    outline: 2px solid color-mix(in srgb, #ff3341 70%, transparent);
+    outline: 2px solid color-mix(in srgb, var(--app-fg) 65%, transparent);
     outline-offset: 3px;
     border-radius: 0.4em;
   }

@@ -109,23 +109,15 @@ const SLIDES = [
       <div class="hero-preview">
         <figure class="hero-screenshot-frame">
           <img
-            data-hero-src="/kassiber-overview-1180.webp"
-            data-hero-srcset="/kassiber-overview-1180.webp 1x, /kassiber-overview-previous.webp 2x"
+            src="/kassiber-overview-1180.webp"
+            srcset="/kassiber-overview-1180.webp 1x, /kassiber-overview-previous.webp 2x"
             alt="The Kassiber Overview screen: Bitcoin balance, BTC activity chart with cost basis and price, balance drivers, and holdings by source"
             width="2360"
             height="1555"
+            loading="eager"
+            fetchpriority="high"
             decoding="async"
-            hidden
           />
-          <noscript>
-            <img
-              src="/kassiber-overview-1180.webp"
-              srcset="/kassiber-overview-1180.webp 1x, /kassiber-overview-previous.webp 2x"
-              alt="The Kassiber Overview screen: Bitcoin balance, BTC activity chart with cost basis and price, balance drivers, and holdings by source"
-              width="2360"
-              height="1555"
-            />
-          </noscript>
         </figure>
         <LazyFragment className="hero-chat-frame" src="/fragments/hero-chat" title="Interactive local model picker" />
       </div>
@@ -477,7 +469,7 @@ const SLIDES = [
         <details class="faq-item" name="faq">
           <summary>What does it cost?</summary>
           <p>
-            Nothing. Kassiber is free and AGPL-3.0 licensed, built by
+            Nothing. Kassiber is free and AGPL-3.0 licensed, built by{" "}
             <a href="https://bitcoin-austria.at" target="_blank" rel="noopener noreferrer">Bitcoin Austria</a>,
             a nonprofit based in Austria. There is no paid tier and nothing
             to upsell.
@@ -516,29 +508,6 @@ const SLIDES = [
 </Layout>
 
 <script>
-  const heroImage = document.querySelector<HTMLImageElement>("img[data-hero-src]");
-  if (heroImage) {
-    heroImage.hidden = false;
-    const loadHeroImage = () => {
-      heroImage.src = heroImage.dataset.heroSrc ?? "";
-      heroImage.srcset = heroImage.dataset.heroSrcset ?? "";
-      delete heroImage.dataset.heroSrc;
-      delete heroImage.dataset.heroSrcset;
-    };
-    if ("IntersectionObserver" in window) {
-      const observer = new IntersectionObserver(([entry]) => {
-        if (!entry?.isIntersecting) return;
-        observer.disconnect();
-        loadHeroImage();
-      }, {
-        rootMargin: matchMedia("(max-width: 820px)").matches ? "0px" : "0px 0px -200px",
-      });
-      observer.observe(heroImage);
-    } else {
-      loadHeroImage();
-    }
-  }
-
   const fragmentFrames = [...document.querySelectorAll<HTMLIFrameElement>("iframe[data-fragment-src]")];
   fragmentFrames.forEach((frame) => { frame.hidden = false; });
   const loadFragment = (frame: HTMLIFrameElement) => {
@@ -936,8 +905,7 @@ const SLIDES = [
 </script>
 
 <style>
-  :global([data-fragment-src][hidden]),
-  :global([data-hero-src][hidden]) {
+  :global([data-fragment-src][hidden]) {
     display: none !important;
   }
 
@@ -1240,14 +1208,6 @@ const SLIDES = [
     margin: 0 auto;
   }
 
-  @media (min-width: 821px) and (max-height: 1000px) {
-    .hero-preview {
-      /* On short desktop screens, begin the product preview on the next fold
-         instead of showing a thin, unreadable slice of it. */
-      margin-top: max(0px, calc(100vh - 680px));
-    }
-  }
-
   .hero-screenshot-frame {
     position: relative;
     aspect-ratio: 2360 / 1555;
@@ -1274,12 +1234,36 @@ const SLIDES = [
   }
 
   :global(.hero-chat-frame) {
+    --dock-travel: clamp(0px, calc(1460px - 100vh), 620px);
+
     position: absolute;
-    inset: 0;
+    top: 0;
+    right: -3%;
+    bottom: 0;
     z-index: 2;
     width: 100%;
     height: 100%;
     border: 0;
+    /* The fragment cannot see the homepage scroll, so its transparent frame
+       carries the dock animation and intentional right-side overhang. */
+    animation-name: heroChatFrameDock;
+    animation-duration: 1ms;
+    animation-timing-function: linear;
+    animation-fill-mode: both;
+    animation-timeline: scroll(root block);
+    animation-range: 0 var(--dock-travel);
+  }
+
+  @supports not (animation-timeline: scroll(root block)) {
+    :global(.hero-chat-frame) {
+      animation: none;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes heroChatFrameDock {
+    from { transform: translateY(calc(-1 * var(--dock-travel))); }
+    to { transform: translateY(0); }
   }
 
   :global(.privacy-visual) {
@@ -1787,7 +1771,10 @@ const SLIDES = [
     }
     :global(.hero-chat-frame) {
       position: relative;
+      right: 0;
       height: 116px;
+      animation: none;
+      transform: none;
     }
     .hero-preview:hover { transform: none; }
     .sov-grid { grid-template-columns: 1fr; }
@@ -1874,6 +1861,11 @@ const SLIDES = [
   }
 
   @media (prefers-reduced-motion: reduce) {
+    :global(.hero-chat-frame) {
+      animation: none;
+      transform: none;
+    }
+
     .faq-item::details-content,
     .faq-item summary::after {
       transition: none;

@@ -21,93 +21,150 @@
  * rather than quantised locally, so they have no id line, which is what the app
  * renders for a model with no display_name.
  *
- * Not interactive. It is a picture of a control, not a control.
+ * Provider tabs are interactive; model rows remain a visual mock.
  */
+
+type Posture = "local" | "remote";
+type Provider = {
+  id: string;
+  name: string;
+  detail: string;
+  icon: string;
+  posture: Posture;
+  models: readonly {
+    name: string;
+    id?: string;
+    posture: Posture;
+    selected?: boolean;
+  }[];
+};
+
+const providers: readonly Provider[] = [
+  {
+    id: "opencode",
+    name: "OpenCode",
+    detail: "oMLX · http://127.0.0.1:8080/v1",
+    icon: "/harnesses/opencode-dark.svg",
+    posture: "local",
+    models: [
+      { name: "Qwen 3.6 35B", id: "Qwen3.6-35B-A3B-4bit", posture: "local", selected: true },
+      { name: "Gemma 4 26B MoE", id: "gemma-4-26b-a4b-it-4bit", posture: "local" },
+      { name: "Kimi K3", id: "moonshotai/kimi-k3", posture: "remote" },
+      { name: "GLM 5.2", posture: "remote" },
+    ],
+  },
+  {
+    id: "claude",
+    name: "Claude Code",
+    detail: "Local Claude Code CLI",
+    icon: "/harnesses/claude-ai-icon.svg",
+    posture: "remote",
+    models: [
+      { name: "Fable 5", id: "claude-fable-5", posture: "remote" },
+      { name: "Opus 4.8", id: "claude-opus-4-8", posture: "remote" },
+      { name: "Sonnet 4.6", id: "claude-sonnet-4-6", posture: "remote" },
+    ],
+  },
+  {
+    id: "codex",
+    name: "Codex CLI",
+    detail: "Local Codex CLI",
+    icon: "/harnesses/openai_dark.svg",
+    posture: "remote",
+    models: [
+      { name: "GPT-5.6 Sol", id: "gpt-5.6-sol", posture: "remote", selected: true },
+      { name: "GPT-5.6 Terra", id: "gpt-5.6-terra", posture: "remote" },
+      { name: "GPT-5.6 Luna", id: "gpt-5.6-luna", posture: "remote" },
+      { name: "GPT-5.5", id: "gpt-5.5", posture: "remote" },
+      { name: "GPT-5.4", id: "gpt-5.4", posture: "remote" },
+      { name: "GPT-5.4 Mini", id: "gpt-5.4-mini", posture: "remote" },
+      { name: "GPT-5.3 Codex Spark", id: "gpt-5.3-codex-spark", posture: "remote" },
+    ],
+  },
+];
 ---
 
-<div class="mpm" aria-hidden="true">
+<div class="mpm">
   <div class="mpm-body">
-    <!-- Provider rail: w-14, border-r, bg-muted/40, p-1, aspect-square buttons. -->
-    <div class="mpm-rail">
-      <span class="mpm-rail-btn is-active" title="oMLX">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="16" height="16" x="4" y="4" rx="2" /><rect width="6" height="6" x="9" y="9" rx="1" /><path d="M15 2v2" /><path d="M15 20v2" /><path d="M2 15h2" /><path d="M2 9h2" /><path d="M20 15h2" /><path d="M20 9h2" /><path d="M9 2v2" /><path d="M9 20v2" /></svg>
-        <span class="mpm-dot is-local"></span>
-      </span>
-      <span class="mpm-rail-btn" title="Ollama">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="16" height="16" x="4" y="4" rx="2" /><rect width="6" height="6" x="9" y="9" rx="1" /><path d="M15 2v2" /><path d="M15 20v2" /><path d="M2 15h2" /><path d="M2 9h2" /><path d="M20 15h2" /><path d="M20 9h2" /><path d="M9 2v2" /><path d="M9 20v2" /></svg>
-        <span class="mpm-dot is-local"></span>
-      </span>
-      <span class="mpm-rail-btn" title="Encrypted inference (TEE)">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z" /><path d="m9 12 2 2 4-4" /></svg>
-        <span class="mpm-dot is-tee"></span>
-      </span>
-      <span class="mpm-rail-btn" title="Claude Code">
-        <img src="/harnesses/claude-ai-icon.svg" alt="" />
-        <span class="mpm-dot is-remote"></span>
-      </span>
-      <span class="mpm-rail-btn" title="Codex CLI">
-        <img src="/harnesses/openai_dark.svg" alt="" />
-        <span class="mpm-dot is-remote"></span>
-      </span>
+    <div class="mpm-rail" aria-label="Agent">
+      {providers.map((provider, index) => (
+        <button
+          class:list={["mpm-rail-btn", { "is-active": index === 0 }]}
+          type="button"
+          id={`mpm-tab-${provider.id}`}
+          aria-controls={`mpm-panel-${provider.id}`}
+          aria-pressed={index === 0 ? "true" : "false"}
+          aria-label={provider.name}
+          data-provider-target={provider.id}
+          title={provider.name}
+        >
+          <img src={provider.icon} alt="" />
+          <span class:list={["mpm-dot", `is-${provider.posture}`]}></span>
+        </button>
+      ))}
     </div>
 
-    <div class="mpm-main">
-      <!-- Header: provider name + base_url, then the privacy filter + search. -->
-      <div class="mpm-head">
-        <div class="mpm-head-row">
-          <div class="mpm-head-meta">
-            <p class="mpm-provider">oMLX</p>
-            <p class="mpm-url">http://127.0.0.1:8080/v1</p>
+    {providers.map((provider, index) => (
+      <section
+        class="mpm-main"
+        role="region"
+        id={`mpm-panel-${provider.id}`}
+        aria-labelledby={`mpm-tab-${provider.id}`}
+        data-provider-panel={provider.id}
+        hidden={index !== 0}
+      >
+        <div class="mpm-head">
+          <div class="mpm-head-row">
+            <div class="mpm-head-meta">
+              <p class="mpm-provider">{provider.name}</p>
+              <p class="mpm-url">{provider.detail}</p>
+            </div>
+            <span class:list={["mpm-kind", `is-${provider.posture}`]}>
+              {provider.posture === "local" ? "local" : "hosted"}
+            </span>
           </div>
-          <div class="mpm-filter" role="group" aria-label="Model privacy filter">
-            <span class="is-on">All</span><span>Local</span>
+
+          <div class="mpm-search">
+            <svg class="mpm-search-mark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /></svg>
+            <span class="mpm-search-placeholder">Search models…</span>
           </div>
         </div>
 
-        <div class="mpm-search">
-          <svg class="mpm-search-mark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /></svg>
-          <span class="mpm-search-placeholder">Search models…</span>
+        <div class="mpm-list">
+          {provider.models.map((model) => (
+            <span class:list={["mpm-row", { "is-selected": model.selected }]}>
+              <span class="mpm-row-text">
+                <span class="mpm-row-name">{model.name}</span>
+                {model.id && <span class="mpm-row-id">{model.id}</span>}
+              </span>
+              <span class:list={["mpm-badge", `is-${model.posture}`]}>{model.posture}</span>
+              {model.selected && (
+                <svg class="mpm-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5" /></svg>
+              )}
+            </span>
+          ))}
         </div>
-      </div>
-
-      <!-- Model rows: p-1.5 list, selected row is bg-muted/70 with a Check. -->
-      <div class="mpm-list">
-        <span class="mpm-row is-selected">
-          <span class="mpm-row-text">
-            <span class="mpm-row-name">Qwen 3.6 35B</span>
-            <span class="mpm-row-id">Qwen3.6-35B-A3B-4bit</span>
-          </span>
-          <span class="mpm-badge is-local">local</span>
-          <svg class="mpm-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5" /></svg>
-        </span>
-
-        <span class="mpm-row">
-          <span class="mpm-row-text">
-            <span class="mpm-row-name">Gemma 4 27B</span>
-            <span class="mpm-row-id">Gemma4-27B-4bit</span>
-          </span>
-          <span class="mpm-badge is-local">local</span>
-        </span>
-
-        <!-- No display_name in the app means the id is the row title and there is
-             no mono second line; these two are served, not quantised locally. -->
-        <span class="mpm-row">
-          <span class="mpm-row-text">
-            <span class="mpm-row-name">Kimi3</span>
-          </span>
-          <span class="mpm-badge is-tee">TEE</span>
-        </span>
-
-        <span class="mpm-row">
-          <span class="mpm-row-text">
-            <span class="mpm-row-name">GLM 5.2</span>
-          </span>
-          <span class="mpm-badge is-tee">TEE</span>
-        </span>
-      </div>
-    </div>
+      </section>
+    ))}
   </div>
 </div>
+
+<script>
+  const tabs = [...document.querySelectorAll<HTMLButtonElement>("[data-provider-target]")];
+  const panels = [...document.querySelectorAll<HTMLElement>("[data-provider-panel]")];
+
+  for (const tab of tabs) {
+    tab.addEventListener("click", () => {
+      const target = tab.dataset.providerTarget;
+      for (const candidate of tabs) {
+        const active = candidate === tab;
+        candidate.classList.toggle("is-active", active);
+        candidate.setAttribute("aria-pressed", String(active));
+      }
+      for (const panel of panels) panel.hidden = panel.dataset.providerPanel !== target;
+    });
+  }
+</script>
 
 <style>
   /*
@@ -145,19 +202,8 @@
     overflow: hidden;
     border-radius: calc(0.375 * var(--u)); /* rounded-md */
 
-    /*
-     * .kb-glass-popover: the nested color-mix resolves to --popover at ~84%
-     * alpha, border-color is --foreground at 10%, and the dark shadow is
-     * 0 18px 44px -18px rgb(0 0 0 / 80%).
-     */
     border: 1px solid color-mix(in srgb, var(--app-fg) 10%, transparent);
-    background-color: color-mix(
-      in srgb,
-      var(--app-popover) 18%,
-      color-mix(in srgb, var(--app-popover) 80%, transparent)
-    );
-    backdrop-filter: blur(12px) saturate(1.14);
-    -webkit-backdrop-filter: blur(12px) saturate(1.14);
+    background: var(--app-popover);
     box-shadow: 0 18px 44px -18px rgb(0 0 0 / 80%);
   }
 
@@ -186,8 +232,12 @@
     aspect-ratio: 1;
     display: grid;
     place-items: center;
+    width: 100%;
+    border: 0;
     border-radius: calc(0.375 * var(--u));
+    background: transparent;
     color: var(--app-muted-fg);
+    cursor: pointer;
   }
 
   /* active && "bg-background text-foreground shadow-sm" */
@@ -195,6 +245,16 @@
     background: var(--app-bg);
     color: var(--app-fg);
     box-shadow: 0 1px 2px 0 rgb(0 0 0 / 5%), 0 1px 3px 0 rgb(0 0 0 / 10%);
+  }
+
+  .mpm-rail-btn:hover {
+    color: var(--app-fg);
+    background: color-mix(in srgb, var(--app-muted) 70%, transparent);
+  }
+
+  .mpm-rail-btn:focus-visible {
+    outline: 2px solid color-mix(in srgb, var(--app-fg) 65%, transparent);
+    outline-offset: -2px;
   }
 
   /* size-5 */
@@ -227,6 +287,10 @@
     flex-direction: column;
     min-width: 0;
     flex: 1;
+  }
+
+  .mpm-main[hidden] {
+    display: none;
   }
 
   /* border-b border-border/60 p-3 */
@@ -267,29 +331,17 @@
     white-space: nowrap;
   }
 
-  /* inline-flex rounded-md bg-muted p-0.5 text-2xs (--text-2xs: 0.694rem) */
-  .mpm-filter {
+  .mpm-kind {
     flex: none;
-    display: inline-flex;
-    padding: calc(0.125 * var(--u));
-    border-radius: calc(0.375 * var(--u));
-    background: var(--app-muted);
-    font-size: calc(0.694 * var(--u));
+    padding: calc(0.125 * var(--u)) calc(0.375 * var(--u));
+    border-radius: 999px;
+    font-size: calc(0.625 * var(--u));
+    font-weight: 500;
+    text-transform: uppercase;
   }
 
-  /* rounded px-1.5 py-1 text-muted-foreground */
-  .mpm-filter span {
-    padding: calc(0.25 * var(--u)) calc(0.375 * var(--u));
-    border-radius: calc(0.25 * var(--u));
-    color: var(--app-muted-fg);
-  }
-
-  /* active: bg-background text-foreground shadow-sm */
-  .mpm-filter span.is-on {
-    background: var(--app-bg);
-    color: var(--app-fg);
-    box-shadow: 0 1px 2px 0 rgb(0 0 0 / 5%), 0 1px 3px 0 rgb(0 0 0 / 10%);
-  }
+  .mpm-kind.is-local { background: rgb(16 185 129 / 15%); color: #6ee7b7; }
+  .mpm-kind.is-remote { background: rgb(245 158 11 / 15%); color: #fcd34d; }
 
   /*
    * Input base (components/ui/input.tsx) plus the picker's h-8 pl-8 text-xs:
@@ -330,7 +382,8 @@
     flex: 1;
     min-height: 0;
     padding: calc(0.375 * var(--u));
-    overflow: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
   }
 
   /* flex w-full items-center gap-3 rounded-md px-3 py-2 */
@@ -388,6 +441,11 @@
   .mpm-badge.is-local {
     background: color-mix(in srgb, #10b981 15%, transparent);
     color: #6ee7b7; /* dark:text-emerald-300 */
+  }
+
+  .mpm-badge.is-remote {
+    background: color-mix(in srgb, #f59e0b 15%, transparent);
+    color: #fcd34d;
   }
 
   /* KIND_TONE.tee: bg-sky-500/15 dark:text-sky-300 */
