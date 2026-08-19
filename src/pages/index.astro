@@ -1786,23 +1786,8 @@ const SLIDES = [
     section { padding: 64px 0; }
     .sec-cta { padding: 96px 0; }
     .container { padding-left: 20px; padding-right: 20px; }
-    /* The screenshot is unreadable at this width; the composer is not, so it
-       stays as the hero's visual and the frame goes. */
-    .hero-screenshot-frame { display: none; }
-    .hero-preview {
-      width: auto;
-      min-height: 116px;
-      margin-left: 0;
-      transform: none;
-    }
-    :global(.hero-chat-frame) {
-      position: relative;
-      right: 0;
-      height: 116px;
-      animation: none;
-      transform: none;
-    }
-    .hero-preview:hover { transform: none; }
+    /* The desktop app capture and model picker are too dense for phones. */
+    .hero-preview { display: none; }
     .sov-grid { grid-template-columns: 1fr; }
   }
 

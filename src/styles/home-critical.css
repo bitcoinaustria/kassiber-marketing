@@ -197,9 +197,7 @@ html:not(.home-ready) .hero-chat { display: none; }
   .hero { padding-top: 132px; padding-bottom: 170px; }
   .hero-title { margin-top: 14px; font-size: clamp(40px, 11vw, 56px); }
   .hero-actions { margin-bottom: 0; }
-  .hero-preview { width: auto; min-height: 116px; margin-left: 0; transform: none; }
-  .hero-screenshot-frame { display: none; }
-  .hero-chat-frame { position: relative; right: 0; width: 100%; height: 116px; border: 0; animation: none; transform: none; }
+  .hero-preview { display: none; }
   .hero-float { position: absolute; inset: 0; display: block; }
   .hero-float-mark { position: absolute; width: 78px; height: 78px; border-radius: 20px; }
   .hero-float-mark img { width: 44px; height: 44px; }
