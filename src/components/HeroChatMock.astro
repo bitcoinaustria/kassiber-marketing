@@ -108,9 +108,8 @@ import ModelPickerMock from "./ModelPickerMock.astro";
   }
 
   .hero-chat-picker summary:focus-visible {
-    outline: 2px solid color-mix(in srgb, var(--app-fg) 65%, transparent);
-    outline-offset: 3px;
-    border-radius: 0.4em;
+    outline: none;
+    color: var(--app-fg);
   }
 
   .hero-chat-picker[open] .hero-chat-model-chevron {
@@ -155,21 +154,6 @@ import ModelPickerMock from "./ModelPickerMock.astro";
     box-shadow: 0 20px 48px -22px rgb(0 0 0 / 65%);
     transform: perspective(2000px) rotateX(2deg);
     transform-origin: 78% 100%;
-    transition: transform 0.6s ease, box-shadow 0.6s ease;
-    will-change: transform;
-  }
-
-  /* The composer occupies a separate plane from the app capture behind it.
-     Giving each its own hover target makes the stack feel layered, not fused. */
-  @media (hover: hover) and (pointer: fine) {
-    .hero-chat {
-      pointer-events: auto;
-    }
-
-    .hero-chat:hover .hero-chat-dock {
-      transform: perspective(2000px) translateY(-10px) rotateX(0deg) rotateY(-1deg) scale(1.0125);
-      box-shadow: 0 28px 58px -22px rgb(0 0 0 / 78%);
-    }
   }
 
   /* App tokens (dark theme), copied from ui-tauri/src/styles/globals.css. */

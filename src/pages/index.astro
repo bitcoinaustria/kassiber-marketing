@@ -331,6 +331,7 @@ const SLIDES = [
                 height="1143"
                 loading="lazy"
                 decoding="async"
+                draggable="false"
               />
               <span class="shot-expand" aria-hidden="true">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
@@ -344,7 +345,7 @@ const SLIDES = [
 
     <dialog class="screens-lightbox" aria-label="Screenshot, enlarged">
       <div class="lightbox-scroll">
-        <img alt="" width="1920" height="1143" decoding="async" />
+        <img alt="" width="1920" height="1143" decoding="async" draggable="false" />
       </div>
       <button class="lightbox-close" type="button" aria-label="Close">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
@@ -909,6 +910,20 @@ const SLIDES = [
     display: none !important;
   }
 
+  :global(.main :focus-visible) {
+    outline: none;
+  }
+
+  :global(.main a:focus-visible) {
+    text-decoration-color: currentColor;
+    text-decoration-thickness: 2px;
+  }
+
+  :global(.main button:focus-visible),
+  :global(.main summary:focus-visible) {
+    filter: brightness(1.15);
+  }
+
   /* ── Section base ─────────────────────────────────────────── */
   section {
     position: relative;
@@ -1363,10 +1378,21 @@ const SLIDES = [
     scrollbar-color: var(--border) transparent;
   }
 
+  .screens-strip:focus-visible {
+    outline: none;
+    scrollbar-color: var(--fg-muted) transparent;
+  }
+
   .screens-item {
     flex: 0 0 min(860px, 84vw);
     scroll-snap-align: start;
     margin: 0;
+  }
+
+  .screens-strip img,
+  .screens-lightbox img {
+    user-select: none;
+    -webkit-user-drag: none;
   }
 
   .screens-item figcaption {

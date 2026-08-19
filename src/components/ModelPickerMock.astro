@@ -247,14 +247,14 @@ const providers: readonly Provider[] = [
     box-shadow: 0 1px 2px 0 rgb(0 0 0 / 5%), 0 1px 3px 0 rgb(0 0 0 / 10%);
   }
 
-  .mpm-rail-btn:hover {
+  .mpm-rail-btn:hover,
+  .mpm-rail-btn:focus-visible {
     color: var(--app-fg);
     background: color-mix(in srgb, var(--app-muted) 70%, transparent);
   }
 
   .mpm-rail-btn:focus-visible {
-    outline: 2px solid color-mix(in srgb, var(--app-fg) 65%, transparent);
-    outline-offset: -2px;
+    outline: none;
   }
 
   /* size-5 */
