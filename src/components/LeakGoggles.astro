@@ -19,6 +19,12 @@
  * play at the speed the sentences read at rather than the speed the wheel
  * turns. It plays once and does not reset, for the same reason.
  */
+interface Props {
+  showNote?: boolean;
+}
+
+const { showNote = true } = Astro.props;
+
 /* Geometry follows the block view in the mempool project: a block is a grid of
    cells, every transaction is a square some whole number of cells wide, and the
    big ones are placed first into the first slot that holds them so everything
@@ -340,14 +346,16 @@ const DIVIDERS = Array.from({ length: BLOCKS }, (_, i) => (i + 1) * (BLOCK_W + B
     </div>
   </div>
 
-  <div class="mp-inner">
-    <p class="mp-note">
-      Your books are the most damaging file you own: a leaked history can't be
-      rotated like a key. Hosted, they become a honeypot that only has to leak
-      once. Kassiber builds them on your machine, and what leaves, if anything,
-      is your decision.
-    </p>
-  </div>
+  {showNote && (
+    <div class="mp-inner">
+      <p class="mp-note">
+        Your books are the most damaging file you own: a leaked history can't be
+        rotated like a key. Hosted, they become a honeypot that only has to leak
+        once. Kassiber builds them on your machine, and what leaves, if anything,
+        is your decision.
+      </p>
+    </div>
+  )}
 </figure>
 
 <style>

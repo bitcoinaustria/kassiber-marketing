@@ -2,7 +2,7 @@ const REPO = "bitcoinaustria/kassiber";
 
 export const RELEASES_URL = `https://github.com/${REPO}/releases`;
 
-const API_URL = `https://api.github.com/repos/${REPO}/releases/latest`;
+const API_URL = `https://api.github.com/repos/${REPO}/releases?per_page=1`;
 const CACHE_KEY = "kassiber-latest-release";
 
 export interface ReleaseAsset {
@@ -18,13 +18,20 @@ export interface Release {
 
 export async function fetchLatestRelease(): Promise<Release> {
   const cached = sessionStorage.getItem(CACHE_KEY);
-  if (cached) return JSON.parse(cached);
-
-  const data = await fetch(API_URL).then((r) => r.json());
-
-  if (data?.assets) {
-    sessionStorage.setItem(CACHE_KEY, JSON.stringify(data));
+  if (cached) {
+    try {
+      return JSON.parse(cached);
+    } catch {
+      sessionStorage.removeItem(CACHE_KEY);
+    }
   }
 
-  return data;
+  const response = await fetch(API_URL);
+  if (!response.ok) throw new Error(`GitHub releases request failed: ${response.status}`);
+
+  const [release] = (await response.json()) as Release[];
+  if (!release) throw new Error("No published Kassiber release found");
+
+  sessionStorage.setItem(CACHE_KEY, JSON.stringify(release));
+  return release;
 }

@@ -195,7 +195,7 @@ const STATES = [
   .sheet-formula span {
     grid-area: 1 / 1;
     opacity: 0;
-    transition: opacity 0.25s ease;
+    visibility: hidden;
   }
 
   [data-sel="s1"] [data-ref="s1"], [data-sel="s1"] [data-formula="s1"],
@@ -203,6 +203,7 @@ const STATES = [
   [data-sel="s3"] [data-ref="s3"], [data-sel="s3"] [data-formula="s3"],
   [data-sel="s4"] [data-ref="s4"], [data-sel="s4"] [data-formula="s4"] {
     opacity: 1;
+    visibility: visible;
   }
 
   /* ── Grid ─────────────────────────────────────────────── */

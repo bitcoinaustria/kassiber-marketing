@@ -145,6 +145,7 @@ const ROWS = Array.from({ length: DECK }, (_, i) => {
     --k-muted-fg: oklch(0.708 0 0);
     --k-fg: oklch(0.985 0 0);
     --k-border: oklch(1 0 0 / 10%);
+    --txs-stage-height: 560px;
 
     position: relative;
   }
@@ -172,7 +173,7 @@ const ROWS = Array.from({ length: DECK }, (_, i) => {
      what made this stutter on phones. Rows already fade at both edges via
      their own opacity, so the mask was buying nothing. */
   .txs.is-anim {
-    height: 560px;
+    height: var(--txs-stage-height);
     /* The mask used to clip as well as fade. Removing it for performance let
        rows keep rising past the top and paint over the headline, so the clip
        has to be stated. overflow is a paint-time clip and costs far less than
@@ -327,7 +328,7 @@ const ROWS = Array.from({ length: DECK }, (_, i) => {
   }
   .txs.is-anim .txs-row:not(.is-class) .txs-c-amt b { color: var(--k-muted-fg); }
 
-  @media (max-width: 1023px) {
+  @media (max-width: 960px) {
     .txs-row { grid-template-columns: minmax(0, 1fr) 170px 132px; }
     .txs-c-net { display: none; }
   }
@@ -338,7 +339,7 @@ const ROWS = Array.from({ length: DECK }, (_, i) => {
   @media (max-width: 767px) {
     /* Rows are half again as tall here, so the stage needs the extra room to
        still show a before and an after either side of the resolve line. */
-    .txs.is-anim { height: 520px; }
+    .txs { --txs-stage-height: 520px; }
     .txs-row { grid-template-columns: minmax(0, 1fr) auto; align-items: start; }
     .txs-c-tx { grid-column: 1; }
     .txs-c-amt { grid-column: 2; }
@@ -353,7 +354,7 @@ const ROWS = Array.from({ length: DECK }, (_, i) => {
     .txs-txhead b { font-size: 13px; }
   }
   @media (max-width: 560px) {
-    .txs.is-anim { height: 480px; }
+    .txs { --txs-stage-height: 480px; }
     .txs-ico { width: 28px; height: 28px; }
     .txs-c-status { padding-left: 52px; }
     .txs-meta, .txs-c-amt em, .txs-c-status em, .txs-schip, .txs-badge { font-size: 11px; }
@@ -389,17 +390,13 @@ const ROWS = Array.from({ length: DECK }, (_, i) => {
       return t * t * (3 - 2 * t);
     };
 
-    let H = 0, rowH = 0, table: number[] = [];
+    let H = 0, rowH = 0, table: number[] = [], ready = false;
 
     /* Spacing shrinks as a row rises, so the settled book compresses into a
        deck at the top while new arrivals stay full size and readable. The
        cumulative offset has no closed form, so integrate it once per layout. */
-    const measure = () => {
-      // Measure before switching to absolute positioning, or every row
-      // collapses to the same box and rowH comes back wrong.
-      rowH = rows[0].offsetHeight || 62;
-      root.classList.add("is-anim");
-      H = root.clientHeight;
+    const rebuildTable = () => {
+      if (!H || !rowH) return;
       const gap = 12;
       const spacingAt = (s: number) =>
         rowH * (1 - 0.66 * smooth(1.4, 7, s)) + gap * (1 - smooth(1.4, 6, s));
@@ -409,14 +406,33 @@ const ROWS = Array.from({ length: DECK }, (_, i) => {
         acc += spacingAt(s) * STEP;
         table.push(acc);
       }
+      ready = true;
     };
+
+    /* ResizeObserver supplies already-computed boxes after layout. Reading
+       offsetHeight here used to force the browser to lay out the whole page
+       synchronously during startup. Without ResizeObserver, keep the useful
+       static list instead of opting into an animation we cannot measure. */
+    if (!("ResizeObserver" in window)) continue;
+    const layoutObserver = new ResizeObserver((entries) => {
+      if (!root.classList.contains("is-anim")) return;
+      for (const entry of entries) {
+        const box = entry.borderBoxSize?.[0];
+        const height = box?.blockSize ?? entry.contentRect.height;
+        if (entry.target === root) H = height;
+        if (entry.target === rows[0]) rowH = height;
+      }
+      rebuildTable();
+      run();
+    });
+    root.classList.add("is-anim");
+    layoutObserver.observe(root);
+    layoutObserver.observe(rows[0]);
+
     const cumY = (s: number) => {
       const i = Math.min(table.length - 1, Math.max(0, Math.round(s / 0.02)));
       return table[i];
     };
-
-    measure();
-    addEventListener("resize", measure, { passive: true });
 
     let raf = 0, prev = 0, phase = 0;
 
@@ -500,6 +516,7 @@ const ROWS = Array.from({ length: DECK }, (_, i) => {
     const calmDown = () => {
       stop();
       root.classList.remove("is-anim");
+      ready = false;
       for (const el of rows) {
         // Clear only what the loop wrote. Wiping the whole style attribute
         // would take the inline --bd/--bg/--fg with it, and those carry each
@@ -521,8 +538,11 @@ const ROWS = Array.from({ length: DECK }, (_, i) => {
         calmDown();
         return;
       }
-      if (!root.classList.contains("is-anim")) measure();
-      if (onScreen && !raf) {
+      if (!root.classList.contains("is-anim")) {
+        ready = false;
+        root.classList.add("is-anim");
+      }
+      if (ready && onScreen && !raf) {
         prev = 0;
         raf = requestAnimationFrame(frame);
       }
