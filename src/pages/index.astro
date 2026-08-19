@@ -1015,6 +1015,9 @@ const SLIDES = [
     dispose(dur + 400, grad, base);
   }
 
+  // On narrow screens the cards frame the text, so every line would cut
+  // straight through the copy — no network there, the cards just float.
+  const wideEnough = window.matchMedia("(min-width: 768px)");
   if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
     document.querySelectorAll<HTMLElement>(".hero").forEach((hero) => {
       const svg = hero.querySelector<SVGSVGElement>(".hero-links");
@@ -1026,7 +1029,7 @@ const SLIDES = [
       }).observe(hero);
       const tick = () => {
         // Roughly every fifth event is an OpenCode poll round.
-        if (visible) (Math.random() < 0.2 ? report : fire)(hero, svg);
+        if (visible && wideEnough.matches) (Math.random() < 0.2 ? report : fire)(hero, svg);
         setTimeout(tick, 1100 + Math.random() * 2000);
       };
       setTimeout(tick, Math.random() * 1200);
