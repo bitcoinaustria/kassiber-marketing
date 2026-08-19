@@ -7,8 +7,8 @@ import { readFile, writeFile } from "node:fs/promises";
 const site = process.env.SITE_URL ?? "https://kassiber.app";
 
 // The homepage's first fold is fully covered by home-critical.css. Keep the
-// rest out of the render path, then apply it on interaction or after 3.5s;
-// noscript still receives the ordinary stylesheets.
+// rest out of the render path, but inline font-face declarations so cached
+// fonts are available at first paint. Noscript still receives full styles.
 const deferHomepageStyles = {
   name: "defer-homepage-styles",
   hooks: {
@@ -19,14 +19,27 @@ const deferHomepageStyles = {
         new URL("./src/styles/home-critical.css", import.meta.url),
         "utf8",
       );
+      const stylesheetHrefs = [...html.matchAll(/<link rel="stylesheet" href="([^"]+)">/g)]
+        .map((match) => match[1]);
+      const fontStylesheets = new Map();
+      await Promise.all(stylesheetHrefs.map(async (href) => {
+        const css = await readFile(new URL(href.slice(1), dir), "utf8");
+        if (css.includes("@font-face")) {
+          fontStylesheets.set(
+            href,
+            css.replaceAll("font-display:swap", "font-display:optional"),
+          );
+        }
+      }));
       html = html.replace(
         "</head>",
-        `<style>${critical}</style></head>`,
+        `<style>${[...fontStylesheets.values()].join("")}${critical}</style></head>`,
       );
       html = html.replace(
         /<link rel="stylesheet" href="([^"]+)">/g,
-        (_, href) =>
-          `<template data-deferred-style><link rel="stylesheet" href="${href}"${href.includes("/index.") ? " data-home-style" : ""}></template><noscript><link rel="stylesheet" href="${href}"></noscript>`,
+        (_, href) => fontStylesheets.has(href)
+          ? ""
+          : `<template data-deferred-style><link rel="stylesheet" href="${href}"${href.includes("/index.") ? " data-home-style" : ""}></template><noscript><link rel="stylesheet" href="${href}"></noscript>`,
       );
       html = html.replace(
         "</head>",
