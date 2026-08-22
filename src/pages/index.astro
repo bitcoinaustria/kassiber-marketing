@@ -84,8 +84,8 @@ const SLIDES = [
 
       <p class="hero-sub">
         One book for on-chain, Lightning, and Liquid. Transfers between your
-        own wallets are matched, not taxed, and reports carry the formulas
-        that prove them.
+        own wallets are matched as moves, not sales, and reports carry the
+        formulas that prove them.
       </p>
 
       <div class="hero-actions">
@@ -158,10 +158,11 @@ const SLIDES = [
   <section id="history">
     <div class="container">
       <div class="section-head">
-        <h2>Raw transactions in. A classified book out.</h2>
+        <h2>Your whole history, sorted.</h2>
         <p>
-          Everything lands in one searchable history, each row with its
-          source and its accounting treatment.
+          Sends, receives, and transfers from every wallet land in one
+          searchable book. Each entry keeps its wallet, its price, and
+          whether it's taxable.
         </p>
       </div>
       <TxStreamMock />
@@ -191,7 +192,7 @@ const SLIDES = [
   <section id="tax" class="sec-tax">
     <div class="container">
       <div class="section-head">
-        <h2>Reports you can verify.</h2>
+        <h2>Tax reports you can verify.</h2>
         <p>
           <a href="https://github.com/eprbell/rp2" target="_blank" rel="noopener noreferrer">RP2</a> computes FIFO, HIFO, or moving-average reports locally. The export re-derives every gain and checks it against Kassiber, for you and your advisor to verify. An Austrian § 27b EStG preset is included.
         </p>
@@ -217,10 +218,12 @@ const SLIDES = [
     <LeakGoggles showNote={false} />
     <div class="container">
       <p class="privacy-note">
-        Your books are the most damaging file you own: a leaked history can't be
-        rotated like a key. Hosted, they become a honeypot that only has to leak
-        once. Kassiber builds them on your machine, and what leaves, if anything,
-        is your decision.
+        A hosted tax tool holds names, addresses, and balances for every
+        customer. Files like that leak, and leaked lists of who holds what
+        have guided robberies. You can't change your history the way you
+        change a password. What you can control is who ever holds it:
+        Kassiber keeps your books on your machine, and nothing leaves
+        without your decision.
       </p>
     </div>
   </section>
@@ -406,6 +409,35 @@ const SLIDES = [
 
       <div class="faq-list">
         <details class="faq-item" name="faq">
+          <summary>Does my data leave my machine?</summary>
+          <p>
+            Only when you choose. Syncing asks a backend about your addresses,
+            and you pick that backend, your own node or Tor included. There is
+            no account and no cloud copy. Reports are local files until you
+            share them yourself.
+          </p>
+        </details>
+
+        <details class="faq-item" name="faq">
+          <summary>Does Kassiber report anything to a tax office?</summary>
+          <p>
+            No. Kassiber files nothing and talks to no authority. It
+            calculates on your device and writes the results into your
+            encrypted database. A report only goes where you send it. What
+            you file, and how, stays in your hands.
+          </p>
+        </details>
+
+        <details class="faq-item" name="faq">
+          <summary>Can Kassiber spend my coins?</summary>
+          <p>
+            No. Kassiber reads descriptors and watch-only addresses; it never
+            holds spending keys. Connected agents can inspect the book. They
+            cannot sign or broadcast transactions.
+          </p>
+        </details>
+
+        <details class="faq-item" name="faq">
           <summary>Can I try it without connecting my own wallets?</summary>
           <p>
             Yes, if you have Docker. The regtest script starts a disposable
@@ -457,15 +489,6 @@ const SLIDES = [
           <p>
             Kassiber cannot recover your passphrase. Lose it and the encrypted
             books stay locked, so store it with your seed backups.
-          </p>
-        </details>
-
-        <details class="faq-item" name="faq">
-          <summary>Can Kassiber spend my coins?</summary>
-          <p>
-            No. Kassiber reads descriptors and watch-only addresses; it never
-            holds spending keys. Connected agents can inspect the book. They
-            cannot sign or broadcast transactions.
           </p>
         </details>
 
