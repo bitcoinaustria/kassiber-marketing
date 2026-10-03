@@ -4,6 +4,7 @@ import CopyCommand from "../components/CopyCommand.astro";
 import AddConnectionMock from "../components/AddConnectionMock.astro";
 import AgentChatMock from "../components/AgentChatMock.astro";
 import HeroChatMock from "../components/HeroChatMock.astro";
+import HeroOverviewMock from "../components/HeroOverviewMock.astro";
 import LeakGoggles from "../components/LeakGoggles.astro";
 import SwapFlowMock from "../components/SwapFlowMock.astro";
 import TaxSheetMock from "../components/TaxSheetMock.astro";
@@ -114,16 +115,7 @@ const SLIDES = [
 
       <div class="hero-preview">
         <figure class="hero-screenshot-frame">
-          <img
-            src="/kassiber-overview-1180.webp"
-            srcset="/kassiber-overview-1180.webp 1x, /kassiber-overview-previous.webp 2x"
-            alt="The Kassiber Overview screen: Bitcoin balance, BTC activity chart with cost basis and price, balance drivers, and holdings by source"
-            width="2360"
-            height="1555"
-            loading="eager"
-            fetchpriority="high"
-            decoding="async"
-          />
+          <HeroOverviewMock />
         </figure>
         <HeroChatMock />
       </div>
@@ -132,8 +124,8 @@ const SLIDES = [
 
   <!-- ── Local-first ───────────────────────────────────────────── -->
   <section id="connections" class="sec-sov">
-    <div class="container sov-inner">
-      <div class="sov-copy">
+    <div class="container">
+      <div class="sov-head">
         <div class="section-head" style="margin-bottom:0">
           <h2>Connect what you already run.</h2>
           <p>
@@ -148,9 +140,7 @@ const SLIDES = [
         </p>
       </div>
 
-      <div class="sov-visual">
-        <AddConnectionMock />
-      </div>
+      <AddConnectionMock />
     </div>
   </section>
 
@@ -171,20 +161,16 @@ const SLIDES = [
 
   <!-- ── Pairing ───────────────────────────────────────────────── -->
   <section id="pairing" class="sec-git">
-    <div class="container git-inner">
-      <div class="git-visual">
-        <SwapFlowMock />
+    <div class="container">
+      <div class="section-head">
+        <h2>A move between your own wallets isn't a sale.</h2>
+        <p>
+          Kassiber pairs both legs of a transfer, swap, or wallet
+          migration, so your cost basis travels with the coins.
+        </p>
       </div>
 
-      <div class="git-copy">
-        <div class="section-head" style="margin-bottom:0">
-          <h2>A move between your own wallets isn't a sale.</h2>
-          <p>
-            Kassiber pairs both legs of a transfer, swap, or wallet
-            migration, so your cost basis travels with the coins.
-          </p>
-        </div>
-      </div>
+      <SwapFlowMock />
     </div>
   </section>
 
@@ -1342,10 +1328,12 @@ const SLIDES = [
     margin: 0 auto;
   }
 
+  /* The recreated app window (HeroOverviewMock): a 1440 × 949 window at the
+     app's own scale, so 1cqw of the preview is one app rem. */
   .hero-screenshot-frame {
     position: relative;
-    aspect-ratio: 2360 / 1555;
-    background: #0a0a0c;
+    aspect-ratio: 1440 / 949;
+    border-radius: calc(1cqw / 14.4 * 12);
     box-shadow: 0 28px 64px -28px rgba(0, 0, 0, 0.75);
     transform: perspective(2000px) rotateX(2deg);
     transform-origin: center bottom;
@@ -1357,14 +1345,6 @@ const SLIDES = [
     .hero-screenshot-frame:hover {
       transform: perspective(2000px) rotateX(0deg);
     }
-  }
-
-  .hero-screenshot-frame img {
-    width: calc(100% + 4px);
-    height: calc(100% + 4px);
-    margin: -2px;
-    object-fit: cover;
-    object-position: center top;
   }
 
   :global(.hero-chat) {
@@ -1399,15 +1379,14 @@ const SLIDES = [
   }
 
   /* ── Local-first ──────────────────────────────────────── */
-  .sov-inner {
-    display: grid;
-    grid-template-columns: 1fr 1.1fr;
-    gap: 64px;
-    align-items: center;
+  /* The dialog keeps the app's three columns, so it takes the full width under
+     the copy rather than a column beside it. */
+  .sov-head {
+    margin-bottom: 40px;
   }
 
-  .sov-visual {
-    min-width: 0;
+  .sov-head .section-note {
+    margin-bottom: 0;
   }
 
   /* ── Harnesses ─────────────────────────────────────────── */
@@ -1613,25 +1592,10 @@ const SLIDES = [
     }
   }
 
-  /* ── Git ──────────────────────────────────────────────── */
-  /* ── Bird's eye ───────────────────────────────────────── */
-
-  /* Bird's eye uses the plain left-aligned .section-head, like #tax and
-     #screens. Centring is reserved for the framing sections. */
-
-
-  .git-inner {
-    display: grid;
-    grid-template-columns: 1.1fr 1fr;
-    gap: 64px; align-items: center;
-  }
-
-  .git-visual {
-    position: relative;
-    display: flex; flex-direction: column;
-    align-items: stretch; gap: 20px;
-  }
-
+  /* ── Bird's eye and pairing ───────────────────────────── */
+  /* Both use the plain left-aligned .section-head over a full-width panel,
+     like #tax and #screens. Centring is reserved for the framing sections;
+     the glass graph needs the width more than a copy column does. */
 
   /* ── Tax & reports ────────────────────────────────────── */
   .sec-tax .section-head p a,
@@ -1863,11 +1827,6 @@ const SLIDES = [
       margin-left: 50%;
       transform: translateX(-50%);
     }
-    .git-inner { grid-template-columns: 1fr; gap: 40px; }
-    /* Stacked, the copy has to come first: the diagram means nothing before
-       you've read what it is. */
-    .git-copy { order: -1; }
-    .sov-inner { grid-template-columns: 1fr; gap: 40px; }
     .agents-detail { grid-template-columns: 1fr; gap: 40px; }
     .open-grid { grid-template-columns: 1fr; }
   }
@@ -1876,7 +1835,7 @@ const SLIDES = [
     :global(.main) > section:not(.hero) { padding: 64px 0; }
     .sec-cta { padding: 96px 0; }
     .container { padding-left: 20px; padding-right: 20px; }
-    /* The desktop app capture and model picker are too dense for phones. */
+    /* The desktop window and model picker are too dense for phones. */
     .hero-preview { display: none; }
     .sov-grid { grid-template-columns: 1fr; }
   }

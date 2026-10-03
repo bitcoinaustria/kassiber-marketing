@@ -1,135 +1,565 @@
 ---
 /*
  * Interactive mock of Kassiber's swap detail: the paired swap route with its
- * leg toggle, and the transaction-flow sankey underneath. Ported from the
- * app's swap detail screen (regtest demo book, Swap LBTC -> BTC) the same way
- * HeroChatMock ports the composer: app dark-theme values copied literally.
+ * leg toggle, and the transaction graph in glass underneath, ported from the
+ * app's TransactionGraphPanel (ui-tauri/src/components/transactions/
+ * TransactionGraphTab.tsx) and its 3D view (graph3d/). App dark-theme values
+ * are copied literally, so the panel reads as the app.
  *
- * The leg cards are real buttons. Selecting a leg swaps the graph and its
- * subtitle, exactly like the app: the Liquid side is a reference graph with
- * confidential amounts, the Bitcoin side is the valued input/output graph.
+ * The graph is the app's own scene: one glass ribbon per input and output, as
+ * thick as mempool draws that strand, your coins as blue blocks, everyone
+ * else's grey, confidential amounts frosted, and every ribbon meeting in one
+ * glass collar. three.js loads only once the panel scrolls near; until then,
+ * and wherever WebGL is missing, the same piece shows straight on as SVG.
  */
+import { SWAP_LEGS, formatBtc, type IoRow, type SwapLeg } from "../lib/txgraph/demoSwap";
+import { frontView } from "../lib/txgraph/frontView";
+import { ribbonLayout } from "../lib/txgraph/ribbonLayout";
+
+const LEGS: SwapLeg[] = [SWAP_LEGS.liquid, SWAP_LEGS.bitcoin];
+const FRONT = Object.fromEntries(LEGS.map((leg) => [leg.key, frontView(ribbonLayout(leg.graph))]));
+
+/** Rows shown before "Show all", fewer than the app's eight to keep the panel short. */
+const COLLAPSED_ROWS = 3;
+
+const total = (rows: IoRow[]) => {
+  const known = rows.filter((row) => row.sats !== null);
+  if (!known.length) return { label: "Known total", value: "Confidential amount" };
+  return {
+    label: known.length === rows.length ? "Total" : "Known total",
+    value: formatBtc(known.reduce((sum, row) => sum + (row.sats ?? 0), 0)),
+  };
+};
+
+const LEGEND = [
+  { key: "known", label: "Known amount" },
+  { key: "unknown", label: "Amount unknown" },
+  { key: "own", label: "Your wallet" },
+  { key: "other", label: "Other" },
+  { key: "fee", label: "Fee" },
+];
 ---
 
-<div class="swap-mock" data-leg="liquid">
+<div class="swap-mock" data-swap-mock data-leg="liquid">
   <div class="swap-route" role="group" aria-label="Paired swap route">
-    <button class="swap-leg" type="button" data-leg-btn="liquid" aria-pressed="true">
-      <span class="swap-leg-head">
-        <span class="swap-leg-key">Spent leg</span>
-        <span class="swap-leg-chip">Selected</span>
-      </span>
-      <span class="swap-leg-asset"><img src="/harnesses/liquid.svg" alt="" /> Liquid</span>
-      <span class="swap-leg-amt">&#8383; 0.04200000</span>
-    </button>
-
-    <div class="swap-peg" aria-hidden="true">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M13 6l6 6-6 6"/></svg>
+    <div class="swap-route-head">
+      <svg class="swap-route-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3 4 7l4 4" /><path d="M4 7h16" /><path d="m16 21 4-4-4-4" /><path d="M20 17H4" /></svg>
+      <span>Paired swap route</span>
     </div>
 
-    <button class="swap-leg" type="button" data-leg-btn="bitcoin" aria-pressed="false">
-      <span class="swap-leg-head">
-        <span class="swap-leg-key">Received leg</span>
-        <span class="swap-leg-chip">Selected</span>
-      </span>
-      <span class="swap-leg-asset"><img src="/harnesses/bitcoin.svg" alt="" /> Bitcoin</span>
-      <span class="swap-leg-amt">&#8383; 0.04195800</span>
-    </button>
+    <div class="swap-route-grid">
+      <button class="swap-leg" type="button" data-leg-btn="liquid" aria-pressed="true">
+        <span class="swap-leg-top">
+          <span class="swap-leg-key">Consolidation leg</span>
+          <span class="swap-leg-chip">Selected</span>
+        </span>
+        <span class="swap-leg-asset">Liquid <img src="/harnesses/liquid.svg" alt="" /></span>
+        <span class="swap-leg-amt">{formatBtc(4_200_000)}</span>
+      </button>
+
+      <div class="swap-peg">
+        <svg class="swap-peg-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14" /><path d="m12 5 7 7-7 7" /></svg>
+        <span class="swap-peg-copy">
+          <span class="swap-peg-name">Atomic Swap</span>
+          <span class="swap-peg-policy">Carrying value</span>
+          <span class="swap-peg-fee">Fee 0.10%</span>
+        </span>
+        <svg class="swap-peg-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14" /><path d="m12 5 7 7-7 7" /></svg>
+      </div>
+
+      <button class="swap-leg" type="button" data-leg-btn="bitcoin" aria-pressed="false">
+        <span class="swap-leg-top">
+          <span class="swap-leg-key">Received leg</span>
+          <span class="swap-leg-chip">Selected</span>
+        </span>
+        <span class="swap-leg-asset">Bitcoin <img src="/harnesses/bitcoin.svg" alt="" /></span>
+        <span class="swap-leg-amt">{formatBtc(4_195_800)}</span>
+      </button>
+    </div>
   </div>
 
   <div class="swap-graph-head">
-    <div class="swap-graph-title">Transaction graph</div>
+    <div class="swap-graph-copy">
+      <div class="swap-graph-title">Transaction graph</div>
+      <!-- A complete graph carries no caption in the app; only the confidential
+           Liquid leg explains itself. -->
+      <div class="swap-graph-sub" data-for="liquid">Reference graph: public references are available; confidential amounts stay hidden</div>
+    </div>
+    <span class="swap-badge">Booked custody conversion</span>
   </div>
 
-  <!-- Liquid leg: a consolidation — eight internal legs converge into the one
-       output funding the swap; the fee arcs away above. -->
-  <svg class="swap-sankey" data-sankey="liquid" viewBox="0 0 718 280" aria-hidden="true"><defs><marker id="swapmock-liquid-input-marker" viewBox="-5 -5 10 10" refX="0" refY="0" markerUnits="strokeWidth" markerWidth="1.5" markerHeight="1" orient="auto"><path d="M -5 -5 L 0 0 L -5 5 L 1 5 L 1 -5 Z" stroke-width="0" fill="rgb(59 130 246)"></path></marker><marker id="swapmock-liquid-input-hover-marker" viewBox="-5 -5 10 10" refX="0" refY="0" markerUnits="strokeWidth" markerWidth="1.5" markerHeight="1" orient="auto"><path d="M -5 -5 L 0 0 L -5 5 L 1 5 L 1 -5 Z" stroke-width="0" fill="rgb(96 165 250)"></path></marker><marker id="swapmock-liquid-output-marker" viewBox="-5 -5 10 10" refX="0" refY="0" markerUnits="strokeWidth" markerWidth="1.5" markerHeight="1" orient="auto"><path d="M 1 -5 L 0 -5 L -5 0 L 0 5 L 1 5 Z" stroke-width="0" fill="rgb(59 130 246)"></path></marker><marker id="swapmock-liquid-output-hover-marker" viewBox="-5 -5 10 10" refX="0" refY="0" markerUnits="strokeWidth" markerWidth="1.5" markerHeight="1" orient="auto"><path d="M 1 -5 L 0 -5 L -5 0 L 0 5 L 1 5 Z" stroke-width="0" fill="rgb(96 165 250)"></path></marker><linearGradient id="swapmock-liquid-input-gradient" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="rgb(59 130 246)"></stop><stop offset="100%" stop-color="rgb(14 165 233)"></stop></linearGradient><linearGradient id="swapmock-liquid-input-hover-gradient" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="rgb(96 165 250)"></stop><stop offset="100%" stop-color="rgb(34 211 238)"></stop></linearGradient><linearGradient id="swapmock-liquid-output-gradient" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="rgb(14 165 233)"></stop><stop offset="100%" stop-color="rgb(59 130 246)"></stop></linearGradient><linearGradient id="swapmock-liquid-output-hover-gradient" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="rgb(34 211 238)"></stop><stop offset="100%" stop-color="rgb(96 165 250)"></stop></linearGradient><linearGradient id="swapmock-liquid-fee-gradient" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="rgb(14 165 233)"></stop><stop offset="52%" stop-color="rgb(245 158 11)"></stop><stop offset="100%" stop-color="transparent"></stop></linearGradient><linearGradient id="swapmock-liquid-fee-hover-gradient" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="rgb(34 211 238)"></stop><stop offset="58%" stop-color="rgb(251 191 36)"></stop><stop offset="100%" stop-color="transparent"></stop></linearGradient></defs><path d="M 97.25 30 L 102.25 30 C 210 30, 210 112, 317 112 L 360 112" fill="none" stroke="url(#swapmock-liquid-input-gradient)" stroke-width="8" stroke-linecap="butt" marker-start="url(#swapmock-liquid-input-marker)"></path><path d="M 97.25 62 L 102.25 62 C 210 62, 210 120, 317 120 L 360 120" fill="none" stroke="url(#swapmock-liquid-input-gradient)" stroke-width="8" stroke-linecap="butt" marker-start="url(#swapmock-liquid-input-marker)"></path><path d="M 97.25 94 L 102.25 94 C 210 94, 210 128, 317 128 L 360 128" fill="none" stroke="url(#swapmock-liquid-input-gradient)" stroke-width="8" stroke-linecap="butt" marker-start="url(#swapmock-liquid-input-marker)"></path><path d="M 97.25 126 L 102.25 126 C 210 126, 210 136, 317 136 L 360 136" fill="none" stroke="url(#swapmock-liquid-input-gradient)" stroke-width="8" stroke-linecap="butt" marker-start="url(#swapmock-liquid-input-marker)"></path><path d="M 97.25 158 L 102.25 158 C 210 158, 210 144, 317 144 L 360 144" fill="none" stroke="url(#swapmock-liquid-input-gradient)" stroke-width="8" stroke-linecap="butt" marker-start="url(#swapmock-liquid-input-marker)"></path><path d="M 97.25 190 L 102.25 190 C 210 190, 210 152, 317 152 L 360 152" fill="none" stroke="url(#swapmock-liquid-input-gradient)" stroke-width="8" stroke-linecap="butt" marker-start="url(#swapmock-liquid-input-marker)"></path><path d="M 97.25 222 L 102.25 222 C 210 222, 210 160, 317 160 L 360 160" fill="none" stroke="url(#swapmock-liquid-input-gradient)" stroke-width="8" stroke-linecap="butt" marker-start="url(#swapmock-liquid-input-marker)"></path><path d="M 97.25 254 L 102.25 254 C 210 254, 210 168, 317 168 L 360 168" fill="none" stroke="url(#swapmock-liquid-input-gradient)" stroke-width="8" stroke-linecap="butt" marker-start="url(#swapmock-liquid-input-marker)"></path><path d="M 654 40.25 L 618.81 40.25 C 511 40.25, 511 107.75, 403.19 107.75 L 358 107.75" fill="none" stroke="url(#swapmock-liquid-fee-gradient)" stroke-width="1.5" stroke-linecap="butt"></path><path d="M 621 140.25 L 616 140.25 C 511 140.25, 511 140, 406 140 L 360 140" fill="none" stroke="url(#swapmock-liquid-output-gradient)" stroke-width="64" stroke-linecap="butt" marker-start="url(#swapmock-liquid-output-marker)"></path></svg>
+  <div
+    class="swap-stage"
+    data-swap-stage
+    role="img"
+    tabindex="0"
+    aria-label="3D view of the transaction flow. Drag, or use the arrow keys, to turn it; Home resets the view."
+  >
+    {LEGS.map((leg) => {
+      const view = FRONT[leg.key];
+      return (
+        <svg class="swap-front" data-for={leg.key} viewBox={view.viewBox} preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+          {view.ribbons.map((ribbon) => <path class={`sf-ribbon sf-${ribbon.kind}`} d={ribbon.d} />)}
+          <rect class="sf-collar" x={view.collar.x} y={view.collar.y} width={view.collar.width} height={view.collar.height} rx={view.collar.width / 2} />
+          {view.blocks.map((block) => (
+            <rect
+              class:list={["sf-block", block.owned ? "sf-own" : "sf-other"]}
+              x={block.x}
+              y={block.y}
+              width={block.width}
+              height={block.height}
+              rx={Math.min(0.05, block.height / 2.5)}
+            />
+          ))}
+        </svg>
+      );
+    })}
+    <span class="swap-hint" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-3-6.7L21 8" /><path d="M21 3v5h-5" /></svg>
+      Drag to turn
+    </span>
+  </div>
 
-  <!-- Bitcoin leg: one in, one out — the received amount flows straight
-       through, minus the fee wisp. -->
-  <svg class="swap-sankey" data-sankey="bitcoin" viewBox="0 0 718 280" aria-hidden="true"><defs><marker id="swapmock-bitcoin-input-marker" viewBox="-5 -5 10 10" refX="0" refY="0" markerUnits="strokeWidth" markerWidth="1.5" markerHeight="1" orient="auto"><path d="M -5 -5 L 0 0 L -5 5 L 1 5 L 1 -5 Z" stroke-width="0" fill="rgb(59 130 246)"></path></marker><marker id="swapmock-bitcoin-input-hover-marker" viewBox="-5 -5 10 10" refX="0" refY="0" markerUnits="strokeWidth" markerWidth="1.5" markerHeight="1" orient="auto"><path d="M -5 -5 L 0 0 L -5 5 L 1 5 L 1 -5 Z" stroke-width="0" fill="rgb(96 165 250)"></path></marker><marker id="swapmock-bitcoin-output-marker" viewBox="-5 -5 10 10" refX="0" refY="0" markerUnits="strokeWidth" markerWidth="1.5" markerHeight="1" orient="auto"><path d="M 1 -5 L 0 -5 L -5 0 L 0 5 L 1 5 Z" stroke-width="0" fill="rgb(59 130 246)"></path></marker><marker id="swapmock-bitcoin-output-hover-marker" viewBox="-5 -5 10 10" refX="0" refY="0" markerUnits="strokeWidth" markerWidth="1.5" markerHeight="1" orient="auto"><path d="M 1 -5 L 0 -5 L -5 0 L 0 5 L 1 5 Z" stroke-width="0" fill="rgb(96 165 250)"></path></marker><linearGradient id="swapmock-bitcoin-input-gradient" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="rgb(59 130 246)"></stop><stop offset="100%" stop-color="rgb(14 165 233)"></stop></linearGradient><linearGradient id="swapmock-bitcoin-input-hover-gradient" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="rgb(96 165 250)"></stop><stop offset="100%" stop-color="rgb(34 211 238)"></stop></linearGradient><linearGradient id="swapmock-bitcoin-output-gradient" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="rgb(14 165 233)"></stop><stop offset="100%" stop-color="rgb(59 130 246)"></stop></linearGradient><linearGradient id="swapmock-bitcoin-output-hover-gradient" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="rgb(34 211 238)"></stop><stop offset="100%" stop-color="rgb(96 165 250)"></stop></linearGradient><linearGradient id="swapmock-bitcoin-fee-gradient" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="rgb(14 165 233)"></stop><stop offset="52%" stop-color="rgb(245 158 11)"></stop><stop offset="100%" stop-color="transparent"></stop></linearGradient><linearGradient id="swapmock-bitcoin-fee-hover-gradient" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="rgb(34 211 238)"></stop><stop offset="58%" stop-color="rgb(251 191 36)"></stop><stop offset="100%" stop-color="transparent"></stop></linearGradient></defs><path d="M 97.25 139 L 102.25 139 C 209.72 139, 209.72 140.25, 317.19 140.25 L 360 140.25" fill="none" stroke="url(#swapmock-bitcoin-input-gradient)" stroke-width="66.5" stroke-linecap="butt" marker-start="url(#swapmock-bitcoin-input-marker)"></path><path d="M 654 41.5 L 606.64 41.5 C 511 41.5, 511 109, 415.36 109 L 358 109" fill="none" stroke="url(#swapmock-bitcoin-fee-gradient)" stroke-width="1.5" stroke-linecap="butt"></path><path d="M 620.75 140.5 L 613.94 140.5 C 511 140.5, 511 140.25, 408.06 140.25 L 358 140.25" fill="none" stroke="url(#swapmock-bitcoin-output-gradient)" stroke-width="66" stroke-linecap="butt" marker-start="url(#swapmock-bitcoin-output-marker)"></path></svg>
+  <div class="swap-legend">
+    {LEGEND.map((item) => (
+      <span class="swap-legend-item">
+        <span class={`swap-swatch swap-swatch--${item.key}`} aria-hidden="true"></span>
+        {item.label}
+      </span>
+    ))}
+  </div>
+  <p class="swap-note">
+    All inputs are spent together in the glass ring; the order of the ribbons
+    does not say which input paid which output.
+  </p>
 
-  <!-- Deliberately abstract: the graph already carries the shape, so the
-       ledger below only names the two sides. -->
-  <div class="swap-io" aria-hidden="true">
-    <div class="swap-io-col">
-      <div class="swap-io-head">Inputs</div>
-      <div class="swap-io-dots">&hellip;</div>
-    </div>
-    <div class="swap-io-col">
-      <div class="swap-io-head">Outputs</div>
-      <div class="swap-io-dots">&hellip;</div>
-    </div>
+  <!-- Both legs' lists share one grid cell, so the panel keeps the taller one's
+       height and the page below never jumps when the legs take turns. -->
+  <div class="swap-io-stack">
+  {LEGS.map((leg) => (
+    <section class="swap-io" data-for={leg.key} data-io aria-label="Inputs and outputs">
+      <div class="swap-io-cols">
+        {([["Inputs", leg.inputs, "input"], ["Outputs", leg.outputs, "output"]] as const).map(([title, rows, side]) => (
+          <div class="swap-io-col">
+            <div class="swap-io-head">
+              <span>{title}</span>
+              <span>{rows.length}</span>
+            </div>
+            {rows.map((row, index) => (
+              <div class:list={["swap-io-row", { "is-extra": index >= COLLAPSED_ROWS }]}>
+                <span class:list={["swap-io-mark", `swap-io-mark--${side}`]} aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14" /><path d="m12 5 7 7-7 7" /></svg>
+                </span>
+                <span class="swap-io-body">
+                  <span class="swap-io-ref">{row.ref}</span>
+                  <span class="swap-io-meta">{row.meta.map((part) => <span>{part}</span>)}</span>
+                </span>
+                <span class="swap-io-amt">{row.sats === null ? "Confidential amount" : formatBtc(row.sats)}</span>
+              </div>
+            ))}
+            {rows.length > COLLAPSED_ROWS && (
+              <button class="swap-io-more" type="button" data-io-more aria-expanded="false">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6" /></svg>
+                <span data-more-label={`Show all ${rows.length - COLLAPSED_ROWS} more`}>Show all {rows.length - COLLAPSED_ROWS} more</span>
+              </button>
+            )}
+          </div>
+        ))}
+      </div>
+      <div class="swap-io-totals">
+        {[leg.inputs, leg.outputs].map((rows) => {
+          const sum = total(rows);
+          return (
+            <div class="swap-io-total">
+              <span>{sum.label}</span>
+              <span>{sum.value}</span>
+            </div>
+          );
+        })}
+      </div>
+    </section>
+  ))}
   </div>
 </div>
 
 <script>
-  for (const mock of document.querySelectorAll<HTMLElement>(".swap-mock")) {
-    const buttons = [...mock.querySelectorAll<HTMLButtonElement>("[data-leg-btn]")];
-    let automatic = !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  import { SWAP_LEGS } from "../lib/txgraph/demoSwap";
+  import { ribbonLayout } from "../lib/txgraph/ribbonLayout";
+  import type { GlassScene } from "../lib/txgraph/glassScene";
 
-    const select = (leg: string) => {
+  type LegKey = "liquid" | "bitcoin";
+  type View = { yaw: number; pitch: number };
+
+  // The app's rest view, seen from the upper left so block tops and inner faces
+  // show, and its turning limits (kb/glass3d/Glass3DView.tsx).
+  const REST: View = { yaw: 0.5, pitch: 0.3 };
+  // Where the canvas takes over from the SVG: straight on, so the hand-over is
+  // invisible and the piece then turns into the rest view.
+  const FRONT: View = { yaw: 0, pitch: 0 };
+  const YAW_LIMIT = 0.95;
+  const PITCH_LIMIT = 0.6;
+  const DRAG_RADIANS_PER_PIXEL = 0.008;
+  const KEY_STEP = 0.08;
+  const INTRO_MS = 1500;
+  const CYCLE_MS = 6500;
+
+  const clamp = (value: number, limit: number) => Math.min(limit, Math.max(-limit, value));
+  const ease = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2);
+
+  function webglAvailable() {
+    try {
+      const context = document.createElement("canvas").getContext("webgl2");
+      // Contexts are few; give the probe's back at once instead of waiting for GC.
+      context?.getExtension("WEBGL_lose_context")?.loseContext();
+      return Boolean(context);
+    } catch {
+      return false;
+    }
+  }
+
+  for (const mock of document.querySelectorAll<HTMLElement>("[data-swap-mock]")) {
+    const stage = mock.querySelector<HTMLElement>("[data-swap-stage]");
+    if (!stage) continue;
+    const buttons = [...mock.querySelectorAll<HTMLButtonElement>("[data-leg-btn]")];
+    const calm = matchMedia("(prefers-reduced-motion: reduce)");
+
+    let view: View = { ...FRONT };
+    let glass = false;
+    let failed = false;
+    let raf = 0;
+    let intro = 0;
+    let introTimer = 0;
+    let onScreen = false;
+    let cycling = !calm.matches;
+    let cycleStarted = false;
+    let sceneModule: Promise<typeof import("../lib/txgraph/glassScene")> | null = null;
+    const scenes = new Map<LegKey, GlassScene>();
+    const pending = new Map<LegKey, Promise<GlassScene | null>>();
+
+    const activeLeg = (): LegKey => (mock.dataset.leg === "bitcoin" ? "bitcoin" : "liquid");
+
+    const draw = () => {
+      if (raf) return;
+      raf = requestAnimationFrame(() => {
+        raf = 0;
+        scenes.get(activeLeg())?.render();
+      });
+    };
+
+    const applyView = () => {
+      for (const scene of scenes.values()) scene.setView(view.yaw, view.pitch);
+      draw();
+    };
+
+    // No restore: a lost context ends the glass view and the SVG takes over.
+    const fail = () => {
+      failed = true;
+      glass = false;
+      window.clearTimeout(introTimer);
+      cancelAnimationFrame(intro);
+      stage.classList.remove("is-glass");
+      for (const scene of scenes.values()) scene.dispose();
+      scenes.clear();
+      stage.querySelectorAll("canvas").forEach((canvas) => canvas.remove());
+    };
+
+    const build = (leg: LegKey) => {
+      const existing = pending.get(leg);
+      if (existing) return existing;
+      const promise = (sceneModule ??= import("../lib/txgraph/glassScene"))
+        .then(({ createGlassScene }) => {
+          if (failed) return null;
+          const canvas = document.createElement("canvas");
+          canvas.className = "swap-canvas";
+          canvas.dataset.for = leg;
+          canvas.setAttribute("aria-hidden", "true");
+          canvas.addEventListener("webglcontextlost", fail);
+          stage.prepend(canvas);
+          // Opaque, in the panel's own colour: transmission refracts what is
+          // behind the glass.
+          const background = getComputedStyle(stage).backgroundColor;
+          const scene = createGlassScene(canvas, ribbonLayout(SWAP_LEGS[leg].graph), background);
+          scene.resize(stage.clientWidth, stage.clientHeight);
+          scene.setView(view.yaw, view.pitch);
+          scenes.set(leg, scene);
+          return scene;
+        })
+        .catch(() => {
+          fail();
+          return null;
+        });
+      pending.set(leg, promise);
+      return promise;
+    };
+
+    const turnTo = (target: View, ms: number) => {
+      cancelAnimationFrame(intro);
+      const from = { ...view };
+      const start = performance.now();
+      const step = (now: number) => {
+        const t = Math.min(1, (now - start) / ms);
+        const k = ease(t);
+        view = {
+          yaw: from.yaw + (target.yaw - from.yaw) * k,
+          pitch: from.pitch + (target.pitch - from.pitch) * k,
+        };
+        applyView();
+        if (t < 1) intro = requestAnimationFrame(step);
+      };
+      intro = requestAnimationFrame(step);
+    };
+
+    // The legs take turns until someone picks one, so both halves of the pair
+    // get seen. The first switch waits for the piece to finish turning in.
+    const startCycle = (delay: number) => {
+      if (cycleStarted) return;
+      cycleStarted = true;
+      const next = () => {
+        if (!cycling) return;
+        if (onScreen && !document.hidden) select(activeLeg() === "liquid" ? "bitcoin" : "liquid");
+        window.setTimeout(next, CYCLE_MS);
+      };
+      window.setTimeout(next, delay);
+    };
+
+    // The glass view starts straight on, under the SVG, then fades in and
+    // turns into the rest view.
+    const reveal = async () => {
+      const scene = await build(activeLeg());
+      if (glass) return;
+      // three.js failed to load or draw: the straight-on pictures stay, and
+      // still take turns.
+      if (!scene) {
+        startCycle(CYCLE_MS);
+        return;
+      }
+      scene.render();
+      glass = true;
+      stage.classList.add("is-glass");
+      if (calm.matches) {
+        view = { ...REST };
+        applyView();
+      } else {
+        introTimer = window.setTimeout(() => turnTo(REST, INTRO_MS), 380);
+      }
+      startCycle(380 + INTRO_MS + CYCLE_MS);
+      // Warm the other leg so the first switch does not stall on building it.
+      const other: LegKey = activeLeg() === "liquid" ? "bitcoin" : "liquid";
+      const idle = window.requestIdleCallback ?? ((fn: () => void) => window.setTimeout(fn, 600));
+      idle(() => void build(other));
+    };
+
+    const select = (leg: LegKey) => {
       mock.dataset.leg = leg;
       for (const button of buttons) {
         button.setAttribute("aria-pressed", String(button.dataset.legBtn === leg));
       }
+      if (!glass) return;
+      void build(leg).then((scene) => {
+        if (!scene) return;
+        scene.resize(stage.clientWidth, stage.clientHeight);
+        scene.setView(view.yaw, view.pitch);
+        draw();
+      });
     };
 
-    const timer = window.setInterval(() => {
-      if (automatic) select(mock.dataset.leg === "liquid" ? "bitcoin" : "liquid");
-    }, 4200);
+    // Turning the piece by hand ends the guided turn and the cycle for good.
+    const takeOver = () => {
+      cycling = false;
+      window.clearTimeout(introTimer);
+      cancelAnimationFrame(intro);
+      stage.classList.add("is-handled");
+    };
 
-    for (const btn of buttons) {
-      btn.addEventListener("click", () => {
-        automatic = false;
-        window.clearInterval(timer);
-        select(btn.dataset.legBtn ?? "liquid");
+    // Picking a leg only ends the cycle; the piece still turns into view.
+    for (const button of buttons) {
+      button.addEventListener("click", () => {
+        cycling = false;
+        select(button.dataset.legBtn === "bitcoin" ? "bitcoin" : "liquid");
+      });
+    }
+
+    // ── Turning ─────────────────────────────────────────────
+    const turn = (yaw: number, pitch: number) => {
+      view = { yaw: clamp(yaw, YAW_LIMIT), pitch: clamp(pitch, PITCH_LIMIT) };
+      applyView();
+    };
+
+    // A press only becomes a turn once it moves sideways, so a page scroll that
+    // happens to start on the piece leaves the guided turn alone.
+    let drag: { x: number; y: number; view: View; touch: boolean; turning: boolean } | null = null;
+    stage.addEventListener("pointerdown", (event) => {
+      if (!glass) return;
+      drag = { x: event.clientX, y: event.clientY, view: { ...view }, touch: event.pointerType === "touch", turning: false };
+    });
+    stage.addEventListener("pointermove", (event) => {
+      if (!drag) return;
+      if (!drag.turning) {
+        if (Math.abs(event.clientX - drag.x) < 4 && (drag.touch || Math.abs(event.clientY - drag.y) < 4)) return;
+        takeOver();
+        stage.setPointerCapture(event.pointerId);
+        drag = { ...drag, view: { ...view }, turning: true };
+      }
+      // A finger only turns the piece sideways; vertical swipes stay page scroll.
+      turn(
+        drag.view.yaw + (event.clientX - drag.x) * DRAG_RADIANS_PER_PIXEL,
+        drag.touch ? drag.view.pitch : drag.view.pitch + (event.clientY - drag.y) * DRAG_RADIANS_PER_PIXEL,
+      );
+    });
+    const release = () => {
+      drag = null;
+    };
+    stage.addEventListener("pointerup", release);
+    stage.addEventListener("pointercancel", release);
+    stage.addEventListener("dblclick", () => {
+      if (!glass) return;
+      takeOver();
+      turnTo(REST, 500);
+    });
+    stage.addEventListener("keydown", (event) => {
+      if (!glass) return;
+      const moves: Record<string, [number, number]> = {
+        ArrowLeft: [-KEY_STEP, 0],
+        ArrowRight: [KEY_STEP, 0],
+        ArrowUp: [0, -KEY_STEP],
+        ArrowDown: [0, KEY_STEP],
+      };
+      if (event.key === "Home") {
+        event.preventDefault();
+        takeOver();
+        turn(REST.yaw, REST.pitch);
+        return;
+      }
+      const move = moves[event.key];
+      if (!move) return;
+      event.preventDefault();
+      takeOver();
+      turn(view.yaw + move[0], view.pitch + move[1]);
+    });
+
+    // ── Lifecycle ───────────────────────────────────────────
+    new ResizeObserver(() => {
+      for (const scene of scenes.values()) scene.resize(stage.clientWidth, stage.clientHeight);
+      draw();
+    }).observe(stage);
+
+    const canGlass = webglAvailable();
+    if (canGlass) {
+      // Fetch three.js a little ahead of the panel, and turn the piece only
+      // once most of it is in view.
+      const near = new IntersectionObserver(
+        ([entry]) => {
+          if (!entry.isIntersecting) return;
+          near.disconnect();
+          void build(activeLeg());
+        },
+        { rootMargin: "600px 0px" },
+      );
+      near.observe(stage);
+    }
+
+    new IntersectionObserver(
+      ([entry]) => {
+        onScreen = entry.isIntersecting;
+        if (!onScreen) return;
+        if (canGlass && !glass && !failed) void reveal();
+        // Without WebGL the straight-on pictures take turns from the start.
+        else if (!canGlass) startCycle(CYCLE_MS);
+      },
+      { threshold: 0.45 },
+    ).observe(stage);
+
+    // ── Inputs and outputs ──────────────────────────────────
+    for (const more of mock.querySelectorAll<HTMLButtonElement>("[data-io-more]")) {
+      more.addEventListener("click", () => {
+        const column = more.closest(".swap-io-col");
+        const open = column?.classList.toggle("is-open") ?? false;
+        more.setAttribute("aria-expanded", String(open));
+        const label = more.querySelector<HTMLElement>("[data-more-label]");
+        if (label) label.textContent = open ? "Show fewer" : (label.dataset.moreLabel ?? "");
       });
     }
   }
 </script>
 
 <style>
-  /* App dark-theme values copied literally, so the panel reads as the app. */
-  /* No card: the route, graph, and ledger sit straight on the section. */
+  /* App dark-theme values copied literally, so the panel reads as the app:
+     --background oklch(0.145 0 0), --muted oklch(0.269 0 0),
+     --muted-foreground oklch(0.708 0 0), --primary oklch(0.922 0 0). */
   .swap-mock {
-    overflow: hidden;
-    padding: 0;
+    --sm-surface: #0f0f11;
+    --sm-bg: #0a0a0a;
+    --sm-muted: #262626;
+    --sm-muted-fg: #a1a1a1;
+    --sm-border: rgba(255, 255, 255, 0.1);
+    --sm-primary: #e5e5e5;
+
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--sm-surface);
+    box-shadow: 0 24px 56px -28px rgba(0, 0, 0, 0.75);
+    padding: 20px;
   }
 
   /* ── Paired route ─────────────────────────────────────── */
   .swap-route {
+    border: 1px solid var(--sm-border);
+    border-radius: 8px;
+    background: rgb(38 38 38 / 0.25);
+    padding: 12px;
+  }
+
+  .swap-route-head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13.5px;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+  }
+
+  .swap-route-icon {
+    width: 16px;
+    height: 16px;
+    flex: none;
+    color: #0ea5e9;
+  }
+
+  .swap-route-grid {
     display: grid;
-    grid-template-columns: 1fr auto 1fr;
-    gap: 12px;
+    grid-template-columns: minmax(0, 1fr) minmax(170px, 0.9fr) minmax(0, 1fr);
+    gap: 8px;
+    margin-top: 12px;
     align-items: stretch;
   }
 
   .swap-leg {
     display: flex;
     flex-direction: column;
-    gap: 5px;
+    gap: 4px;
+    min-width: 0;
+    padding: 9px 12px;
     text-align: left;
-    padding: 12px 14px;
-    border: 1px solid rgba(255, 255, 255, 0.09);
-    border-radius: 9px;
-    background: #101014;
-    cursor: pointer;
-    transition: border-color 0.18s ease, background 0.18s ease;
+    border: 1px solid var(--sm-border);
+    border-radius: 7px;
+    background: var(--sm-bg);
+    transition: border-color 0.18s ease, background-color 0.18s ease;
   }
 
   .swap-leg:hover {
-    border-color: rgba(255, 255, 255, 0.2);
+    border-color: rgb(229 229 229 / 0.4);
+    background: rgb(229 229 229 / 0.05);
   }
 
   [data-leg="liquid"] .swap-leg[data-leg-btn="liquid"],
   [data-leg="bitcoin"] .swap-leg[data-leg-btn="bitcoin"] {
-    border-color: rgba(255, 255, 255, 0.38);
-    background: #131318;
+    border-color: rgb(229 229 229 / 0.6);
+    background: rgb(229 229 229 / 0.1);
   }
 
-  .swap-leg-head {
+  .swap-leg-top {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: space-between;
     gap: 8px;
   }
@@ -137,20 +567,21 @@
   .swap-leg-key {
     font-size: 10px;
     font-weight: 500;
-    letter-spacing: 0.1em;
+    letter-spacing: 0.04em;
     text-transform: uppercase;
-    color: var(--fg-dim);
+    color: var(--sm-muted-fg);
     white-space: nowrap;
   }
 
   .swap-leg-chip {
+    flex: none;
     font-size: 10px;
-    line-height: 1;
-    padding: 4px 7px;
-    border: 1px solid rgba(255, 255, 255, 0.22);
+    font-weight: 500;
+    line-height: 1.35;
+    padding: 0 6px;
+    border: 1px solid var(--sm-border);
     border-radius: 6px;
     color: var(--fg);
-    white-space: nowrap;
     opacity: 0;
     transition: opacity 0.18s ease;
   }
@@ -163,166 +594,490 @@
   .swap-leg-asset {
     display: inline-flex;
     align-items: center;
-    gap: 7px;
-    font-size: 14.5px;
-    font-weight: 600;
-    letter-spacing: -0.01em;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 500;
     color: var(--fg);
   }
 
   .swap-leg-asset img {
-    width: 16px;
-    height: 16px;
+    width: 14px;
+    height: 14px;
     object-fit: contain;
   }
 
   .swap-leg-amt {
     font-size: 13px;
-    color: var(--fg-muted);
-    letter-spacing: 0.01em;
+    font-weight: 500;
+    color: var(--fg);
     font-variant-numeric: tabular-nums;
   }
 
   .swap-peg {
-    display: grid;
+    display: flex;
     align-items: center;
-    place-items: center;
-    color: var(--fg-dim);
+    justify-content: center;
+    gap: 8px;
+    min-width: 0;
+    padding: 6px 10px;
+    text-align: center;
   }
 
-  .swap-peg > svg {
-    width: 20px;
-    height: 20px;
+  .swap-peg-arrow {
+    width: 15px;
+    height: 15px;
     flex: none;
+    color: var(--sm-muted-fg);
+  }
+
+  .swap-peg-copy {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 0;
+  }
+
+  .swap-peg-name {
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 1.3;
+  }
+
+  .swap-peg-policy {
+    margin-top: 3px;
+    font-size: 11.5px;
+    color: var(--sm-muted-fg);
+  }
+
+  .swap-peg-fee {
+    margin-top: 7px;
+    padding: 1px 6px;
+    font-size: 10px;
+    font-weight: 500;
+    color: var(--sm-muted-fg);
+    border: 1px solid rgb(255 255 255 / 0.07);
+    border-radius: 6px;
+    background: rgb(38 38 38 / 0.35);
+    font-variant-numeric: tabular-nums;
   }
 
   /* ── Graph ────────────────────────────────────────────── */
   .swap-graph-head {
-    margin: 18px 4px 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 18px 0 12px;
   }
 
   .swap-graph-title {
-    font-size: 14.5px;
-    font-weight: 600;
+    font-size: 13.5px;
+    font-weight: 500;
     letter-spacing: -0.01em;
-    margin-bottom: 3px;
   }
 
-  .swap-sankey {
-    display: none;
+  .swap-graph-sub {
+    margin-top: 2px;
+    font-size: 11.5px;
+    color: var(--sm-muted-fg);
+  }
+
+  /* Hidden, not removed: the line keeps its height so nothing below moves. */
+  [data-leg="bitcoin"] .swap-graph-sub[data-for="liquid"] {
+    visibility: hidden;
+  }
+
+  /* Secondary badge, as the app's annotation strip draws it. */
+  .swap-badge {
+    flex: none;
+    padding: 2px 8px;
+    font-size: 11px;
+    font-weight: 500;
+    border-radius: 6px;
+    background: var(--sm-muted);
+    color: var(--fg);
+  }
+
+  /* 2 : 1 rather than the app's 2.5 : 1. Seen from above, the piece's long
+     ends tilt apart vertically, and in the wider panel that left it small. */
+  .swap-stage {
+    position: relative;
+    aspect-ratio: 2 / 1;
+    border-radius: 7px;
+    overflow: hidden;
+    background: var(--sm-surface);
+    outline: none;
+    /* Sideways drags turn the piece; vertical swipes still scroll the page. */
+    touch-action: pan-y;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  .swap-stage:focus-visible {
+    box-shadow: inset 0 0 0 2px rgb(250 250 250 / 0.55);
+  }
+
+  .swap-stage.is-glass {
+    cursor: grab;
+  }
+
+  .swap-stage.is-glass:active {
+    cursor: grabbing;
+  }
+
+  .swap-front,
+  .swap-stage :global(.swap-canvas) {
+    position: absolute;
+    inset: 0;
     width: 100%;
-    height: auto;
-    transform: translateX(-17.5%) scaleX(1.29);
-    transform-origin: left center;
-  }
-
-  [data-leg="liquid"] .swap-sankey[data-sankey="liquid"],
-  [data-leg="bitcoin"] .swap-sankey[data-sankey="bitcoin"] {
+    height: 100%;
     display: block;
-    animation: swapSankeyIn 0.35s ease;
+    opacity: 0;
+    transition: opacity 0.35s ease;
   }
 
-  @keyframes swapSankeyIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+  [data-leg="liquid"] .swap-front[data-for="liquid"],
+  [data-leg="bitcoin"] .swap-front[data-for="bitcoin"] {
+    opacity: 1;
   }
 
-  @media (prefers-reduced-motion: reduce) {
-    [data-leg] .swap-sankey {
-      animation: none;
-    }
+  [data-leg="liquid"] .swap-stage.is-glass .swap-front,
+  [data-leg="bitcoin"] .swap-stage.is-glass .swap-front {
+    opacity: 0;
   }
 
-  /* ── Inputs / outputs ─────────────────────────────────── */
+  [data-leg="liquid"] .swap-stage.is-glass :global(.swap-canvas[data-for="liquid"]),
+  [data-leg="bitcoin"] .swap-stage.is-glass :global(.swap-canvas[data-for="bitcoin"]) {
+    opacity: 1;
+  }
+
+  /* The straight-on picture: the glass piece's palette, flat. */
+  .sf-known { fill: #5b8fe9; fill-opacity: 0.78; }
+  .sf-estimated { fill: #a3aebd; fill-opacity: 0.42; }
+  .sf-fee { fill: #f5b544; fill-opacity: 0.9; }
+  .sf-feeEstimated { fill: #d8c89c; fill-opacity: 0.55; }
+  .sf-collar { fill: #dbe5f3; fill-opacity: 0.55; }
+  .sf-own { fill: #2563eb; }
+  .sf-other { fill: #64748b; }
+
+  /* Bottom right: the one corner neither leg's piece reaches into. */
+  .swap-hint {
+    position: absolute;
+    right: 10px;
+    bottom: 10px;
+    z-index: 1;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 9px;
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    color: var(--fg-dim);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: rgb(15 15 17 / 0.8);
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+  }
+
+  .swap-hint svg {
+    width: 11px;
+    height: 11px;
+  }
+
+  .swap-stage.is-glass .swap-hint {
+    opacity: 1;
+    transition-delay: 1.6s;
+  }
+
+  .swap-stage.is-handled .swap-hint {
+    opacity: 0;
+    transition-delay: 0s;
+  }
+
+  /* ── Legend ───────────────────────────────────────────── */
+  .swap-legend {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 16px;
+    margin-top: 12px;
+    font-size: 11.5px;
+    color: var(--sm-muted-fg);
+  }
+
+  .swap-legend-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .swap-swatch {
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+  }
+
+  .swap-swatch--known { background: #8fb4ff; box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.4); }
+  .swap-swatch--unknown { background: rgb(148 163 184 / 0.6); box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.6); }
+  .swap-swatch--own { background: #2563eb; }
+  .swap-swatch--other { background: #64748b; }
+  .swap-swatch--fee { background: #f5b544; }
+
+  .swap-note {
+    margin-top: 6px;
+    font-size: 11.5px;
+    line-height: 1.5;
+    color: var(--fg-dim);
+  }
+
+  /* ── Inputs and outputs ───────────────────────────────── */
+  .swap-io-stack {
+    display: grid;
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px solid var(--sm-border);
+  }
+
+  /* Totals sit on the shared bottom edge, so a short list does not leave them
+     floating mid-panel. */
   .swap-io {
+    grid-area: 1 / 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    visibility: hidden;
+    opacity: 0;
+    transition: opacity 0.3s ease, visibility 0.3s;
+  }
+
+  [data-leg="liquid"] .swap-io[data-for="liquid"],
+  [data-leg="bitcoin"] .swap-io[data-for="bitcoin"] {
+    visibility: visible;
+    opacity: 1;
+  }
+
+  .swap-io-cols {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 24px;
-    margin: 10px 4px 0;
-    padding-top: 14px;
-    border-top: 1px solid rgba(255, 255, 255, 0.07);
+    gap: 16px;
+  }
+
+  .swap-io-col {
+    min-width: 0;
   }
 
   .swap-io-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--sm-border);
     font-size: 10px;
-    font-weight: 500;
-    letter-spacing: 0.1em;
+    color: var(--sm-muted-fg);
+  }
+
+  .swap-io-head span:first-child {
+    font-weight: 600;
+    letter-spacing: 0.05em;
     text-transform: uppercase;
-    color: var(--fg-dim);
-    margin-bottom: 6px;
   }
 
-  .swap-io-dots {
+  .swap-io-row {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    gap: 8px;
+    padding: 8px 0;
+    border-top: 1px solid var(--sm-border);
+  }
+
+  .swap-io-head + .swap-io-row {
+    border-top: 0;
+  }
+
+  .swap-io-row.is-extra {
+    display: none;
+  }
+
+  .swap-io-col.is-open .swap-io-row.is-extra {
+    display: grid;
+  }
+
+  .swap-io-mark {
+    display: grid;
+    place-items: center;
+    width: 18px;
+    height: 18px;
+    margin-top: 1px;
+    border-radius: 999px;
+    border: 1px solid;
+  }
+
+  .swap-io-mark svg {
+    width: 11px;
+    height: 11px;
+  }
+
+  .swap-io-mark--input {
+    border-color: rgb(239 68 68 / 0.3);
+    background: rgb(239 68 68 / 0.1);
+    color: #f87171;
+  }
+
+  .swap-io-mark--output {
+    border-color: rgb(16 185 129 / 0.3);
+    background: rgb(16 185 129 / 0.1);
+    color: #34d399;
+  }
+
+  .swap-io-body {
+    min-width: 0;
+  }
+
+  .swap-io-ref {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
     font-family: var(--font-mono);
-    font-size: 17px;
-    line-height: 1;
-    letter-spacing: 0.12em;
-    color: var(--fg-dim);
+    font-size: 11.5px;
+    font-weight: 500;
   }
 
-  /* Touch: no hover to hint with, so the two legs become a segmented control —
-     both options always visible, the selected one filled. Half the height of
-     the stacked cards, and obviously a choice. */
-  @media (max-width: 450px) {
-    .swap-route {
-      grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
-      gap: 5px;
+  .swap-io-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px 8px;
+    margin-top: 2px;
+    font-size: 11px;
+    color: var(--sm-muted-fg);
+  }
+
+  .swap-io-amt {
+    padding-top: 1px;
+    font-size: 11.5px;
+    font-weight: 500;
+    text-align: right;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .swap-io-more {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    width: 100%;
+    padding: 8px 0;
+    border-top: 1px solid var(--sm-border);
+    font-size: 11.5px;
+    color: var(--sm-muted-fg);
+    text-align: left;
+    transition: color 0.15s ease;
+  }
+
+  .swap-io-more:hover {
+    color: var(--fg);
+  }
+
+  .swap-io-more svg {
+    width: 13px;
+    height: 13px;
+    transition: transform 0.2s ease;
+  }
+
+  .swap-io-col.is-open .swap-io-more svg {
+    transform: rotate(180deg);
+  }
+
+  .swap-io-totals {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-top: auto;
+    padding-top: 8px;
+    border-top: 1px solid var(--sm-border);
+  }
+
+  .swap-io-total {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    font-size: 11.5px;
+  }
+
+  .swap-io-total span:first-child {
+    color: var(--sm-muted-fg);
+  }
+
+  .swap-io-total span:last-child {
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ── Narrow ───────────────────────────────────────────── */
+  @media (max-width: 720px) {
+    .swap-mock {
+      padding: 14px;
     }
 
-    .swap-leg {
-      grid-row: 1;
-      gap: 3px;
-      padding: 8px 9px;
-      min-height: 56px;
-      justify-content: center;
-      background: rgba(255, 255, 255, 0.02);
-      -webkit-tap-highlight-color: transparent;
-      touch-action: manipulation;
+    .swap-io-cols,
+    .swap-io-totals {
+      grid-template-columns: 1fr;
+      gap: 12px;
     }
 
-    .swap-leg[data-leg-btn="liquid"] {
-      grid-column: 1;
+    .swap-io-totals {
+      gap: 4px;
+    }
+  }
+
+  /* Phones: the two legs side by side as a segmented choice, the route
+     between them moves underneath. */
+  @media (max-width: 560px) {
+    .swap-route-grid {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     }
 
     .swap-peg {
-      grid-column: 2;
-      grid-row: 1;
+      grid-column: 1 / -1;
+      grid-row: 2;
+      padding: 2px 0 0;
     }
 
-    .swap-leg[data-leg-btn="bitcoin"] {
-      grid-column: 3;
+    .swap-peg-arrow {
+      display: none;
     }
 
-    [data-leg="liquid"] .swap-leg[data-leg-btn="liquid"],
-    [data-leg="bitcoin"] .swap-leg[data-leg-btn="bitcoin"] {
-      background: rgba(255, 255, 255, 0.09);
-      border-color: rgba(255, 255, 255, 0.45);
+    .swap-peg-copy {
+      flex-direction: row;
+      align-items: center;
+      gap: 8px;
     }
 
-    /* The fill carries the state on a phone; the chip is redundant width. */
+    .swap-peg-policy,
+    .swap-peg-fee {
+      margin-top: 0;
+    }
+
     .swap-leg-chip {
       display: none;
     }
 
-    .swap-leg-asset {
-      font-size: 13.5px;
+    .swap-leg {
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
     }
 
-    .swap-leg-amt {
-      font-size: 11.5px;
+    /* Taller by ratio, never by min-height: an aspect-ratio box turns a
+       minimum height into a minimum width and spills out of the card. */
+    .swap-stage {
+      aspect-ratio: 1.55 / 1;
     }
 
-    /* Keep the peg between the compact cards on narrow screens. */
-    .swap-peg {
-      justify-content: center;
-      padding-top: 0;
+    .swap-hint {
+      font-size: 9.5px;
     }
-
-    .swap-peg > svg {
-      transform: none;
-      width: 13px;
-      height: 13px;
-    }
-
   }
 </style>

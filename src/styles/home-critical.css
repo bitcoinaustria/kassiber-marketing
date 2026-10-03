@@ -158,18 +158,11 @@ html:not([data-platform]) .dl-icon--apple { display: block; }
 }
 .hero-screenshot-frame {
   position: relative;
-  aspect-ratio: 2360 / 1555;
-  background: #0a0a0c;
+  aspect-ratio: 1440 / 949;
+  border-radius: calc(1cqw / 14.4 * 12);
   box-shadow: 0 28px 64px -28px rgba(0, 0, 0, 0.75);
   transform: perspective(2000px) rotateX(2deg);
   transform-origin: center bottom;
-}
-.hero-screenshot-frame img {
-  width: calc(100% + 4px);
-  height: calc(100% + 4px);
-  margin: -2px;
-  object-fit: cover;
-  object-position: center top;
 }
 @media (max-width: 1180px) {
   .hero-float-mark { width: 76px; height: 76px; border-radius: 20px; }

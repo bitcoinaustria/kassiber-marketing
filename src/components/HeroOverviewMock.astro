@@ -1,0 +1,1620 @@
+---
+/*
+ * The Overview screen, rebuilt in HTML for the hero instead of a screenshot.
+ * Ported from the app's shell (ui-tauri/src/components/kb/AppShell.tsx) and
+ * dashboard (components/overview-dashboard/), v0.22.78, dark theme, macOS,
+ * side nav open, developer tools off: the unified 40 px title bar with the
+ * book crumb, the nav sitting flush on the chrome, and the page on its own
+ * rounded panel.
+ *
+ * Sized as the app sizes itself. The window is 1440 px wide at the app's 0.9
+ * UI scale, so one app rem (14.4 px) is exactly 1cqw of the hero preview:
+ * a Tailwind `text-sm` (0.875rem) is `0.875cqw` here, and the whole window
+ * scales with the preview like the screenshot it replaces. Literal px in the
+ * app (the 40 px title bar, the 348 px side column) are converted.
+ *
+ * The book is illustrative (src/lib/overviewDemo.ts), and the window is a
+ * picture: it carries one label for assistive tech and nothing focusable.
+ */
+import {
+  BRUSH,
+  CHART,
+  DONUT,
+  DOTS,
+  DRIVERS,
+  FINAL_BALANCE,
+  FINAL_PRICE,
+  HOLDINGS,
+  NET_BTC,
+  PATHS,
+  RECENT,
+  TAGS,
+  UNREALIZED_PCT,
+  X_TICKS,
+  Y_TICKS,
+  btc,
+  eur,
+  groupThousands,
+  tagWidth,
+} from "../lib/overviewDemo";
+
+// lucide 0.469 paths, the app's icon set.
+const ICON = {
+  panelLeft: '<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M9 3v18"/>',
+  arrowLeft: '<path d="m12 19-7-7 7-7"/><path d="M19 12H5"/>',
+  arrowRight: '<path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>',
+  folder: '<path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/>',
+  chevronsUpDown: '<path d="m7 15 5 5 5-5"/><path d="m7 9 5-5 5 5"/>',
+  triangleAlert: '<path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/>',
+  refresh: '<path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/>',
+  chevronDown: '<path d="m6 9 6 6 6-6"/>',
+  bell: '<path d="M10.268 21a2 2 0 0 0 3.464 0"/><path d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326"/>',
+  moon: '<path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>',
+  eye: '<path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/>',
+  wifi: '<path d="M12 20h.01"/><path d="M2 8.82a15 15 0 0 1 20 0"/><path d="M5 12.859a10 10 0 0 1 14 0"/><path d="M8.5 16.429a5 5 0 0 1 7 0"/>',
+  lock: '<circle cx="12" cy="16" r="1"/><rect x="3" y="10" width="18" height="12" rx="2"/><path d="M7 10V7a5 5 0 0 1 10 0v3"/>',
+  search: '<circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>',
+  gauge: '<path d="m12 14 4-4"/><path d="M3.34 19a10 10 0 1 1 17.32 0"/>',
+  clipboardList: '<rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4"/><path d="M12 16h4"/><path d="M8 11h.01"/><path d="M8 16h.01"/>',
+  walletCards: '<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2"/><path d="M3 11h3c.8 0 1.6.3 2.1.9l1.1.9c1.6 1.6 4.1 1.6 5.7 0l1.1-.9c.5-.5 1.3-.9 2.1-.9H21"/>',
+  chartColumn: '<path d="M3 3v16a2 2 0 0 0 2 2h16"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/>',
+  messageSquareText: '<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><path d="M13 8H7"/><path d="M17 12H7"/>',
+  shieldAlert: '<path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="M12 8v4"/><path d="M12 16h.01"/>',
+  fingerprint: '<path d="M12 10a2 2 0 0 0-2 2c0 1.02-.1 2.51-.26 4"/><path d="M14 13.12c0 2.38 0 6.38-1 8.88"/><path d="M17.29 21.02c.12-.6.43-2.3.5-3.02"/><path d="M2 12a10 10 0 0 1 18-6"/><path d="M2 16h.01"/><path d="M21.8 16c.2-2 .131-5.354 0-6"/><path d="M5 19.5C5.5 18 6 15 6 12a6 6 0 0 1 .34-2"/><path d="M8.65 22c.21-.66.45-1.32.57-2"/><path d="M9 6.8a6 6 0 0 1 9 5.2v2"/>',
+  badgeCheck: '<path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z"/><path d="m9 12 2 2 4-4"/>',
+  arrowLeftRight: '<path d="M8 3 4 7l4 4"/><path d="M4 7h16"/><path d="m16 21 4-4-4-4"/><path d="M20 17H4"/>',
+  bookOpen: '<path d="M12 7v14"/><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/>',
+  history: '<path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/>',
+  lifeBuoy: '<circle cx="12" cy="12" r="10"/><path d="m4.93 4.93 4.24 4.24"/><path d="m14.83 9.17 4.24-4.24"/><path d="m14.83 14.83 4.24 4.24"/><path d="m9.17 14.83-4.24 4.24"/><circle cx="12" cy="12" r="4"/>',
+  chevronRight: '<path d="m9 18 6-6-6-6"/>',
+  plus: '<path d="M5 12h14"/><path d="M12 5v14"/>',
+  settings: '<path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/>',
+  circleCheck: '<circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/>',
+  maximize: '<polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" x2="14" y1="3" y2="10"/><line x1="3" x2="10" y1="21" y2="14"/>',
+  arrowDownRight: '<path d="m7 7 10 10"/><path d="M17 7v10H7"/>',
+  arrowUpRight: '<path d="M7 7h10v10"/><path d="M7 17 17 7"/>',
+  circleDollar: '<circle cx="12" cy="12" r="10"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><path d="M12 18V6"/>',
+  chartPie: '<path d="M21 12c.552 0 1.005-.449.95-.998a10 10 0 0 0-8.953-8.951c-.55-.055-.998.398-.998.95v8a1 1 0 0 0 1 1z"/><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/>',
+  fileText: '<path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/>',
+};
+
+const NAV_MAIN = [
+  { label: "Overview", icon: ICON.gauge, active: true },
+  { label: "Transactions", icon: ICON.clipboardList },
+  { label: "Wallets", icon: ICON.walletCards },
+  { label: "Reports", icon: ICON.chartColumn },
+  { label: "Assistant", icon: ICON.messageSquareText },
+];
+
+// Source Funds is an early-stage page: with developer tools off the app
+// greys it out rather than hiding it.
+const NAV_REVIEW = [
+  { label: "Quarantine", icon: ICON.shieldAlert },
+  { label: "Reconcile", icon: ICON.fingerprint },
+  { label: "Source Funds", icon: ICON.badgeCheck, locked: true },
+  { label: "Transfers & Custody", icon: ICON.arrowLeftRight },
+  { label: "Journals", icon: ICON.bookOpen },
+];
+
+const NAV_FOOT = [
+  { label: "Activity", icon: ICON.history, locked: true },
+  { label: "Support", icon: ICON.lifeBuoy, more: true },
+  { label: "Extras", icon: ICON.plus, more: true },
+];
+
+const SOURCES = HOLDINGS.length;
+const signed = (n: number, digits: number) => `${n >= 0 ? "+" : "−"} ₿ ${Math.abs(n).toFixed(digits)}`;
+
+const STATS = [
+  { label: "BTC price", value: `${eur(FINAL_PRICE)} / BTC`, status: "Coinbase · 5m ago" },
+  { label: "Bitcoin balance", value: `₿ ${FINAL_BALANCE.toFixed(3)}`, status: "Current" },
+  { label: "Transactions", value: "218", status: "Loaded" },
+  { label: "Connections", value: String(SOURCES), status: "Configured" },
+  { label: "Open review", value: "0", status: "Clear", note: "journal quarantine" },
+];
+
+const HEALTH = [
+  { title: "Journal state", value: "Current", detail: "Reports are ready from the current journal state.", icon: ICON.circleCheck },
+  { title: "Review queue", value: "Clear", detail: "No quarantined transactions in this book.", icon: ICON.circleCheck },
+  { title: "Connections", value: `${SOURCES}/${SOURCES} current`, detail: `${SOURCES} configured sources`, icon: ICON.walletCards },
+];
+
+const DRIVER_ICON: Record<string, string> = {
+  incoming: ICON.arrowDownRight,
+  outgoing: ICON.arrowUpRight,
+  swap: ICON.arrowLeftRight,
+  fees: ICON.circleDollar,
+};
+
+const LEGEND = [
+  { label: "Bitcoin Balance", swatch: "line", color: "#f6a21a" },
+  { label: "Portfolio Value", swatch: "line", color: "#38bdf8", off: true },
+  { label: "Activity", swatch: "dots" },
+  { label: "Avg cost / BTC", swatch: "dash", color: "#50c695" },
+  { label: "BTC Price", swatch: "dash", color: "#94a3b8" },
+];
+
+const RANGES = ["Auto", "30D", "3M", "6M", "YTD", "1Y", "All"];
+---
+
+<div
+  class="ov"
+  role="img"
+  aria-label="The Kassiber Overview screen: BTC price, Bitcoin balance and book status tiles, a year of BTC activity with balance, average cost and price, balance drivers, holdings by source, book readiness, and recent transactions"
+>
+  <div class="ov-window" aria-hidden="true">
+    <!-- ── Title bar ──────────────────────────────────────── -->
+    <div class="ov-titlebar">
+      <div class="ov-lead">
+        <span class="ov-lights"><i></i><i></i><i></i></span>
+        <span class="ov-tbtn"><svg viewBox="0 0 24 24" set:html={ICON.panelLeft} /></span>
+        <span class="ov-tbtn"><svg viewBox="0 0 24 24" set:html={ICON.arrowLeft} /></span>
+        <span class="ov-tbtn"><svg viewBox="0 0 24 24" set:html={ICON.arrowRight} /></span>
+      </div>
+      <div class="ov-crumbs">
+        <span class="ov-book">
+          <svg class="ov-book-folder" viewBox="0 0 24 24" set:html={ICON.folder} />
+          <span>project-satoshi</span>
+          <svg class="ov-book-switch" viewBox="0 0 24 24" set:html={ICON.chevronsUpDown} />
+        </span>
+        <span class="ov-sep">/</span>
+        <span class="ov-page-name">Overview</span>
+        <span class="ov-alpha"><svg viewBox="0 0 24 24" set:html={ICON.triangleAlert} />Alpha</span>
+      </div>
+      <div class="ov-tools">
+        <span class="ov-tbtn ov-tbtn--split"><svg viewBox="0 0 24 24" set:html={ICON.refresh} /></span>
+        <span class="ov-tbtn ov-tbtn--caret"><svg viewBox="0 0 24 24" set:html={ICON.chevronDown} /></span>
+        <span class="ov-tbtn"><svg viewBox="0 0 24 24" set:html={ICON.bell} /></span>
+        <span class="ov-tbtn ov-tbtn--glyph">₿</span>
+        <span class="ov-tbtn"><svg viewBox="0 0 24 24" set:html={ICON.moon} /></span>
+        <span class="ov-tbtn"><svg viewBox="0 0 24 24" set:html={ICON.eye} /></span>
+        <span class="ov-tbtn ov-tbtn--online"><svg viewBox="0 0 24 24" set:html={ICON.wifi} /></span>
+        <span class="ov-tbtn"><svg viewBox="0 0 24 24" set:html={ICON.lock} /></span>
+      </div>
+    </div>
+
+    <div class="ov-body">
+      <!-- ── Side nav, flush on the chrome ──────────────────── -->
+      <div class="ov-nav">
+        <div class="ov-nav-head">
+          <div class="ov-brand">Kassiber.app</div>
+          <div class="ov-row">
+            <svg viewBox="0 0 24 24" set:html={ICON.search} />
+            <span>Search</span>
+            <kbd>⌘K</kbd>
+          </div>
+        </div>
+
+        <div class="ov-group">
+          <div class="ov-group-label">Main</div>
+          {NAV_MAIN.map((item) => (
+            <div class:list={["ov-row", { "is-active": item.active }]}>
+              <svg viewBox="0 0 24 24" set:html={item.icon} />
+              <span>{item.label}</span>
+            </div>
+          ))}
+        </div>
+
+        <div class="ov-group">
+          <div class="ov-group-label">Review</div>
+          {NAV_REVIEW.map((item) => (
+            <div class:list={["ov-row", { "is-locked": item.locked }]}>
+              <svg viewBox="0 0 24 24" set:html={item.icon} />
+              <span>{item.label}</span>
+            </div>
+          ))}
+        </div>
+
+        <div class="ov-nav-foot">
+          {NAV_FOOT.map((item) => (
+            <div class:list={["ov-row", { "is-locked": item.locked }]}>
+              <svg viewBox="0 0 24 24" set:html={item.icon} />
+              <span>{item.label}</span>
+              {item.more && <svg class="ov-row-more" viewBox="0 0 24 24" set:html={ICON.chevronRight} />}
+            </div>
+          ))}
+          <div class="ov-row ov-row--settings">
+            <svg viewBox="0 0 24 24" set:html={ICON.settings} />
+            <span>Settings</span>
+          </div>
+          <div class="ov-bookcard">
+            <span class="ov-avatar">B</span>
+            <span class="ov-bookcard-text">
+              <span>BIT-AT</span>
+              <span>project-satoshi</span>
+            </span>
+            <svg viewBox="0 0 24 24" set:html={ICON.chevronsUpDown} />
+          </div>
+          <div class="ov-version">Kassiber v0.22.78 · <span>c638188</span></div>
+        </div>
+      </div>
+
+      <!-- ── Page panel ────────────────────────────────────── -->
+      <div class="ov-panel">
+        <div class="ov-page">
+          <div class="ov-welcome">
+            <div class="ov-welcome-state">
+              <span class="ov-ready"><svg viewBox="0 0 24 24" set:html={ICON.circleCheck} />Ready for reports</span>
+              <span class="ov-ready-detail">{SOURCES}/{SOURCES} sources current</span>
+            </div>
+            <span class="ov-primary"><svg viewBox="0 0 24 24" set:html={ICON.plus} />Add connection</span>
+          </div>
+
+          <div class="ov-surface ov-stats">
+            {STATS.map((stat) => (
+              <div class="ov-stat">
+                <span class="ov-stat-label">{stat.label}</span>
+                <span class="ov-stat-value">{stat.value}</span>
+                <span class="ov-stat-status">
+                  <b>{stat.status}</b>
+                  {stat.note && <span>{stat.note}</span>}
+                </span>
+              </div>
+            ))}
+          </div>
+
+          <div class="ov-grid">
+            <div class="ov-col">
+              <!-- BTC activity -->
+              <div class="ov-surface ov-chart">
+                <div class="ov-chart-head">
+                  <div>
+                    <div class="ov-chart-title">
+                      <b>BTC activity</b>
+                      <span>As of Oct 3, 2026</span>
+                    </div>
+                    <div class="ov-chart-meta">
+                      <span>net <b class="is-up">{signed(NET_BTC, 4)}</b></span>
+                      <span>{DOTS.reduce((n, dot) => n + (dot.count ?? 1), 0)} events</span>
+                      <b class="is-up">+ {UNREALIZED_PCT.toFixed(2)}% unrealized (EUR)</b>
+                    </div>
+                  </div>
+                  <span class="ov-ghost"><svg viewBox="0 0 24 24" set:html={ICON.maximize} /></span>
+                </div>
+
+                <div class="ov-legend">
+                  {LEGEND.map((item) => (
+                    <span class:list={["ov-legend-item", { "is-off": item.off }]}>
+                      {item.swatch === "dots" ? (
+                        <span class="ov-legend-dots"><i style="background:#34d399"></i><i style="background:#f87171"></i><i style="background:#38bdf8"></i></span>
+                      ) : (
+                        <span class:list={["ov-legend-line", { "is-dashed": item.swatch === "dash" }]} style={`--c:${item.color}`}></span>
+                      )}
+                      {item.label}
+                    </span>
+                  ))}
+                </div>
+
+                <div class="ov-plot-block">
+                  <svg class="ov-plot" viewBox={`0 0 ${CHART.width} ${CHART.height}`}>
+                    {Y_TICKS.map((tick) => (
+                      <line class="ov-grid-line" x1={CHART.x0} x2={CHART.x1} y1={tick.y} y2={tick.y} />
+                    ))}
+                    {X_TICKS.map((tick) => (
+                      <line class="ov-grid-line" x1={tick.x} x2={tick.x} y1={CHART.y0} y2={CHART.y1} />
+                    ))}
+                    {Y_TICKS.map((tick) => (
+                      <text class="ov-tick" x={CHART.x0 - 4} y={tick.y + 3.5} text-anchor="end">{tick.btc}</text>
+                    ))}
+                    {Y_TICKS.map((tick) => (
+                      <text class="ov-tick" x={CHART.x1 + 4} y={tick.y + 3.5}>{groupThousands(Math.round(tick.eur))} EUR</text>
+                    ))}
+                    {X_TICKS.map((tick) => (
+                      <text class="ov-tick" x={tick.x} y={CHART.y1 + 18} text-anchor="middle">{tick.label}</text>
+                    ))}
+
+                    <!-- Last-value reference lines, under the series. -->
+                    <line class="ov-ref" x1={CHART.x0} x2={CHART.x1} y1={TAGS.price.y} y2={TAGS.price.y} stroke="#94a3b8" />
+                    <line class="ov-ref" x1={CHART.x0} x2={CHART.x1} y1={TAGS.cost.y} y2={TAGS.cost.y} stroke="#50c695" />
+                    <line class="ov-ref" x1={CHART.x0} x2={CHART.x1} y1={TAGS.balance.y} y2={TAGS.balance.y} stroke="#f6a21a" />
+
+                    <path class="ov-series" d={PATHS.price} stroke="#94a3b8" stroke-width="1.6" stroke-dasharray="3 5" opacity="0.72" />
+                    <path class="ov-series" d={PATHS.cost} stroke="#50c695" stroke-width="2" stroke-dasharray="5 5" />
+                    <path class="ov-series ov-balance" d={PATHS.balance} stroke="#f6a21a" stroke-width="2.5" />
+
+                    {DOTS.map((dot) => (
+                      <g class="ov-dot">
+                        {dot.slices ? (
+                          <>
+                            <circle cx={dot.cx} cy={dot.cy} r={dot.r + 2.5} fill="#0a0a0a" />
+                            {dot.slices.map((slice) => <path d={slice.d} fill={slice.color} fill-opacity="0.92" />)}
+                          </>
+                        ) : (
+                          <circle cx={dot.cx} cy={dot.cy} r={dot.r} fill={dot.color} fill-opacity="0.92" stroke="#0a0a0a" stroke-width="2.5" />
+                        )}
+                        {dot.count && (
+                          <text class="ov-dot-count" x={dot.cx} y={dot.cy - dot.r - 4} text-anchor="middle">{dot.count}</text>
+                        )}
+                      </g>
+                    ))}
+
+                    {[
+                      { tag: TAGS.balance, x: CHART.x0 + 2, fill: "#f6a21a" },
+                      { tag: TAGS.price, x: CHART.x1 + 2, fill: "#94a3b8" },
+                      { tag: TAGS.cost, x: CHART.x1 + 2, fill: "#50c695" },
+                    ].map(({ tag, x, fill }) => (
+                      <g>
+                        <rect x={x} y={tag.y - 7.5} width={tagWidth(tag.label)} height="15" rx="3" fill={fill} />
+                        <text class="ov-tag" x={x + tagWidth(tag.label) / 2} y={tag.y + 3.3} text-anchor="middle">{tag.label}</text>
+                      </g>
+                    ))}
+                  </svg>
+
+                  <svg class="ov-brush" viewBox="0 0 784 54">
+                    <defs>
+                      <linearGradient id="ov-brush-fill" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stop-color="#f6a21a" stop-opacity="0.28" />
+                        <stop offset="100%" stop-color="#f6a21a" stop-opacity="0.03" />
+                      </linearGradient>
+                    </defs>
+                    <rect x={BRUSH.x0} y="0.5" width={BRUSH.x1 - BRUSH.x0} height="53" fill="#1d1d1d" stroke="#f6a21a" stroke-width="1" />
+                    <path d={BRUSH.area} fill="url(#ov-brush-fill)" />
+                    <path d={BRUSH.line} fill="none" stroke="#f6a21a" stroke-width="1.35" />
+                    {[BRUSH.x0, BRUSH.x1 - 10].map((x) => (
+                      <g>
+                        <rect x={x} y="0" width="10" height="54" fill="#f6a21a" />
+                        <line x1={x + 3} x2={x + 7} y1="25" y2="25" stroke="#fff" />
+                        <line x1={x + 3} x2={x + 7} y1="29" y2="29" stroke="#fff" />
+                      </g>
+                    ))}
+                  </svg>
+
+                  <div class="ov-ranges">
+                    <div class="ov-chips">
+                      {RANGES.map((range, index) => <span class:list={["ov-chip", { "is-on": index === 0 }]}>{range}</span>)}
+                      <span class="ov-chip">log</span>
+                    </div>
+                    <div class="ov-chips">
+                      <span class="ov-chip">log</span>
+                      <span class="ov-chip">fit</span>
+                      <svg class="ov-gear" viewBox="0 0 24 24" set:html={ICON.settings} />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Recent transactions -->
+              <div class="ov-surface ov-recent">
+                <div class="ov-recent-head">
+                  <b>Recent Transactions</b>
+                  <span>Show all</span>
+                </div>
+                {RECENT.map((row) => (
+                  <div class="ov-tx">
+                    <span class="ov-tx-icon"><svg viewBox="0 0 24 24" set:html={ICON.arrowDownRight} /></span>
+                    <span class="ov-tx-body">
+                      <span class="ov-tx-name">{row.source}</span>
+                      <span class="ov-tx-meta">
+                        <i class="ov-tint">Income</i>
+                        <i class="ov-tint ov-tint--ok">Confirmed</i>
+                        <span>{row.when}</span>
+                      </span>
+                    </span>
+                    <span class="ov-tx-amt">
+                      <b>+ {row.btc}</b>
+                      <span>{row.eur}</span>
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div class="ov-col">
+              <!-- Balance drivers -->
+              <div class="ov-surface ov-card">
+                <div class="ov-card-head">
+                  <span class="ov-card-icon"><svg viewBox="0 0 24 24" set:html={ICON.arrowLeftRight} /></span>
+                  <span class="ov-card-copy">
+                    <b>Balance Drivers</b>
+                    <span>Latest {DRIVERS.count} transactions</span>
+                  </span>
+                  <b class="ov-card-figure is-up">{signed(DRIVERS.net, 8)}</b>
+                </div>
+                <div class="ov-drivers">
+                  {DRIVERS.rows.map((row) => (
+                    <div class={`ov-driver ov-driver--${row.key}`}>
+                      <div class="ov-driver-line">
+                        <svg viewBox="0 0 24 24" set:html={DRIVER_ICON[row.key]} />
+                        <span class="ov-driver-label">{row.label}</span>
+                        <span class="ov-driver-count">{row.count}</span>
+                        <span class="ov-driver-value">{btc(row.btc, row.key === "fees" ? 8 : 3)}</span>
+                      </div>
+                      <div class="ov-bar"><i style={`width:${row.width.toFixed(1)}%`}></i></div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <!-- Holdings by source -->
+              <div class="ov-surface ov-card">
+                <div class="ov-card-head">
+                  <span class="ov-card-icon"><svg viewBox="0 0 24 24" set:html={ICON.chartPie} /></span>
+                  <span class="ov-card-copy">
+                    <b>Holdings by Source</b>
+                    <span>BTC allocation</span>
+                  </span>
+                  <span class="ov-card-link">View connections</span>
+                </div>
+                <div class="ov-holdings">
+                  <div class="ov-donut">
+                    <svg viewBox="0 0 136 136">
+                      {DONUT.map((slice) => <path d={slice.d} fill={slice.color} />)}
+                    </svg>
+                    <span class="ov-donut-center">
+                      <b>₿ {FINAL_BALANCE.toFixed(3)}</b>
+                      <span>Total</span>
+                    </span>
+                  </div>
+                  <div class="ov-holdings-list">
+                    {DONUT.map((slice) => (
+                      <div class="ov-holding">
+                        <i style={`background:${slice.color}`}></i>
+                        <span class="ov-holding-name">{slice.name}</span>
+                        <span class="ov-holding-value"><b>₿ {slice.btc.toFixed(3)}</b><span>{slice.percent}%</span></span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              <!-- Book readiness -->
+              <div class="ov-surface ov-card ov-health">
+                <div class="ov-card-head">
+                  <span class="ov-card-icon"><svg viewBox="0 0 24 24" set:html={ICON.circleCheck} /></span>
+                  <span class="ov-card-copy">
+                    <b>Book readiness</b>
+                    <span>Reports, review, and sources</span>
+                  </span>
+                </div>
+                <div class="ov-action">
+                  <span class="ov-action-icon"><svg viewBox="0 0 24 24" set:html={ICON.fileText} /></span>
+                  <span>
+                    <b>Open reports</b>
+                    <span>Move from overview into the report package for the current book.</span>
+                  </span>
+                </div>
+                <div class="ov-health-list">
+                  {HEALTH.map((item) => (
+                    <div class="ov-health-row">
+                      <span class="ov-health-icon"><svg viewBox="0 0 24 24" set:html={item.icon} /></span>
+                      <span class="ov-health-copy">
+                        <span>{item.title}</span>
+                        <b>{item.value}</b>
+                      </span>
+                      <span class="ov-health-detail">{item.detail}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  /*
+   * 1cqw is one app rem here (see the header). Colours are the app's dark
+   * tokens: --app-chrome oklch(0.18) #121212, --background oklch(0.145)
+   * #0a0a0a, --card oklch(0.205) #171717, --muted oklch(0.269) #262626,
+   * --muted-foreground oklch(0.708) #a1a1a1, and Tailwind v4's emerald, red,
+   * sky and amber.
+   */
+  .ov {
+    --chrome: #121212;
+    --page: #0a0a0a;
+    --card: #171717;
+    --muted: #262626;
+    --muted-fg: #a1a1a1;
+    --fg: #fafafa;
+    --nav-fg: #f4f4f5;
+    --line: rgb(255 255 255 / 0.1);
+    --emerald-300: #5ee9b5;
+    --emerald-400: #00d492;
+    --px: calc(1cqw / 14.4);
+
+    position: relative;
+    width: 100%;
+    height: 100%;
+    color: var(--fg);
+    font-family: var(--font-sans);
+    font-feature-settings: normal;
+    line-height: 1.5;
+    text-align: left;
+    user-select: none;
+    pointer-events: none;
+  }
+
+  .ov svg {
+    display: block;
+    max-width: none;
+  }
+
+  .ov-window svg[viewBox="0 0 24 24"] {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .ov-window {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border-radius: calc(var(--px) * 12);
+    background: var(--chrome);
+    box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.1);
+  }
+
+  /* ── Title bar ──────────────────────────────────────────── */
+  .ov-titlebar {
+    flex: none;
+    display: flex;
+    align-items: center;
+    height: calc(var(--px) * 40);
+  }
+
+  /* As wide as the nav while it is open, so the crumb lines up with the panel. */
+  .ov-lead {
+    flex: none;
+    display: flex;
+    align-items: center;
+    gap: 0.125cqw;
+    width: 16cqw;
+    height: 100%;
+    padding: 0 0.5cqw 0 calc(var(--px) * 80);
+    position: relative;
+  }
+
+  .ov-lights {
+    position: absolute;
+    left: calc(var(--px) * 14);
+    top: 50%;
+    display: flex;
+    gap: calc(var(--px) * 8);
+    transform: translateY(-50%);
+  }
+
+  .ov-lights i {
+    width: calc(var(--px) * 12);
+    height: calc(var(--px) * 12);
+    border-radius: 50%;
+    background: #ff5f57;
+  }
+
+  .ov-lights i:nth-child(2) { background: #febc2e; }
+  .ov-lights i:nth-child(3) { background: #28c840; }
+
+  .ov-tbtn {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 2cqw;
+    height: 2cqw;
+    border: 1px solid transparent;
+    border-radius: 0.375cqw;
+    color: var(--muted-fg);
+  }
+
+  .ov-tbtn svg {
+    width: 1cqw;
+    height: 1cqw;
+  }
+
+  .ov-tbtn--split {
+    border-radius: 0.375cqw 0 0 0.375cqw;
+  }
+
+  .ov-tbtn--caret {
+    width: 1.25cqw;
+    margin-left: -0.125cqw;
+    border-radius: 0 0.375cqw 0.375cqw 0;
+    border-left-color: rgb(255 255 255 / 0.06);
+  }
+
+  .ov-tbtn--caret svg {
+    width: 0.75cqw;
+    height: 0.75cqw;
+  }
+
+  .ov-tbtn--glyph {
+    font-size: 0.875cqw;
+    font-weight: 600;
+    line-height: 1;
+    color: var(--nav-fg);
+  }
+
+  .ov-tbtn--online {
+    border-color: rgb(0 188 125 / 0.2);
+    background: rgb(38 38 38 / 0.4);
+    color: var(--emerald-300);
+  }
+
+  .ov-crumbs {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.75cqw;
+    padding-left: 1.25cqw;
+    font-size: 0.875cqw;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+
+  .ov-book {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375cqw;
+    color: var(--muted-fg);
+  }
+
+  .ov-book-folder {
+    width: 0.875cqw;
+    height: 0.875cqw;
+  }
+
+  .ov-book-switch {
+    width: 0.75cqw;
+    height: 0.75cqw;
+    opacity: 0.5;
+  }
+
+  .ov-sep {
+    color: rgb(161 161 161 / 0.4);
+  }
+
+  .ov-page-name {
+    color: var(--nav-fg);
+  }
+
+  .ov-alpha {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25cqw;
+    height: 1.5cqw;
+    padding: 0 0.5cqw;
+    border: 1px solid rgb(255 51 65 / 0.35);
+    border-radius: 999px;
+    background: rgb(255 51 65 / 0.1);
+    color: #ff3341;
+    font-size: 0.75cqw;
+  }
+
+  .ov-alpha svg {
+    width: 0.75cqw;
+    height: 0.75cqw;
+  }
+
+  .ov-tools {
+    flex: none;
+    display: flex;
+    align-items: center;
+    gap: 0.125cqw;
+    padding: 0 0.5cqw;
+  }
+
+  /* ── Body ───────────────────────────────────────────────── */
+  .ov-body {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+  }
+
+  .ov-nav {
+    flex: none;
+    display: flex;
+    flex-direction: column;
+    width: 16cqw;
+    color: var(--muted-fg);
+  }
+
+  .ov-nav-head {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25cqw;
+    padding: 0.25cqw 0.5cqw;
+  }
+
+  .ov-brand {
+    display: flex;
+    align-items: center;
+    height: 2cqw;
+    padding: 0 0.5cqw;
+    font-size: 0.875cqw;
+    font-weight: 500;
+    letter-spacing: -0.025em;
+    color: var(--nav-fg);
+  }
+
+  .ov-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25cqw;
+    padding: 0.375cqw 0.5cqw;
+  }
+
+  .ov-group-label {
+    margin-bottom: 0.25cqw;
+    padding: 0 0.5cqw;
+    font-size: 0.75cqw;
+    font-weight: 500;
+    color: rgb(161 161 161 / 0.8);
+  }
+
+  .ov-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5cqw;
+    height: 2cqw;
+    padding: 0.5cqw;
+    border-radius: 0.375cqw;
+    font-size: 0.875cqw;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+
+  .ov-row svg {
+    flex: none;
+    width: 1cqw;
+    height: 1cqw;
+  }
+
+  .ov-row.is-active {
+    background: rgb(255 255 255 / 0.12);
+    color: var(--nav-fg);
+  }
+
+  /* Early-stage pages stay listed but greyed while developer tools are off. */
+  .ov-row.is-locked {
+    opacity: 0.5;
+  }
+
+  .ov-row kbd {
+    display: inline-flex;
+    align-items: center;
+    height: 1.25cqw;
+    margin-left: auto;
+    padding: 0 0.25cqw;
+    border-radius: 0.25cqw;
+    background: rgb(255 255 255 / 0.08);
+    font-family: var(--font-sans);
+    font-size: 0.75cqw;
+    font-weight: 500;
+  }
+
+  .ov-row-more {
+    margin-left: auto;
+  }
+
+  .ov-nav-foot {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25cqw;
+    margin-top: auto;
+    padding: 0.5cqw;
+  }
+
+  .ov-row--settings {
+    margin: 0.25cqw -0.5cqw 0;
+    padding-left: 1cqw;
+    padding-right: 1cqw;
+    border-top: 1px solid rgb(39 39 42 / 0.6);
+    border-radius: 0;
+    height: calc(2cqw + 0.25cqw);
+    padding-top: 0.75cqw;
+  }
+
+  .ov-bookcard {
+    display: flex;
+    align-items: center;
+    gap: 0.5cqw;
+    height: 3cqw;
+    padding: 0.5cqw;
+    border-radius: 0.375cqw;
+    font-size: 0.875cqw;
+    line-height: 1.25;
+  }
+
+  .ov-avatar {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 2cqw;
+    height: 2cqw;
+    border-radius: 0.5cqw;
+    background: rgb(255 255 255 / 0.12);
+    color: var(--nav-fg);
+    font-weight: 500;
+  }
+
+  .ov-bookcard-text {
+    flex: 1;
+    display: grid;
+  }
+
+  .ov-bookcard-text span:first-child {
+    font-weight: 500;
+    color: var(--nav-fg);
+  }
+
+  .ov-bookcard-text span:last-child {
+    font-size: 0.75cqw;
+  }
+
+  .ov-bookcard svg {
+    width: 1cqw;
+    height: 1cqw;
+  }
+
+  .ov-version {
+    padding: 0 0.5cqw 0.25cqw;
+    font-size: 0.75cqw;
+    line-height: 1;
+    text-align: center;
+  }
+
+  .ov-version span {
+    font-family: var(--font-mono);
+  }
+
+  /* Flush against the nav and the title bar, a hairline gutter elsewhere. */
+  .ov-panel {
+    flex: 1;
+    min-width: 0;
+    margin: 0 0.375cqw 0.375cqw 0;
+    overflow: hidden;
+    border: 1px solid rgb(255 255 255 / 0.07);
+    border-radius: 1cqw;
+    background: var(--page);
+  }
+
+  .ov-page {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75cqw;
+    padding: 1.25cqw;
+  }
+
+  /* ── Shared surfaces ────────────────────────────────────── */
+  .ov-surface {
+    border: 1px solid rgb(255 255 255 / 0.07);
+    border-radius: 0.75cqw;
+    background: var(--card);
+    box-shadow: 0 1px 2px rgb(0 0 0 / 0.35), 0 10px 30px rgb(0 0 0 / 0.2);
+  }
+
+  .is-up {
+    color: var(--emerald-400);
+  }
+
+  /* ── Welcome row ────────────────────────────────────────── */
+  .ov-welcome {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75cqw;
+  }
+
+  .ov-welcome-state {
+    display: flex;
+    align-items: center;
+    gap: 0.75cqw;
+  }
+
+  .ov-ready {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375cqw;
+    height: 1.75cqw;
+    padding: 0 0.5cqw;
+    border: 1px solid rgb(0 188 125 / 0.25);
+    border-radius: 0.375cqw;
+    background: rgb(0 188 125 / 0.1);
+    color: var(--emerald-300);
+    font-size: 0.75cqw;
+    font-weight: 500;
+  }
+
+  .ov-ready svg {
+    width: 1cqw;
+    height: 1cqw;
+  }
+
+  .ov-ready-detail {
+    font-size: 0.875cqw;
+    color: var(--muted-fg);
+  }
+
+  .ov-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5cqw;
+    height: 2cqw;
+    padding: 0 0.625cqw;
+    border-radius: 0.375cqw;
+    background: #e5e5e5;
+    color: #171717;
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.16), 0 1px 2px rgb(0 0 0 / 0.1);
+    font-size: 0.875cqw;
+    font-weight: 500;
+  }
+
+  .ov-primary svg {
+    width: 1cqw;
+    height: 1cqw;
+  }
+
+  /* ── Stat tiles ─────────────────────────────────────────── */
+  .ov-stats {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    overflow: hidden;
+  }
+
+  .ov-stat {
+    display: flex;
+    flex-direction: column;
+    gap: 0.375cqw;
+    padding: 0.75cqw;
+    min-width: 0;
+  }
+
+  .ov-stat + .ov-stat {
+    border-left: 1px solid var(--line);
+  }
+
+  .ov-stat-label {
+    font-size: 0.75cqw;
+    font-weight: 500;
+    color: var(--muted-fg);
+  }
+
+  .ov-stat-value {
+    font-size: 1.25cqw;
+    font-weight: 600;
+    line-height: 1.4;
+    letter-spacing: -0.025em;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+
+  .ov-stat-status {
+    display: flex;
+    gap: 0.375cqw;
+    font-size: 0.75cqw;
+    white-space: nowrap;
+  }
+
+  .ov-stat-status b {
+    font-weight: 500;
+    color: var(--emerald-400);
+  }
+
+  .ov-stat-status span {
+    color: var(--muted-fg);
+  }
+
+  /* ── Columns ────────────────────────────────────────────── */
+  .ov-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) calc(var(--px) * 348);
+    gap: 0.75cqw;
+    align-items: start;
+  }
+
+  .ov-col {
+    display: grid;
+    gap: 0.75cqw;
+    min-width: 0;
+  }
+
+  /* ── BTC activity ───────────────────────────────────────── */
+  .ov-chart {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75cqw;
+    padding: 0.75cqw;
+  }
+
+  .ov-chart-head {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.75cqw;
+  }
+
+  .ov-chart-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5cqw;
+  }
+
+  .ov-chart-title b {
+    font-size: 0.875cqw;
+    font-weight: 600;
+  }
+
+  .ov-chart-title span {
+    font-size: 0.694cqw;
+    color: var(--muted-fg);
+  }
+
+  .ov-chart-meta {
+    display: flex;
+    gap: 0.625cqw;
+    margin-top: 0.375cqw;
+    font-size: 0.75cqw;
+    color: var(--muted-fg);
+  }
+
+  .ov-chart-meta b {
+    font-weight: 600;
+  }
+
+  .ov-ghost {
+    display: grid;
+    place-items: center;
+    width: 2cqw;
+    height: 2cqw;
+    color: var(--muted-fg);
+  }
+
+  .ov-ghost svg {
+    width: 1cqw;
+    height: 1cqw;
+  }
+
+  .ov-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25cqw 0.5cqw;
+    font-size: 0.75cqw;
+    color: var(--muted-fg);
+  }
+
+  .ov-legend-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375cqw;
+    padding: 0.125cqw 0.375cqw;
+  }
+
+  .ov-legend-item.is-off {
+    opacity: 0.3;
+  }
+
+  .ov-legend-line {
+    width: 1.25cqw;
+    height: 0.125cqw;
+    border-radius: 999px;
+    background: var(--c);
+  }
+
+  .ov-legend-line.is-dashed {
+    height: 0;
+    border-top: 1px dashed var(--c);
+    background: none;
+  }
+
+  .ov-legend-dots {
+    display: flex;
+    gap: 0.125cqw;
+    width: 2.75cqw;
+  }
+
+  .ov-legend-dots i {
+    width: 0.375cqw;
+    height: 0.375cqw;
+    border-radius: 50%;
+  }
+
+  .ov-plot,
+  .ov-brush {
+    width: 100%;
+    height: auto;
+    overflow: visible;
+  }
+
+  .ov-brush {
+    margin-top: calc(var(--px) * 4);
+  }
+
+  .ov-grid-line {
+    stroke: rgb(255 255 255 / 0.045);
+    stroke-width: 1;
+  }
+
+  .ov-tick {
+    font-family: var(--font-sans);
+    font-size: 10px;
+    fill: #a1a1a1;
+  }
+
+  .ov-ref {
+    stroke-width: 1;
+    stroke-dasharray: 2 4;
+    opacity: 0.45;
+  }
+
+  .ov-series {
+    fill: none;
+    stroke-linejoin: round;
+  }
+
+  .ov-dot-count {
+    font-family: var(--font-sans);
+    font-size: 10px;
+    font-weight: 600;
+    fill: #fafafa;
+    stroke: #0a0a0a;
+    stroke-width: 3;
+    paint-order: stroke;
+  }
+
+  .ov-tag {
+    font-family: var(--font-sans);
+    font-size: 9.5px;
+    font-weight: 600;
+    fill: #09090b;
+  }
+
+  .ov-ranges {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75cqw;
+    margin-top: 0.5cqw;
+    padding-top: 0.5cqw;
+    border-top: 1px solid var(--line);
+  }
+
+  .ov-chips {
+    display: flex;
+    align-items: center;
+    gap: 0.125cqw;
+  }
+
+  .ov-chip {
+    padding: 0.125cqw 0.375cqw;
+    border-radius: 0.375cqw;
+    font-size: 0.75cqw;
+    font-weight: 500;
+    color: var(--muted-fg);
+  }
+
+  .ov-chip.is-on {
+    background: var(--muted);
+    color: var(--fg);
+  }
+
+  .ov-gear {
+    width: 0.875cqw;
+    height: 0.875cqw;
+    margin-left: 0.25cqw;
+    color: var(--muted-fg);
+  }
+
+  /* ── Recent transactions ────────────────────────────────── */
+  .ov-recent {
+    overflow: hidden;
+  }
+
+  .ov-recent-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.625cqw 1cqw;
+    border-bottom: 1px solid var(--line);
+    font-size: 0.875cqw;
+  }
+
+  .ov-recent-head b {
+    font-weight: 500;
+  }
+
+  .ov-recent-head span {
+    font-size: 0.75cqw;
+    font-weight: 500;
+    color: var(--muted-fg);
+  }
+
+  .ov-tx {
+    display: flex;
+    align-items: center;
+    gap: 0.75cqw;
+    padding: 0.5cqw 1cqw;
+  }
+
+  .ov-tx + .ov-tx {
+    border-top: 1px solid var(--line);
+  }
+
+  .ov-tx-icon {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 2cqw;
+    height: 2cqw;
+    border-radius: 0.375cqw;
+    background: rgb(0 79 59 / 0.25);
+    box-shadow: inset 0 0 0 1px rgb(0 212 146 / 0.2);
+    color: var(--emerald-300);
+  }
+
+  .ov-tx-icon svg {
+    width: 1cqw;
+    height: 1cqw;
+  }
+
+  .ov-tx-body {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .ov-tx-name {
+    display: block;
+    font-size: 0.875cqw;
+    font-weight: 500;
+  }
+
+  .ov-tx-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.375cqw;
+    margin-top: 0.25cqw;
+    font-size: 0.694cqw;
+    color: var(--muted-fg);
+  }
+
+  .ov-tint {
+    padding: 0.125cqw 0.375cqw;
+    border-radius: 0.375cqw;
+    background: rgb(0 79 59 / 0.25);
+    box-shadow: inset 0 0 0 1px rgb(0 212 146 / 0.2);
+    color: var(--emerald-300);
+    font-style: normal;
+    font-weight: 500;
+  }
+
+  .ov-tint--ok {
+    background: rgb(0 79 59 / 0.3);
+    color: var(--emerald-400);
+  }
+
+  .ov-tx-amt {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.125cqw;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .ov-tx-amt b {
+    font-size: 0.875cqw;
+    font-weight: 600;
+    color: var(--emerald-300);
+  }
+
+  .ov-tx-amt span {
+    font-size: 0.694cqw;
+    color: var(--muted-fg);
+  }
+
+  /* ── Side cards ─────────────────────────────────────────── */
+  .ov-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75cqw;
+    padding: 0.75cqw;
+  }
+
+  .ov-card-head {
+    display: flex;
+    align-items: center;
+    gap: 0.625cqw;
+  }
+
+  .ov-card-icon {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 2cqw;
+    height: 2cqw;
+    border: 1px solid var(--line);
+    border-radius: 0.375cqw;
+    background: var(--page);
+    color: var(--muted-fg);
+  }
+
+  .ov-card-icon svg {
+    width: calc(var(--px) * 18);
+    height: calc(var(--px) * 18);
+  }
+
+  .ov-card-copy {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  .ov-card-copy b {
+    font-size: 0.875cqw;
+    font-weight: 500;
+  }
+
+  .ov-card-copy span {
+    font-size: 0.75cqw;
+    color: var(--muted-fg);
+  }
+
+  .ov-card-figure {
+    font-size: 0.875cqw;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .ov-card-link {
+    align-self: flex-start;
+    font-size: 0.75cqw;
+    font-weight: 500;
+    color: var(--muted-fg);
+  }
+
+  .ov-drivers {
+    display: flex;
+    flex-direction: column;
+    gap: 0.625cqw;
+  }
+
+  .ov-driver {
+    display: grid;
+    gap: 0.375cqw;
+  }
+
+  .ov-driver-line {
+    display: flex;
+    align-items: center;
+    gap: 0.5cqw;
+    font-size: 0.75cqw;
+  }
+
+  .ov-driver-line svg {
+    width: 0.875cqw;
+    height: 0.875cqw;
+  }
+
+  .ov-driver-label {
+    color: var(--muted-fg);
+  }
+
+  .ov-driver-count {
+    font-size: 0.694cqw;
+    color: var(--muted-fg);
+  }
+
+  .ov-driver-value {
+    margin-left: auto;
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .ov-bar {
+    height: 0.375cqw;
+    overflow: hidden;
+    border-radius: 999px;
+    background: var(--muted);
+  }
+
+  .ov-bar i {
+    display: block;
+    height: 100%;
+    border-radius: 999px;
+  }
+
+  .ov-driver--incoming { color: var(--emerald-300); }
+  .ov-driver--incoming .ov-bar i { background: #00bc7d; }
+  .ov-driver--outgoing { color: #ffa2a2; }
+  .ov-driver--outgoing .ov-bar i { background: #fb2c36; }
+  .ov-driver--swap { color: #74d4ff; }
+  .ov-driver--swap .ov-bar i { background: #00a6f4; }
+  .ov-driver--fees { color: var(--muted-fg); }
+  .ov-driver--fees .ov-bar i { background: rgb(161 161 161 / 0.6); }
+
+  .ov-holdings {
+    display: grid;
+    grid-template-columns: minmax(calc(var(--px) * 104), 0.85fr) minmax(0, 1.15fr);
+    align-items: center;
+    gap: 0.75cqw;
+  }
+
+  .ov-donut {
+    position: relative;
+    width: calc(var(--px) * 136);
+    height: calc(var(--px) * 136);
+    margin: 0 auto;
+  }
+
+  .ov-donut svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  .ov-donut-center {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    line-height: 1.25;
+  }
+
+  .ov-donut-center b {
+    font-size: 0.875cqw;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .ov-donut-center span {
+    font-size: 0.694cqw;
+    color: var(--muted-fg);
+  }
+
+  .ov-holdings-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75cqw;
+  }
+
+  .ov-holding {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5cqw;
+    font-size: 0.75cqw;
+    line-height: 1.35;
+  }
+
+  .ov-holding i {
+    flex: none;
+    width: 0.625cqw;
+    height: 0.625cqw;
+    margin-top: 0.25cqw;
+    border-radius: 50%;
+  }
+
+  .ov-holding-name {
+    flex: 1;
+    min-width: 0;
+    color: var(--muted-fg);
+    overflow-wrap: anywhere;
+  }
+
+  .ov-holding-value {
+    display: flex;
+    gap: 0.375cqw;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+
+  .ov-holding-value b {
+    font-weight: 500;
+  }
+
+  .ov-holding-value span {
+    color: var(--muted-fg);
+  }
+
+  .ov-health {
+    gap: 0.625cqw;
+    padding: 0.75cqw 1cqw;
+  }
+
+  .ov-action {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75cqw;
+    padding: 0.625cqw;
+    border-radius: 0.5cqw;
+    background: rgb(0 79 59 / 0.25);
+    box-shadow: inset 0 0 0 1px rgb(0 212 146 / 0.2);
+    color: var(--emerald-300);
+  }
+
+  .ov-action-icon {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 2cqw;
+    height: 2cqw;
+    margin-top: 0.125cqw;
+    border-radius: 0.375cqw;
+    background: rgb(10 10 10 / 0.7);
+  }
+
+  .ov-action-icon svg {
+    width: 1cqw;
+    height: 1cqw;
+  }
+
+  .ov-action b {
+    display: block;
+    font-size: 0.875cqw;
+    font-weight: 600;
+  }
+
+  .ov-action > span:last-child > span {
+    display: block;
+    margin-top: 0.125cqw;
+    font-size: 0.75cqw;
+    line-height: 1.66;
+    opacity: 0.8;
+  }
+
+  .ov-health-list {
+    border: 1px solid var(--line);
+    border-radius: 0.5cqw;
+    background: rgb(10 10 10 / 0.5);
+  }
+
+  .ov-health-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75cqw;
+    padding: 0.625cqw 0.75cqw;
+  }
+
+  .ov-health-row + .ov-health-row {
+    border-top: 1px solid var(--line);
+  }
+
+  .ov-health-icon {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 2cqw;
+    height: 2cqw;
+    border-radius: 0.375cqw;
+    background: rgb(0 79 59 / 0.25);
+    box-shadow: inset 0 0 0 1px rgb(0 212 146 / 0.2);
+    color: var(--emerald-300);
+  }
+
+  .ov-health-icon svg {
+    width: 1cqw;
+    height: 1cqw;
+  }
+
+  .ov-health-copy {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  .ov-health-copy span {
+    font-size: 0.75cqw;
+    font-weight: 500;
+    color: var(--muted-fg);
+  }
+
+  .ov-health-copy b {
+    margin-top: 0.125cqw;
+    font-size: 0.875cqw;
+    font-weight: 600;
+  }
+
+  .ov-health-detail {
+    max-width: calc(var(--px) * 140);
+    font-size: 0.694cqw;
+    line-height: 1.45;
+    text-align: right;
+    color: var(--muted-fg);
+  }
+</style>

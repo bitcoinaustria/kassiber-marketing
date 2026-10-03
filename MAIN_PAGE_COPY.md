@@ -25,6 +25,8 @@ One book for on-chain, Lightning, and Liquid. Transfers between your own wallets
 
 Watch-only. Kassiber never sees your private keys.
 
+**App window:** the Overview screen, recreated in HTML with an illustrative demo book (project-satoshi / Overview · Ready for reports · Add connection · BTC activity · Balance Drivers · Holdings by Source · Book readiness · Recent Transactions)
+
 **Assistant prompt:** Ask anything
 
 **Selected model:** omlx · Qwen3.6-35B-A3B-4bit
@@ -40,10 +42,12 @@ Missing yours? [Open an issue](https://github.com/bitcoinaustria/kassiber/issues
 **Connection dialog**
 
 - Add connection
-- Watch-only wallets, your node, merchant tools, files.
-- Categories: Wallets, Exchanges, Nodes, Lightning, Merchant, Files
+- Choose a watch-only wallet, node, exchange, or local file source.
+- Categories: Wallets, Nodes, Lightning, Merchant, Exchanges, Files
+- Search: Search sources (e.g. river, descriptor, btcpay)…
+- One line per source (name and format); the detail pane carries the description and setup notes, as in the app's catalog
 - Actions: Cancel, Continue
-- Note: Third-party brands and logos belong to their respective owners.
+- Note: Third-party marks belong to their owners; shown to identify sources, with no affiliation implied.
 
 <!-- Section: Bird's eye: money in, money out, and the internal moves. Anchor: history -->
 
@@ -59,11 +63,16 @@ Kassiber pairs both legs of a transfer, swap, or wallet migration, so your cost 
 
 **Swap example**
 
-- Spent leg — Liquid — ₿ 0.04200000
+- Paired swap route
+- Consolidation leg — Liquid — ₿ 0.04200000
+- Atomic Swap · Carrying value · Fee 0.10%
 - Received leg — Bitcoin — ₿ 0.04195800
-- Transaction graph
-- Inputs
-- Outputs
+- Transaction graph (glass 3D view; drag to turn)
+- Reference graph: public references are available; confidential amounts stay hidden (Liquid leg only)
+- Booked custody conversion
+- Legend: Known amount, Amount unknown, Your wallet, Other, Fee
+- All inputs are spent together in the glass ring; the order of the ribbons does not say which input paid which output.
+- Inputs, Outputs, Total, Known total
 
 <!-- Section: Tax and reports. Anchor: tax -->
 
