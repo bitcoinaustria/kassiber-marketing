@@ -135,12 +135,22 @@ const LEGEND = [
 ];
 
 const RANGES = ["Auto", "30D", "3M", "6M", "YTD", "1Y", "All"];
+
+interface Props {
+  /** Drawn as scenery behind another mock: no label, hidden from assistive tech. */
+  decorative?: boolean;
+  /** Keeps SVG ids unique when the window appears twice on a page. */
+  id?: string;
+}
+const { decorative = false, id = "ov" } = Astro.props;
+const brushFill = `${id}-brush-fill`;
 ---
 
 <div
   class="ov"
-  role="img"
-  aria-label="The Kassiber Overview screen: BTC price, Bitcoin balance and book status tiles, a year of BTC activity with balance, average cost and price, balance drivers, holdings by source, book readiness, and recent transactions"
+  role={decorative ? undefined : "img"}
+  aria-hidden={decorative ? "true" : undefined}
+  aria-label={decorative ? undefined : "The Kassiber Overview screen: BTC price, Bitcoin balance and book status tiles, a year of BTC activity with balance, average cost and price, balance drivers, holdings by source, book readiness, and recent transactions"}
 >
   <div class="ov-window" aria-hidden="true">
     <!-- ── Title bar ──────────────────────────────────────── -->
@@ -342,13 +352,13 @@ const RANGES = ["Auto", "30D", "3M", "6M", "YTD", "1Y", "All"];
 
                   <svg class="ov-brush" viewBox="0 0 784 54">
                     <defs>
-                      <linearGradient id="ov-brush-fill" x1="0" y1="0" x2="0" y2="1">
+                      <linearGradient id={brushFill} x1="0" y1="0" x2="0" y2="1">
                         <stop offset="0%" stop-color="#f6a21a" stop-opacity="0.28" />
                         <stop offset="100%" stop-color="#f6a21a" stop-opacity="0.03" />
                       </linearGradient>
                     </defs>
                     <rect x={BRUSH.x0} y="0.5" width={BRUSH.x1 - BRUSH.x0} height="53" fill="#1d1d1d" stroke="#f6a21a" stroke-width="1" />
-                    <path d={BRUSH.area} fill="url(#ov-brush-fill)" />
+                    <path d={BRUSH.area} fill={`url(#${brushFill})`} />
                     <path d={BRUSH.line} fill="none" stroke="#f6a21a" stroke-width="1.35" />
                     {[BRUSH.x0, BRUSH.x1 - 10].map((x) => (
                       <g>

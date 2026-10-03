@@ -8,14 +8,17 @@ import {
   Group,
   HemisphereLight,
   Mesh,
+  MeshBasicMaterial,
   MeshPhysicalMaterial,
   NeutralToneMapping,
   OrthographicCamera,
   PMREMGenerator,
+  Raycaster,
   Scene,
   Sphere,
   SRGBColorSpace,
   TubeGeometry,
+  Vector2,
   Vector3,
   WebGLRenderer,
   type Material,
@@ -42,8 +45,15 @@ export type GlassScene = {
   setView: (yaw: number, pitch: number) => void;
   /** Explicit draw; no animation loop or background work. */
   render: () => void;
+  /** The leg under a point in normalised device coordinates, or null. */
+  pick: (x: number, y: number) => string | null;
+  /** Lights one leg's ribbon and coin, or none. Call render after. */
+  highlight: (legId: string | null) => void;
   dispose: () => void;
 };
+
+/** What a scene hands its stage: the hit areas and how to light a leg. */
+type Populated = { highlight: (legId: string | null) => void };
 
 type GlassTone = {
   color: string;
@@ -110,12 +120,15 @@ function coinMaterial(owned: boolean) {
 function createGlassStage(
   canvas: HTMLCanvasElement,
   background: string,
-  populate: (content: Group, own: <T extends Material>(material: T) => T) => void,
+  populate: (content: Group, hits: Group, own: <T extends Material>(material: T) => T) => Populated,
   { minHalfWidth = 4.4, minHalfHeight = 2.5 } = {},
 ): GlassScene {
   const renderer = new WebGLRenderer({ canvas, antialias: true, powerPreference: "low-power" });
   const scene = new Scene();
   const content = new Group();
+  // Pointer targets, wider than the thin strands. Kept out of `content`, so
+  // they never widen the camera frame the SVG front view has to match.
+  const hits = new Group();
   const materials = new Set<Material>();
   let environment: WebGLRenderTarget | undefined;
   let disposed = false;
@@ -123,7 +136,7 @@ function createGlassStage(
     if (disposed) return;
     disposed = true;
     const geometries = new Set<Mesh["geometry"]>();
-    content.traverse((object) => {
+    for (const group of [content, hits]) group.traverse((object) => {
       if (object instanceof Mesh) {
         geometries.add(object.geometry);
         for (const material of Array.isArray(object.material) ? object.material : [object.material]) {
@@ -160,15 +173,18 @@ function createGlassStage(
     key.position.set(-4, 7, 8);
     scene.add(key);
 
-    populate(content, (material) => {
+    const { highlight } = populate(content, hits, (material) => {
       materials.add(material);
       return material;
     });
     const pivot = new Group();
+    const holder = new Group();
     const bounds = new Box3().setFromObject(content);
-    content.position.sub(bounds.getCenter(new Vector3()));
-    pivot.add(content);
+    holder.position.sub(bounds.getCenter(new Vector3()));
+    holder.add(content, hits);
+    pivot.add(holder);
     scene.add(pivot);
+    const raycaster = new Raycaster();
 
     const reach = Math.max(0, new Box3().setFromObject(pivot).getBoundingSphere(new Sphere()).radius);
     const camera = new OrthographicCamera(-1, 1, 1, -1, 0.1, reach * 2 + 20);
@@ -183,7 +199,7 @@ function createGlassStage(
     // vertices per turn is cheap.
     const fit = () => {
       pivot.updateMatrixWorld(true);
-      const box = new Box3().setFromObject(pivot, true);
+      const box = new Box3().setFromObject(content, true);
       if (box.isEmpty()) box.set(new Vector3(), new Vector3());
       frame = {
         halfWidth: Math.max(frame.halfWidth, minHalfWidth, Math.max(Math.abs(box.min.x), Math.abs(box.max.x)) * 1.06),
@@ -217,6 +233,12 @@ function createGlassStage(
       render() {
         renderer.render(scene, camera);
       },
+      pick(x, y) {
+        raycaster.setFromCamera(new Vector2(x, y), camera);
+        const [hit] = raycaster.intersectObjects(hits.children, false);
+        return (hit?.object.userData.legId as string | undefined) ?? null;
+      },
+      highlight,
       dispose,
     };
   } catch (error) {
@@ -325,8 +347,16 @@ function collarGeometry(halfHeight: number, halfDepth: number, radius: number) {
   return new TubeGeometry(new CatmullRomCurve3(points, true), 96, radius, 12, true);
 }
 
+/** A hovered leg glows brighter, as the flat graph's hover gradient lifts a strand. */
+const lift = (tone: GlassTone, color: string, glow: string, glowIntensity: number): GlassTone => ({
+  ...tone,
+  color,
+  glow,
+  glowIntensity,
+});
+
 export function createGlassScene(canvas: HTMLCanvasElement, layout: RibbonLayout, background: string): GlassScene {
-  return createGlassStage(canvas, background, (content, own) => {
+  return createGlassStage(canvas, background, (content, hits, own) => {
     const materials = {
       known: own(glass(TONES.known)),
       estimated: own(glass(TONES.estimated)),
@@ -339,13 +369,20 @@ export function createGlassScene(canvas: HTMLCanvasElement, layout: RibbonLayout
       external: own(coinMaterial(false)),
     } satisfies Record<string, Material>;
 
-    const ribbonGroups = {
-      known: [] as BufferGeometry[],
-      estimated: [] as BufferGeometry[],
-      fee: [] as BufferGeometry[],
-      feeEstimated: [] as BufferGeometry[],
-      edge: [] as BufferGeometry[],
-    };
+    const lit = {
+      known: own(glass(lift(TONES.known, "#dbe9ff", "#3b82f6", 1.35))),
+      estimated: own(glass(lift(TONES.estimated, "#eef2f7", "#64748b", 1.1))),
+      fee: own(glass(lift(TONES.fee, "#ffe7a3", "#f59e0b", 1.4))),
+      feeEstimated: own(glass(lift(TONES.feeEstimated, "#f6eed8", "#a8894a", 1.1))),
+      owned: own(satin("#60a5fa")),
+      external: own(satin("#cbd5e1")),
+    } satisfies Record<string, Material>;
+    const hitMaterial = own(new MeshBasicMaterial({ visible: false }));
+
+    // One mesh per ribbon, unlike the app's merged batches, so a hovered leg
+    // can light up on its own. A few dozen meshes is nothing to draw.
+    const lightable: Array<{ mesh: Mesh; legId: string; base: Material; on: Material }> = [];
+    const edges: BufferGeometry[] = [];
     for (const ribbon of layout.ribbons) {
       const kind = ribbon.fee
         ? ribbon.estimated
@@ -354,22 +391,26 @@ export function createGlassScene(canvas: HTMLCanvasElement, layout: RibbonLayout
         : ribbon.estimated
           ? "estimated"
           : "known";
-      ribbonGroups[kind].push(ribbonGeometry(ribbon.points, ribbon.thickness));
+      const mesh = new Mesh(ribbonGeometry(ribbon.points, ribbon.thickness), materials[kind]);
+      content.add(mesh);
+      lightable.push({ mesh, legId: ribbon.legId, base: materials[kind], on: lit[kind] });
+      // A strand as thin as dust still needs a target a pointer can land on.
+      const hit = new Mesh(ribbonGeometry(ribbon.points, Math.max(ribbon.thickness, 0.16), 0.3), hitMaterial);
+      hit.userData.legId = ribbon.legId;
+      hits.add(hit);
       // Only along the edges: a full backing would darken the glass it shows through.
       if (ribbon.fee || ribbon.thickness < EDGED_THICKNESS) continue;
       for (const side of [1, -1]) {
-        ribbonGroups.edge.push(
-          ribbonGeometry(ribbon.points, EDGE * 2, RIBBON_DEPTH * 0.7, side * (ribbon.thickness / 2 + EDGE * 0.4)),
-        );
+        edges.push(ribbonGeometry(ribbon.points, EDGE * 2, RIBBON_DEPTH * 0.7, side * (ribbon.thickness / 2 + EDGE * 0.4)));
       }
     }
-    for (const [kind, geometries] of Object.entries(ribbonGroups) as Array<[keyof typeof ribbonGroups, BufferGeometry[]]>) {
-      if (!geometries.length) continue;
-      const merged = mergeGeometries(geometries);
-      geometries.forEach((geometry) => geometry.dispose());
-      if (merged) content.add(new Mesh(merged, materials[kind]));
+    if (edges.length) {
+      const merged = mergeGeometries(edges);
+      edges.forEach((geometry) => geometry.dispose());
+      if (merged) content.add(new Mesh(merged, materials.edge));
     }
     for (const leg of layout.legs) {
+      const base = leg.owned ? materials.owned : materials.external;
       const block = new Mesh(
         new RoundedBoxGeometry(
           BLOCK_WIDTH,
@@ -380,11 +421,22 @@ export function createGlassScene(canvas: HTMLCanvasElement, layout: RibbonLayout
           3,
           Math.min(0.05, leg.height / 2.5),
         ),
-        leg.owned ? materials.owned : materials.external,
+        base,
       );
       block.position.set(leg.x, leg.y, 0);
       content.add(block);
+      lightable.push({ mesh: block, legId: leg.id, base, on: leg.owned ? lit.owned : lit.external });
+      const hit = new Mesh(new RoundedBoxGeometry(BLOCK_WIDTH, Math.max(leg.height, 0.16), BLOCK_DEPTH, 1, 0.01), hitMaterial);
+      hit.position.copy(block.position);
+      hit.userData.legId = leg.id;
+      hits.add(hit);
     }
     content.add(new Mesh(collarGeometry(layout.center.halfHeight, RIBBON_DEPTH / 2 + 0.07, 0.05), materials.center));
+
+    return {
+      highlight(legId) {
+        for (const { mesh, legId: id, base, on } of lightable) mesh.material = id === legId ? on : base;
+      },
+    };
   });
 }

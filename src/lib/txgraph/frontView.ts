@@ -18,8 +18,8 @@ const EDGED_THICKNESS = 0.08;
 const MIN_HALF_WIDTH = 4.4;
 const MIN_HALF_HEIGHT = 2.5;
 
-export type FrontRibbon = { d: string; kind: "known" | "estimated" | "fee" | "feeEstimated" };
-export type FrontBlock = { x: number; y: number; width: number; height: number; owned: boolean };
+export type FrontRibbon = { legId: string; d: string; kind: "known" | "estimated" | "fee" | "feeEstimated" };
+export type FrontBlock = { legId: string; x: number; y: number; width: number; height: number; owned: boolean };
 
 export type FrontView = {
   /** SVG viewBox in scene units, y flipped so up is up. */
@@ -53,6 +53,7 @@ export function frontView(layout: RibbonLayout): FrontView {
     shape: outline(ribbon.points, ribbon.thickness),
   }));
   const blocks = layout.legs.map((leg) => ({
+    legId: leg.id,
     x: leg.x - BLOCK_WIDTH / 2,
     y: leg.y - leg.height / 2,
     width: BLOCK_WIDTH,
@@ -94,6 +95,7 @@ export function frontView(layout: RibbonLayout): FrontView {
   return {
     viewBox: `${r(-halfWidth)} ${r(-halfHeight)} ${r(halfWidth * 2)} ${r(halfHeight * 2)}`,
     ribbons: outlines.map(({ ribbon, shape }) => ({
+      legId: ribbon.legId,
       d: `M ${shape.map(([x, y]) => `${sx(x)} ${sy(y)}`).join(" L ")} Z`,
       kind: ribbon.fee
         ? ribbon.estimated
@@ -104,6 +106,7 @@ export function frontView(layout: RibbonLayout): FrontView {
           : "known",
     })),
     blocks: blocks.map((block) => ({
+      legId: block.legId,
       x: sx(block.x),
       y: sy(block.y + block.height),
       width: r(block.width),

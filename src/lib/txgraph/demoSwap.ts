@@ -13,6 +13,10 @@ import type { GraphRow, GraphTransaction } from "./geometry";
  */
 
 export type IoRow = {
+  /** The graph row it lists, so a hovered strand and its row light up together. */
+  id: string;
+  /** What the hover card leads with, as the app's nodeTooltipTitle picks it. */
+  title: string;
   /** Short outpoint, as the app's formatShortTxid prints it. */
   ref: string;
   meta: string[];
@@ -53,12 +57,14 @@ export const SWAP_LEGS: Record<SwapLeg["key"], SwapLeg> = {
       fee: own("fee", LIQUID_FEE, "fee"),
     },
     inputs: LIQUID_INPUTS.map((input, index) => ({
+      id: `in-${index}`,
+      title: "Satoshi-Liquid",
       ref: input.ref,
       meta: ["Internal wallet leg", "segwit v0", `#${index}`],
       sats: input.sats,
     })),
     // The fee is a strand of its own, not a listed output, as in the app.
-    outputs: [{ ref: "b71e04c9d2…5f3a:0", meta: ["External recipient", "External wallet leg", "#0"], sats: null }],
+    outputs: [{ id: "lockup", title: "lq1qq2xv…k8m4f0", ref: "b71e04c9d2…5f3a:0", meta: ["External recipient", "External wallet leg", "#0"], sats: null }],
   },
   bitcoin: {
     key: "bitcoin",
@@ -68,8 +74,8 @@ export const SWAP_LEGS: Record<SwapLeg["key"], SwapLeg> = {
       outputs: [own("claim", 4_195_800, "output")],
       fee: other("fee", 350, "fee"),
     },
-    inputs: [{ ref: "6ac2f19e07…d84b:0", meta: ["External wallet leg", "taproot", "#0"], sats: 4_196_150 }],
-    outputs: [{ ref: "f1c4a5fb55…6f8e:0", meta: ["Incoming payment", "Internal wallet leg", "segwit v0", "#0"], sats: 4_195_800 }],
+    inputs: [{ id: "lockup", title: "bc1pz7ux…q3nl0w", ref: "6ac2f19e07…d84b:0", meta: ["External wallet leg", "taproot", "#0"], sats: 4_196_150 }],
+    outputs: [{ id: "claim", title: "Satoshi-Onchain-Multi", ref: "f1c4a5fb55…6f8e:0", meta: ["Incoming payment", "Internal wallet leg", "segwit v0", "#0"], sats: 4_195_800 }],
   },
 };
 

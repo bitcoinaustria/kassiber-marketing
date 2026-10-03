@@ -1,4 +1,6 @@
 ---
+import HeroOverviewMock from "./HeroOverviewMock.astro";
+
 /*
  * Interactive mock of Kassiber's "Add connection" dialog, ported from the app's
  * ui-tauri/src/components/kb/AddConnectionDialog.tsx and its catalog,
@@ -28,6 +30,8 @@ type Source = {
   logo?: string;
   tile?: Tile;
   invert?: boolean;
+  /** Share of the frame the mark fills, for marks drawn edge to edge. */
+  fit?: number;
   frame?: string;
   planned?: boolean;
   pathLabel: string;
@@ -226,7 +230,7 @@ const SOURCES: Source[] = [
     details: ["Signed msat amounts drive direction", "Phoenix type is preserved as a tag"],
   },
   {
-    id: "btcpay", title: "BTCPay Server", category: "merchant", logo: BTCPAY,
+    id: "btcpay", title: "BTCPay Server", category: "merchant", logo: BTCPAY, fit: 0.68,
     description: "Invoices, payments, refunds, and payouts for every store, through a read-only API key.",
     pathLabel: "Greenfield API", formatLabel: "stores, invoices & payouts",
     docs: "https://docs.btcpayserver.org/Development/GreenFieldExample/",
@@ -239,7 +243,7 @@ const SOURCES: Source[] = [
     ],
   },
   {
-    id: "btcpay-csv", title: "BTCPay CSV", category: "merchant", logo: BTCPAY,
+    id: "btcpay-csv", title: "BTCPay CSV", category: "merchant", logo: BTCPAY, fit: 0.68,
     description: "Manual BTCPay wallet export import when API sync is not available.",
     pathLabel: "CSV import", formatLabel: "btcpay_csv",
     details: [
@@ -406,6 +410,12 @@ const SOURCES: Source[] = [
 const FIRST = "descriptor";
 ---
 
+<!-- The dialog floats over the Overview it opens from, under the palette's
+     faint wash, so its frosted sheet has something to frost. -->
+<div class="conn-scene">
+<div class="conn-backdrop" aria-hidden="true">
+  <HeroOverviewMock decorative id="conn-ov" />
+</div>
 <div class="conn-mock" data-conn-mock data-tab="wallets">
   <div class="conn-head">
     <div class="conn-title">Add connection</div>
@@ -456,7 +466,7 @@ const FIRST = "descriptor";
               aria-hidden="true"
             >
               {source.logo ? (
-                <img src={source.logo} alt="" class:list={{ "is-inverted": source.invert }} loading="lazy" decoding="async" />
+                <img src={source.logo} alt="" class:list={{ "is-inverted": source.invert }} style={source.fit ? `--fit:${source.fit}` : undefined} loading="lazy" decoding="async" />
               ) : (
                 <span class="conn-tile" style={`background:${source.tile?.bg};color:${source.tile?.fg}`}>{source.tile?.label}</span>
               )}
@@ -480,7 +490,7 @@ const FIRST = "descriptor";
               aria-hidden="true"
             >
               {source.logo ? (
-                <img src={source.logo} alt="" class:list={{ "is-inverted": source.invert }} loading="lazy" decoding="async" />
+                <img src={source.logo} alt="" class:list={{ "is-inverted": source.invert }} style={source.fit ? `--fit:${source.fit}` : undefined} loading="lazy" decoding="async" />
               ) : (
                 <span class="conn-tile" style={`background:${source.tile?.bg};color:${source.tile?.fg}`}>{source.tile?.label}</span>
               )}
@@ -513,6 +523,7 @@ const FIRST = "descriptor";
   </div>
 </div>
 
+</div>
 <script>
   for (const mock of document.querySelectorAll<HTMLElement>("[data-conn-mock]")) {
     const categories = [...mock.querySelectorAll<HTMLButtonElement>("[data-cat-btn]")];
@@ -577,15 +588,69 @@ const FIRST = "descriptor";
     --cm-accent: #262626;
     --cm-muted-fg: #a1a1a1;
 
+    position: relative;
     display: grid;
     grid-template-rows: auto minmax(0, 1fr) auto;
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    border: 1px solid rgb(255 255 255 / 0.08);
     border-radius: 16px;
     background: var(--cm-surface);
     box-shadow:
-      inset 0 1px rgba(255, 255, 255, 0.04),
-      0 24px 72px -20px rgba(0, 0, 0, 0.9);
+      inset 0 1px rgb(255 255 255 / 0.04),
+      0 24px 72px -20px rgb(0 0 0 / 0.9);
     overflow: hidden;
+  }
+
+  /* ── Scene: the dialog over the Overview ──────────────── */
+  /* Below the wide layout the dialog stacks taller than any window around it,
+     so it stands alone on the section. */
+  .conn-backdrop {
+    display: none;
+  }
+
+  @media (min-width: 1100px) {
+    /* The window behind is the hero's Overview at the same app scale: one app
+       rem per 1cqw of this scene. */
+    .conn-scene {
+      position: relative;
+      container-type: inline-size;
+      aspect-ratio: 1440 / 949;
+    }
+
+    .conn-backdrop {
+      display: block;
+      position: absolute;
+      inset: 0;
+      border-radius: calc(1cqw / 14.4 * 12);
+      box-shadow: 0 28px 64px -28px rgb(0 0 0 / 0.75);
+    }
+
+    /* kb-glass-backdrop: a faint, unblurred wash, so the page stays legible. */
+    .conn-backdrop::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      background: rgb(0 0 0 / 0.22);
+    }
+
+    /* kb-glass-dialog: a --background tint at the glass opacity over a backdrop
+       blur, a white 8% edge, the top edge catching light, and a deep drop. */
+    .conn-scene .conn-mock {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: min(1040px, calc(100% - 96px));
+      transform: translate(-50%, -50%);
+      background: color-mix(in srgb, #0a0a0a 80%, transparent);
+      -webkit-backdrop-filter: blur(16px) saturate(1.08);
+      backdrop-filter: blur(16px) saturate(1.08);
+    }
+
+    @supports not (backdrop-filter: blur(1px)) {
+      .conn-scene .conn-mock {
+        background: #171717;
+      }
+    }
   }
 
   .conn-head {
@@ -797,8 +862,8 @@ const FIRST = "descriptor";
   }
 
   .conn-art img {
-    max-width: 100%;
-    max-height: 100%;
+    max-width: calc(100% * var(--fit, 1));
+    max-height: calc(100% * var(--fit, 1));
     object-fit: contain;
   }
 

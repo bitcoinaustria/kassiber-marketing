@@ -31,6 +31,29 @@ const total = (rows: IoRow[]) => {
   };
 };
 
+/**
+ * The hover card's lines, as the flat graph's hover detail lists them: who the
+ * leg is, then its amount, role, ownership and outpoint.
+ */
+type Tip = { title: string; parts: string[]; ref?: string };
+const TIPS = Object.fromEntries(
+  LEGS.map((leg) => {
+    const tips: Record<string, Tip> = {};
+    for (const [side, rows] of [["input", leg.inputs], ["output", leg.outputs]] as const) {
+      for (const row of rows) {
+        tips[`${side}:${row.id}`] = {
+          title: row.title,
+          parts: [row.sats === null ? "Confidential amount" : formatBtc(row.sats), ...row.meta.filter((part) => !part.startsWith("#"))],
+          ref: row.ref,
+        };
+      }
+    }
+    const fee = leg.graph.fee;
+    if (fee?.sats != null) tips["output:fee"] = { title: "Fee", parts: [formatBtc(fee.sats), "Network fee"] };
+    return [leg.key, tips];
+  }),
+);
+
 const LEGEND = [
   { key: "known", label: "Known amount" },
   { key: "unknown", label: "Amount unknown" },
@@ -40,7 +63,7 @@ const LEGEND = [
 ];
 ---
 
-<div class="swap-mock" data-swap-mock data-leg="liquid">
+<div class="swap-mock" data-swap-mock data-leg="liquid" data-tips={JSON.stringify(TIPS)}>
   <div class="swap-route" role="group" aria-label="Paired swap route">
     <div class="swap-route-head">
       <svg class="swap-route-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3 4 7l4 4" /><path d="M4 7h16" /><path d="m16 21 4-4-4-4" /><path d="M20 17H4" /></svg>
@@ -99,11 +122,12 @@ const LEGEND = [
       const view = FRONT[leg.key];
       return (
         <svg class="swap-front" data-for={leg.key} viewBox={view.viewBox} preserveAspectRatio="xMidYMid meet" aria-hidden="true">
-          {view.ribbons.map((ribbon) => <path class={`sf-ribbon sf-${ribbon.kind}`} d={ribbon.d} />)}
+          {view.ribbons.map((ribbon) => <path class={`sf-ribbon sf-${ribbon.kind}`} data-leg-id={ribbon.legId} d={ribbon.d} />)}
           <rect class="sf-collar" x={view.collar.x} y={view.collar.y} width={view.collar.width} height={view.collar.height} rx={view.collar.width / 2} />
           {view.blocks.map((block) => (
             <rect
               class:list={["sf-block", block.owned ? "sf-own" : "sf-other"]}
+              data-leg-id={block.legId}
               x={block.x}
               y={block.y}
               width={block.width}
@@ -114,6 +138,12 @@ const LEGEND = [
         </svg>
       );
     })}
+    <!-- The flat graph's hover detail: dark, bottom left, never in the way of
+         the pointer. -->
+    <div class="swap-tip" data-swap-tip aria-hidden="true" hidden>
+      <div class="swap-tip-title" data-tip-title></div>
+      <div class="swap-tip-meta" data-tip-meta></div>
+    </div>
     <span class="swap-hint" aria-hidden="true">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-3-6.7L21 8" /><path d="M21 3v5h-5" /></svg>
       Drag to turn
@@ -146,7 +176,7 @@ const LEGEND = [
               <span>{rows.length}</span>
             </div>
             {rows.map((row, index) => (
-              <div class:list={["swap-io-row", { "is-extra": index >= COLLAPSED_ROWS }]}>
+              <div class:list={["swap-io-row", { "is-extra": index >= COLLAPSED_ROWS }]} data-leg-id={`${side}:${row.id}`}>
                 <span class:list={["swap-io-mark", `swap-io-mark--${side}`]} aria-hidden="true">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14" /><path d="m12 5 7 7-7 7" /></svg>
                 </span>
@@ -251,6 +281,39 @@ const LEGEND = [
       draw();
     };
 
+    // ── Hover ───────────────────────────────────────────────
+    // As in the app's graph: the leg under the pointer lifts, its card shows
+    // who it is, and its row in the list below lights up, and the other way
+    // round from the list.
+    type Tip = { title: string; parts: string[]; ref?: string };
+    const tips = JSON.parse(mock.dataset.tips ?? "{}") as Record<LegKey, Record<string, Tip>>;
+    const tip = mock.querySelector<HTMLElement>("[data-swap-tip]");
+    const tipTitle = mock.querySelector<HTMLElement>("[data-tip-title]");
+    const tipMeta = mock.querySelector<HTMLElement>("[data-tip-meta]");
+    let hovered: string | null = null;
+
+    const hover = (legId: string | null) => {
+      if (legId === hovered) return;
+      hovered = legId;
+      const leg = activeLeg();
+      const scene = scenes.get(leg);
+      if (scene) {
+        scene.highlight(legId);
+        draw();
+      }
+      for (const el of mock.querySelectorAll<HTMLElement | SVGElement>(`[data-for="${leg}"] [data-leg-id]`)) {
+        el.classList.toggle("is-hot", el.dataset.legId === legId);
+      }
+      const info = legId ? tips[leg]?.[legId] : undefined;
+      if (!tip || !tipTitle || !tipMeta) return;
+      tip.hidden = !info;
+      if (!info) return;
+      tipTitle.textContent = info.title;
+      const parts = info.parts.map((text) => Object.assign(document.createElement("span"), { textContent: text }));
+      if (info.ref) parts.push(Object.assign(document.createElement("span"), { className: "is-mono", textContent: info.ref }));
+      tipMeta.replaceChildren(...parts);
+    };
+
     // No restore: a lost context ends the glass view and the SVG takes over.
     const fail = () => {
       failed = true;
@@ -350,6 +413,7 @@ const LEGEND = [
     };
 
     const select = (leg: LegKey) => {
+      hover(null);
       mock.dataset.leg = leg;
       for (const button of buttons) {
         button.setAttribute("aria-pressed", String(button.dataset.legBtn === leg));
@@ -393,10 +457,23 @@ const LEGEND = [
       drag = { x: event.clientX, y: event.clientY, view: { ...view }, touch: event.pointerType === "touch", turning: false };
     });
     stage.addEventListener("pointermove", (event) => {
+      // A mouse or pen picks the leg under it; a finger has no hover.
+      if (!drag?.turning && event.pointerType !== "touch") {
+        if (glass) {
+          const rect = stage.getBoundingClientRect();
+          const x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+          const y = 1 - ((event.clientY - rect.top) / rect.height) * 2;
+          hover(scenes.get(activeLeg())?.pick(x, y) ?? null);
+        } else {
+          const target = (event.target as Element).closest<SVGElement>("[data-leg-id]");
+          hover(target?.dataset.legId ?? null);
+        }
+      }
       if (!drag) return;
       if (!drag.turning) {
         if (Math.abs(event.clientX - drag.x) < 4 && (drag.touch || Math.abs(event.clientY - drag.y) < 4)) return;
         takeOver();
+        hover(null);
         stage.setPointerCapture(event.pointerId);
         drag = { ...drag, view: { ...view }, turning: true };
       }
@@ -410,6 +487,9 @@ const LEGEND = [
       drag = null;
     };
     stage.addEventListener("pointerup", release);
+    stage.addEventListener("pointerleave", () => {
+      if (!drag?.turning) hover(null);
+    });
     stage.addEventListener("pointercancel", release);
     stage.addEventListener("dblclick", () => {
       if (!glass) return;
@@ -470,6 +550,13 @@ const LEGEND = [
     ).observe(stage);
 
     // ── Inputs and outputs ──────────────────────────────────
+    for (const row of mock.querySelectorAll<HTMLElement>(".swap-io-row[data-leg-id]")) {
+      row.addEventListener("pointerenter", (event) => {
+        if (event.pointerType !== "touch") hover(row.dataset.legId ?? null);
+      });
+      row.addEventListener("pointerleave", () => hover(null));
+    }
+
     for (const more of mock.querySelectorAll<HTMLButtonElement>("[data-io-more]")) {
       more.addEventListener("click", () => {
         const column = more.closest(".swap-io-col");
@@ -737,14 +824,21 @@ const LEGEND = [
     transition: opacity 0.35s ease;
   }
 
+  /* Only the shown picture takes the pointer; the hidden leg's lies on top. */
+  .swap-front {
+    pointer-events: none;
+  }
+
   [data-leg="liquid"] .swap-front[data-for="liquid"],
   [data-leg="bitcoin"] .swap-front[data-for="bitcoin"] {
     opacity: 1;
+    pointer-events: auto;
   }
 
   [data-leg="liquid"] .swap-stage.is-glass .swap-front,
   [data-leg="bitcoin"] .swap-stage.is-glass .swap-front {
     opacity: 0;
+    pointer-events: none;
   }
 
   [data-leg="liquid"] .swap-stage.is-glass :global(.swap-canvas[data-for="liquid"]),
@@ -760,6 +854,49 @@ const LEGEND = [
   .sf-collar { fill: #dbe5f3; fill-opacity: 0.55; }
   .sf-own { fill: #2563eb; }
   .sf-other { fill: #64748b; }
+  .sf-ribbon, .sf-block { transition: filter 0.15s ease, fill-opacity 0.15s ease; }
+  .sf-ribbon.is-hot { fill-opacity: 1; filter: brightness(1.3); }
+  .sf-block.is-hot { filter: brightness(1.35); }
+
+  /* The app's hover detail: bg-[#101114]/95, a white 10% edge, text-xs. */
+  .swap-tip {
+    position: absolute;
+    left: 12px;
+    bottom: 8px;
+    z-index: 2;
+    max-width: min(520px, calc(100% - 24px));
+    padding: 8px 12px;
+    border: 1px solid rgb(255 255 255 / 0.1);
+    border-radius: 6px;
+    background: rgb(16 17 20 / 0.95);
+    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.3), 0 4px 6px -4px rgb(0 0 0 / 0.3);
+    font-size: 12px;
+    color: #fff;
+    pointer-events: none;
+  }
+
+  .swap-tip[hidden] {
+    display: none;
+  }
+
+  .swap-tip-title {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-weight: 500;
+  }
+
+  .swap-tip-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px 8px;
+    margin-top: 4px;
+    color: rgb(255 255 255 / 0.7);
+  }
+
+  .swap-tip-meta :global(.is-mono) {
+    font-family: var(--font-mono);
+  }
 
   /* Bottom right: the one corner neither leg's piece reaches into. */
   .swap-hint {
@@ -889,12 +1026,19 @@ const LEGEND = [
     display: grid;
     grid-template-columns: auto minmax(0, 1fr) auto;
     gap: 8px;
-    padding: 8px 0;
+    margin: 0 -6px;
+    padding: 8px 6px;
+    transition: background-color 0.15s ease;
     border-top: 1px solid var(--sm-border);
   }
 
   .swap-io-head + .swap-io-row {
     border-top: 0;
+  }
+
+  /* hover:bg-muted/35, lit from the row itself or from its strand. */
+  .swap-io-row.is-hot {
+    background: rgb(38 38 38 / 0.35);
   }
 
   .swap-io-row.is-extra {
