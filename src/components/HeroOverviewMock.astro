@@ -34,6 +34,7 @@ import {
   Y_TICKS,
   btc,
   eur,
+  traceAt,
   groupThousands,
   tagWidth,
 } from "../lib/overviewDemo";
@@ -147,7 +148,7 @@ const brushFill = `${id}-brush-fill`;
 ---
 
 <div
-  class="ov"
+  class:list={["ov", { "ov--live": !decorative }]}
   role={decorative ? undefined : "img"}
   aria-hidden={decorative ? "true" : undefined}
   aria-label={decorative ? undefined : "The Kassiber Overview screen: BTC price, Bitcoin balance and book status tiles, a year of BTC activity with balance, average cost and price, balance drivers, holdings by source, book readiness, and recent transactions"}
@@ -318,12 +319,12 @@ const brushFill = `${id}-brush-fill`;
                     <line class="ov-ref" x1={CHART.x0} x2={CHART.x1} y1={TAGS.cost.y} y2={TAGS.cost.y} stroke="#50c695" />
                     <line class="ov-ref" x1={CHART.x0} x2={CHART.x1} y1={TAGS.balance.y} y2={TAGS.balance.y} stroke="#f6a21a" />
 
-                    <path class="ov-series" d={PATHS.price} stroke="#94a3b8" stroke-width="1.6" stroke-dasharray="3 5" opacity="0.72" />
-                    <path class="ov-series" d={PATHS.cost} stroke="#50c695" stroke-width="2" stroke-dasharray="5 5" />
-                    <path class="ov-series ov-balance" d={PATHS.balance} stroke="#f6a21a" stroke-width="2.5" />
+                    <path class="ov-series ov-fade" d={PATHS.price} stroke="#94a3b8" stroke-width="1.6" stroke-dasharray="3 5" opacity="0.72" />
+                    <path class="ov-series ov-fade" d={PATHS.cost} stroke="#50c695" stroke-width="2" stroke-dasharray="5 5" />
+                    <path class="ov-series ov-balance" d={PATHS.balance} stroke="#f6a21a" stroke-width="2.5" pathLength="1" />
 
-                    {DOTS.map((dot) => (
-                      <g class="ov-dot">
+                    {DOTS.map((dot, index) => (
+                      <g class="ov-dot" style={`--at:${traceAt(dot.cx).toFixed(3)};--o:${dot.cx}px ${dot.cy}px`} data-i={index}>
                         {dot.slices ? (
                           <>
                             <circle cx={dot.cx} cy={dot.cy} r={dot.r + 2.5} fill="#0a0a0a" />
@@ -1154,6 +1155,42 @@ const brushFill = `${id}-brush-fill`;
   .ov-series {
     fill: none;
     stroke-linejoin: round;
+  }
+
+  /*
+   * The hero's chart draws itself once on load: the balance traces left to
+   * right, each activity dot pops as the line reaches it, and the price and
+   * cost lines fade up behind. Pure CSS, so the site-wide reduced-motion rule
+   * lands it on the final frame. The copy behind the Add connection dialog
+   * stays still.
+   */
+  .ov--live .ov-balance {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+    animation: ovTrace 2s linear 0.35s both;
+  }
+
+  .ov--live .ov-fade {
+    animation: ovFade 1.2s ease 1s both;
+  }
+
+  .ov--live .ov-dot {
+    transform-box: view-box;
+    transform-origin: var(--o);
+    animation: ovPop 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+    animation-delay: calc(0.35s + var(--at) * 2s);
+  }
+
+  @keyframes ovTrace {
+    to { stroke-dashoffset: 0; }
+  }
+
+  @keyframes ovFade {
+    from { opacity: 0; }
+  }
+
+  @keyframes ovPop {
+    from { opacity: 0; transform: scale(0.2); }
   }
 
   .ov-dot-count {

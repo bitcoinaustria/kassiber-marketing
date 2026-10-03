@@ -1,6 +1,7 @@
 ---
 import Layout from "../layouts/Layout.astro";
 import CopyCommand from "../components/CopyCommand.astro";
+import CoinBlocksMock from "../components/CoinBlocksMock.astro";
 import AddConnectionMock from "../components/AddConnectionMock.astro";
 import AgentChatMock from "../components/AgentChatMock.astro";
 import HeroChatMock from "../components/HeroChatMock.astro";
@@ -174,13 +175,39 @@ const SLIDES = [
     </div>
   </section>
 
+  <!-- ── Coins ─────────────────────────────────────────────────── -->
+  <section id="coins" class="sec-coins">
+    <div class="container coins-inner">
+      <div class="coins-copy">
+        <div class="section-head" style="margin-bottom:0">
+          <h2>Every coin, not just a balance.</h2>
+          <p>
+            Kassiber keeps each unspent coin in your wallets: which ones are
+            settled, which still sit in the mempool, and how your balance is
+            split between them.
+          </p>
+        </div>
+
+        <p class="section-note">
+          Sharing your screen? One switch hides every amount. The blocks stop
+          reading values at all and level out, so nothing shows through.
+        </p>
+      </div>
+
+      <div class="coins-visual">
+        <CoinBlocksMock />
+      </div>
+    </div>
+  </section>
+
   <!-- ── Tax & reports ─────────────────────────────────────────── -->
   <section id="tax" class="sec-tax">
     <div class="container">
       <div class="section-head">
         <h2>Tax reports you can verify.</h2>
         <p>
-          <a href="https://github.com/eprbell/rp2" target="_blank" rel="noopener noreferrer">RP2</a> computes FIFO, HIFO, or moving-average reports locally. The export re-derives every gain and checks it against Kassiber, for you and your advisor to verify. An Austrian § 27b EStG preset is included.
+          <a href="https://github.com/eprbell/rp2" target="_blank" rel="noopener noreferrer">RP2</a> computes FIFO, HIFO, or moving-average reports locally. The export re-derives every gain and checks it against Kassiber, for you and your advisor to verify. An Austrian § 27b EStG preset is included. Where cost basis is
+          incomplete, Kassiber says so instead of passing a gap off as final.
         </p>
       </div>
 
@@ -228,7 +255,9 @@ const SLIDES = [
 
         <p class="section-note">
           Works with OpenCode, Claude Code, and Codex CLI via <a href={SKILL_REPOSITORY_URL} target="_blank" rel="noopener noreferrer">the Kassiber skill</a>;
-          local models through oMLX or Ollama.
+          local models through oMLX or Ollama. Any other MCP client can read
+          the book through <code>kassiber mcp</code>: read-only, and off until
+          you switch it on.
         </p>
       </div>
 
@@ -400,7 +429,9 @@ const SLIDES = [
             Only when you choose. Syncing asks a backend about your addresses,
             and you pick that backend, your own node or Tor included. There is
             no account and no cloud copy. Reports are local files until you
-            share them yourself.
+            share them yourself. Offline mode blocks every connection, even to
+            your own node, until you turn it off; only a local AI model keeps
+            working.
           </p>
         </details>
 
@@ -475,6 +506,15 @@ const SLIDES = [
           <p>
             Kassiber cannot recover your passphrase. Lose it and the encrypted
             books stay locked, so store it with your seed backups.
+          </p>
+        </details>
+
+        <details class="faq-item" name="faq">
+          <summary>What if my computer dies?</summary>
+          <p>
+            Export an encrypted backup to any drive and restore it on the next
+            machine. Kassiber checks the backup before it replaces anything and
+            keeps your current books aside until the restore succeeds.
           </p>
         </details>
 
@@ -1592,6 +1632,26 @@ const SLIDES = [
     }
   }
 
+  /* ── Coins ────────────────────────────────────────────── */
+  /* Copy beside the panel, for a change of pace between the full-width
+     demos; the panel keeps the wider column so the shelf of coins reads. */
+  .coins-inner {
+    display: grid;
+    grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.6fr);
+    gap: 56px;
+    align-items: center;
+  }
+
+  .coins-visual {
+    min-width: 0;
+  }
+
+  .section-note code {
+    font-family: var(--font-mono);
+    font-size: 0.9em;
+    color: var(--fg);
+  }
+
   /* ── Bird's eye and pairing ───────────────────────────── */
   /* Both use the plain left-aligned .section-head over a full-width panel,
      like #tax and #screens. Centring is reserved for the framing sections;
@@ -1828,6 +1888,7 @@ const SLIDES = [
       transform: translateX(-50%);
     }
     .agents-detail { grid-template-columns: 1fr; gap: 40px; }
+    .coins-inner { grid-template-columns: 1fr; gap: 40px; }
     .open-grid { grid-template-columns: 1fr; }
   }
 

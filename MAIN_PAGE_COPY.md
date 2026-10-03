@@ -74,11 +74,27 @@ Kassiber pairs both legs of a transfer, swap, or wallet migration, so your cost 
 - All inputs are spent together in the glass ring; the order of the ribbons does not say which input paid which output.
 - Inputs, Outputs, Total, Known total
 
+<!-- Section: Coins. Anchor: coins -->
+
+## Every coin, not just a balance.
+
+Kassiber keeps each unspent coin in your wallets: which ones are settled, which still sit in the mempool, and how your balance is split between them.
+
+Sharing your screen? One switch hides every amount. The blocks stop reading values at all and level out, so nothing shows through.
+
+**Coin panel**
+
+- UTXOs · Satoshi-Onchain-Multi · 14 active outputs · 2 pending
+- Hide amounts / Show amounts
+- Each block is one unspent coin, as tall as its amount relative to this wallet's largest. Frosted: not yet confirmed.
+- Each block is one unspent coin. Values are hidden, so every block has the same height. Frosted: not yet confirmed.
+- Columns: Amount, Location, Confirmed, Status, Outpoint · Total
+
 <!-- Section: Tax and reports. Anchor: tax -->
 
 ## Reports you can verify.
 
-[RP2](https://github.com/eprbell/rp2) computes FIFO, HIFO, or moving-average reports locally. The export re-derives every gain and checks it against Kassiber, for you and your advisor to verify. An Austrian § 27b EStG preset is included.
+[RP2](https://github.com/eprbell/rp2) computes FIFO, HIFO, or moving-average reports locally. The export re-derives every gain and checks it against Kassiber, for you and your advisor to verify. An Austrian § 27b EStG preset is included. Where cost basis is incomplete, Kassiber says so instead of passing a gap off as final.
 
 **Report example**
 
@@ -111,7 +127,7 @@ Bitcoin never wrote your name on the ledger, but one exchange or leak ties you t
 
 Point your agent at the book. It reads and prepares, never signs or broadcasts.
 
-Works with OpenCode, Claude Code, and Codex CLI via [the Kassiber skill](https://github.com/bitcoinaustria/kassiber-skill); local models through oMLX or Ollama.
+Works with OpenCode, Claude Code, and Codex CLI via [the Kassiber skill](https://github.com/bitcoinaustria/kassiber-skill); local models through oMLX or Ollama. Any other MCP client can read the book through `kassiber mcp`: read-only, and off until you switch it on.
 
 **Agent examples**
 
@@ -183,6 +199,10 @@ Pre-alpha, rough edges and all. We'd rather tell you.
 **Can I try it without connecting my own wallets?**
 
 Yes, if you have Docker. The regtest script starts a disposable network with thirteen wallets, Lightning channels, Liquid, a BTCPay store, and years of activity. The teardown command deletes the demo data. It never touches mainnet or your wallets.
+
+**What if my computer dies?**
+
+Export an encrypted backup to any drive and restore it on the next machine. Kassiber checks the backup before it replaces anything and keeps your current books aside until the restore succeeds.
 
 **Do I need to run my own node?**
 

@@ -140,6 +140,31 @@ function stepPath(steps: Array<{ t: number; v: number }>, sy: (v: number) => num
   return `${d} H ${f(sx(END))}`;
 }
 
+/**
+ * How far along the drawn balance line a point at plot x lies, as a share of
+ * the line's length: the hero traces the line, and each dot pops as the trace
+ * reaches it. Rises count, so this is not the same as the x share.
+ */
+export function traceAt(x: number) {
+  const steps = SERIES.balanceSteps;
+  const pts: Array<[number, number]> = [[sx(steps[0].t), syBtc(steps[0].v)]];
+  for (let i = 1; i < steps.length; i += 1) {
+    pts.push([sx(steps[i].t), pts[pts.length - 1][1]], [sx(steps[i].t), syBtc(steps[i].v)]);
+  }
+  pts.push([sx(END), pts[pts.length - 1][1]]);
+  let total = 0;
+  let upto = 0;
+  for (let i = 1; i < pts.length; i += 1) {
+    const [ax, ay] = pts[i - 1];
+    const [bx, by] = pts[i];
+    const len = Math.hypot(bx - ax, by - ay);
+    if (bx <= x) upto += len;
+    else if (ax < x) upto += x - ax;
+    total += len;
+  }
+  return total ? upto / total : 0;
+}
+
 export const PATHS = {
   balance: stepPath(SERIES.balanceSteps, syBtc),
   cost: stepPath(SERIES.costSteps, syEur),
