@@ -161,6 +161,19 @@ $ ./scripts/integration-harness.sh demo-up
 - Fork on GitHub
 - Browse source
 
+<!-- Section: Screenshots. Anchor: screens -->
+
+## See for yourself.
+
+- Balance, cost basis, and price.
+- Incoming, outgoing, and transfers, quarter by quarter.
+- Booked, priced, and marked taxable.
+- An L-BTC → BTC swap, paired as a move.
+- Liquid amounts hidden. Pairing still resolves.
+- Every wallet and source feeds the same book.
+- Watch-only. Never keys.
+- Filing fields and lot audits.
+
 <!-- Section: Final call to action. Anchor: download -->
 
 ## Keep your books to yourself.
