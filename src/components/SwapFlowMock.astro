@@ -163,8 +163,20 @@ const LEGEND = [
     does not say which input paid which output.
   </p>
 
-  <!-- Both legs' lists share one grid cell, so the panel keeps the taller one's
-       height and the page below never jumps when the legs take turns. -->
+  <!-- The list folds away, as the transaction sheet's technical details do:
+       the hover card already names each leg. Open, both legs' lists share one
+       grid cell, so the panel keeps the taller one's height and nothing below
+       jumps when the legs take turns. -->
+  <details class="swap-io-fold">
+  <summary class="swap-io-summary">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6" /></svg>
+    <span class="swap-io-summary-title">Inputs &amp; outputs</span>
+    {LEGS.map((leg) => (
+      <span class="swap-io-summary-count" data-for={leg.key}>
+        {leg.inputs.length} {leg.inputs.length === 1 ? "input" : "inputs"} · {leg.outputs.length} {leg.outputs.length === 1 ? "output" : "outputs"}
+      </span>
+    ))}
+  </summary>
   <div class="swap-io-stack">
   {LEGS.map((leg) => (
     <section class="swap-io" data-for={leg.key} data-io aria-label="Inputs and outputs">
@@ -210,6 +222,7 @@ const LEGEND = [
     </section>
   ))}
   </div>
+  </details>
 </div>
 
 <script>
@@ -971,9 +984,61 @@ const LEGEND = [
   }
 
   /* ── Inputs and outputs ───────────────────────────────── */
+  .swap-io-fold {
+    margin-top: 14px;
+    border-top: 1px solid var(--sm-border);
+  }
+
+  .swap-io-summary {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 0 0;
+    cursor: pointer;
+    list-style: none;
+    font-size: 12.5px;
+    color: var(--sm-muted-fg);
+    transition: color 0.15s ease;
+  }
+
+  .swap-io-summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .swap-io-summary:hover,
+  .swap-io-fold[open] .swap-io-summary {
+    color: var(--fg);
+  }
+
+  .swap-io-summary svg {
+    width: 14px;
+    height: 14px;
+    flex: none;
+    transition: transform 0.2s ease;
+  }
+
+  .swap-io-fold[open] .swap-io-summary svg {
+    transform: rotate(90deg);
+  }
+
+  .swap-io-summary-title {
+    font-weight: 500;
+  }
+
+  .swap-io-summary-count {
+    display: none;
+    color: var(--sm-muted-fg);
+    font-variant-numeric: tabular-nums;
+  }
+
+  [data-leg="liquid"] .swap-io-summary-count[data-for="liquid"],
+  [data-leg="bitcoin"] .swap-io-summary-count[data-for="bitcoin"] {
+    display: inline;
+  }
+
   .swap-io-stack {
     display: grid;
-    margin-top: 14px;
+    margin-top: 12px;
     padding-top: 12px;
     border-top: 1px solid var(--sm-border);
   }

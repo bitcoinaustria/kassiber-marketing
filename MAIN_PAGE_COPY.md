@@ -72,7 +72,7 @@ Kassiber pairs both legs of a transfer, swap, or wallet migration, so your cost 
 - Booked custody conversion
 - Legend: Known amount, Amount unknown, Your wallet, Other, Fee
 - All inputs are spent together in the glass ring; the order of the ribbons does not say which input paid which output.
-- Inputs, Outputs, Total, Known total
+- Inputs & outputs (folded; e.g. 8 inputs · 1 output): Inputs, Outputs, Total, Known total
 
 <!-- Section: Coins. Anchor: coins -->
 
@@ -160,19 +160,6 @@ $ ./scripts/integration-harness.sh demo-up
 
 - Fork on GitHub
 - Browse source
-
-<!-- Section: Screenshots. Anchor: screens -->
-
-## See for yourself.
-
-- Balance, cost basis, and price.
-- Incoming, outgoing, and transfers, quarter by quarter.
-- Booked, priced, and marked taxable.
-- An L-BTC → BTC swap, paired as a move.
-- Liquid amounts hidden. Pairing still resolves.
-- Every wallet and source feeds the same book.
-- Watch-only. Never keys.
-- Filing fields and lot audits.
 
 <!-- Section: Final call to action. Anchor: download -->
 
