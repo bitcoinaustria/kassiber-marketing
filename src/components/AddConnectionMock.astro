@@ -1,494 +1,1099 @@
 ---
-/*
- * Interactive mock of Kassiber's "Add connection" dialog, ported like
- * HeroChatMock and SwapFlowMock: app dark-theme values copied literally,
- * every source scraped from the real dialog (regtest demo book, v0.22.70).
- *
- * The category rail is real: clicking a tab swaps the source list, and each
- * list carries its full roster and scrolls inside the panel, as in the app.
- * Rows are simplified to icon + name + one line; the app's mono provenance
- * line is dropped so the whole roster stays readable at column width.
- */
+import HeroOverviewMock from "./HeroOverviewMock.astro";
 
 /*
- * Logos are the app's own integration assets (ui-tauri/src/assets/integrations),
- * with the app's two treatments preserved: hardware-wallet glyphs are near-black
- * and get inverted to white, and a few dark-ink marks sit on a light plate the
- * way the app frames them. ZEUS and Phoenix ship no mark in the app (it falls
- * back to a bolt and a "PHX" tile), so their real logos come from the projects'
- * own repos — ZeusLN/zeus and ACINQ/phoenix. Sources with no logo anywhere
- * (Electrum, Specter, the file importers) keep the app's generated tiles.
+ * Interactive mock of Kassiber's "Add connection" dialog, ported from the app's
+ * ui-tauri/src/components/kb/AddConnectionDialog.tsx and its catalog,
+ * ui-tauri/src/lib/connectionCatalog.tsx (v0.22.78, developer tools off, so
+ * the unfinished Core Lightning and LND cards stay hidden). App dark-theme
+ * values are copied literally, so the panel reads as the app.
+ *
+ * The dialog has the command palette's treatment: a category rail, a bare
+ * search row over one-line source rows, and a detail pane that carries each
+ * source's description and setup notes. All three work here: the rail swaps
+ * the list, the search filters every category at once, and a row opens its
+ * details. Only Cancel and Continue are inert.
+ *
+ * Logos are the app's own integration assets, with its treatments: hardware-
+ * wallet glyphs are near-black and get inverted to white, Bitpanda sits on its
+ * brand green, and sources without a mark keep the app's generated tiles. ZEUS
+ * and Phoenix keep their real logos from the projects' own repos, where the
+ * app falls back to a bolt and a "PHX" tile.
  */
 type Tile = { label: string; bg: string; fg: string };
-type Item = {
+type Category = "wallets" | "nodes" | "lightning" | "merchant" | "exchanges" | "files";
+type Source = {
+  id: string;
   title: string;
-  desc: string;
+  description: string;
+  category: Category;
   logo?: string;
   tile?: Tile;
-  treat?: "invert" | "plate";
+  invert?: boolean;
+  /** Share of the frame the mark fills, for marks drawn edge to edge. */
+  fit?: number;
+  frame?: string;
   planned?: boolean;
+  pathLabel: string;
+  formatLabel?: string;
+  docs?: string;
+  details: string[];
 };
 
 const BTC = "/harnesses/bitcoin.svg";
 const LQ = "/harnesses/liquid.svg";
 const BTCPAY = "/harnesses/btcpay.svg";
 const I = (name: string) => `/integrations/${name}`;
+const tile = (label: string, bg: string, fg = "#ffffff"): Tile => ({ label, bg, fg });
 
-// The app's generated tiles, label and colour for colour.
-const T_EL: Tile = { label: "EL", bg: "#2563eb", fg: "#ffffff" };
-const T_SP: Tile = { label: "SP", bg: "#7c3aed", fg: "#ffffff" };
-const T_XLS: Tile = { label: "XLS", bg: "#f2a900", fg: "#1a1a1a" };
-const T_CSVY: Tile = { label: "CSV", bg: "#f2a900", fg: "#1a1a1a" };
-const T_CSV: Tile = { label: "CSV", bg: "#64748b", fg: "#ffffff" };
-const T_LBL: Tile = { label: "LBL", bg: "#475569", fg: "#ffffff" };
+const CATEGORIES: { id: Category; label: string; icon: string }[] = [
+  // lucide wallet, server, zap, server, database, file-input: the app's icons.
+  { id: "wallets", label: "Wallets", icon: '<path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1"/><path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4"/>' },
+  { id: "nodes", label: "Nodes", icon: '<rect width="20" height="8" x="2" y="2" rx="2" ry="2"/><rect width="20" height="8" x="2" y="14" rx="2" ry="2"/><line x1="6" x2="6.01" y1="6" y2="6"/><line x1="6" x2="6.01" y1="18" y2="18"/>' },
+  { id: "lightning", label: "Lightning", icon: '<path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/>' },
+  { id: "merchant", label: "Merchant", icon: '<rect width="20" height="8" x="2" y="2" rx="2" ry="2"/><rect width="20" height="8" x="2" y="14" rx="2" ry="2"/><line x1="6" x2="6.01" y1="6" y2="6"/><line x1="6" x2="6.01" y1="18" y2="18"/>' },
+  { id: "exchanges", label: "Exchanges", icon: '<ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5V19A9 3 0 0 0 21 19V5"/><path d="M3 12A9 3 0 0 0 21 12"/>' },
+  { id: "files", label: "Files", icon: '<path d="M4 22h14a2 2 0 0 0 2-2V7l-5-5H6a2 2 0 0 0-2 2v4"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M2 15h10"/><path d="m9 18 3-3-3-3"/>' },
+];
 
-const TABS: { id: string; label: string; items: Item[] }[] = [
+const FORWARD = "Continue opens the Wallet export form for the exported material";
+const PARSER_PLANNED = "Dedicated parser is planned";
+
+// Catalog order, as the app lists it; each category shows its own slice.
+const SOURCES: Source[] = [
   {
-    id: "wallets",
-    label: "Wallets",
-    items: [
-      { logo: BTC, title: "Wallet export", desc: "Descriptor, BSMS, or xpub-family import." },
-      { logo: BTC, title: "Address list", desc: "A flat list of addresses, e.g. a pre-HD Core keypool." },
-      { logo: BTC, title: "Silent Payments", desc: "Watch-only BIP352 from BIP392 sp() material." },
-      { logo: LQ, title: "Liquid wallet export", desc: "Liquid wallet export or Elements descriptor." },
-      { logo: I("samourai.webp"), title: "Samourai", desc: "Samourai and Whirlpool account descriptors." },
-      { logo: I("wasabi.webp"), title: "Wasabi", desc: "RPC output with CoinJoin and anonymity evidence." },
-      { logo: I("sparrow.webp"), title: "Sparrow", desc: "Descriptor or xpub export." },
-      { tile: T_SP, title: "Specter Desktop", desc: "Descriptor export." },
-      { logo: I("bluewallet-38.webp"), title: "BlueWallet", desc: "Account xpub export." },
-      { logo: I("blockstream-green.svg"), title: "Blockstream Green", desc: "Singlesig xpub export." },
-      { logo: I("liana.svg"), title: "Liana", desc: "Timelock multisig descriptor import." },
-      { logo: I("nunchuk.svg"), title: "Nunchuk", desc: "Descriptor or BSMS export." },
-      { logo: I("bitbox.svg"), treat: "invert", title: "BitBox", desc: "Account xpub export." },
-      { logo: I("trezor.svg"), treat: "invert", title: "Trezor", desc: "Account xpub export." },
-      { logo: I("coldcard.svg"), treat: "invert", title: "Coldcard", desc: "Descriptor or xpub export." },
-      { logo: I("ledger.svg"), treat: "invert", title: "Ledger", desc: "Ledger Live account export." },
-      { logo: I("foundation-passport.svg"), treat: "invert", title: "Foundation Passport", desc: "Descriptor or xpub export." },
-      { logo: I("bullbitcoin-mark.webp"), title: "Bull Bitcoin Wallet", desc: "Unified wallet transaction CSV." },
+    id: "descriptor", title: "Wallet export", category: "wallets", logo: BTC,
+    description: "Descriptor, BSMS, xpub-family, or wallet export import.",
+    pathLabel: "Watch-only wallet", formatLabel: "descriptor/BSMS/xpub-family",
+    details: [
+      "Mainnet by default",
+      "Uses a configured Bitcoin backend",
+      "Paste one common wallet export or descriptor",
+      "ypub/zpub/upub/vpub keys and BSMS records are converted to descriptors",
+      "Kassiber stores receive/change branches when present",
     ],
   },
   {
-    id: "exchanges",
-    label: "Exchanges",
-    items: [
-      { logo: I("river.webp"), title: "River", desc: "CSV activity export with trades, transfers, and fees." },
-      { logo: I("bullbitcoin-mark.webp"), title: "Bull Bitcoin", desc: "CSV order export with execution prices, fees, and transfers." },
-      { logo: I("pocket-bitcoin.svg"), title: "Pocket Bitcoin", desc: "CSV account export with buy prices, fees, and transfers." },
-      { logo: I("coinfinity-mark.svg"), treat: "plate", title: "Coinfinity", desc: "CSV order export with execution prices, fees, and transfers." },
-      { logo: I("strike.webp"), title: "Strike", desc: "CSV activity export with trades, transfers, and fees." },
-      { logo: I("21bitcoin.webp"), title: "21bitcoin", desc: "CSV ledger export with trades, transfers, and fees." },
-      { logo: I("binance.svg"), title: "Binance", desc: "CSV export with trades, deposits, withdrawals, and fees." },
-      { logo: I("relai.svg"), treat: "plate", title: "Relai", desc: "CSV activity export with buys, transfers, and fees.", planned: true },
-      { logo: I("swan-bitcoin.svg"), title: "Swan Bitcoin", desc: "CSV account export with buys, transfers, and fees.", planned: true },
-      { logo: I("bitpanda.svg"), title: "Bitpanda", desc: "CSV history export with trades, transfers, and fees.", planned: true },
-      { logo: I("kraken.svg"), title: "Kraken", desc: "API history with trades, transfers, and fees.", planned: true },
-      { logo: I("coinbase.svg"), title: "Coinbase", desc: "API history with trades, transfers, and fees.", planned: true },
+    id: "address-list", title: "Address list", category: "wallets", logo: BTC,
+    description: "Watch a flat list of individual addresses — e.g. a pre-HD Bitcoin Core keypool.",
+    pathLabel: "Watch-only wallet", formatLabel: "address list",
+    details: [
+      "Paste addresses or load a .txt/.csv file, one address per line",
+      "No derivation: every address is scanned, so there is no gap limit",
+      "Use Electrum/Fulcrum or Bitcoin Core RPC for large lists — Esplora is one lookup per address",
     ],
   },
   {
-    id: "nodes",
-    label: "Nodes",
-    items: [
-      { logo: BTC, title: "Bitcoin Core", desc: "Your own full node over JSON-RPC." },
-      { tile: T_EL, title: "Electrum server", desc: "Electrum over TCP/SSL: Fulcrum, ElectrumX." },
-      { logo: I("mempool-space.svg"), treat: "plate", title: "Esplora / mempool", desc: "Esplora-type HTTP REST, with explorer links." },
+    id: "silent-payment", title: "Silent Payments", category: "wallets", logo: BTC,
+    description: "Watch-only BIP352 receiving/accounting from BIP392 sp() material.",
+    pathLabel: "Watch-only wallet", formatLabel: "BIP352 / BIP392 sp()",
+    details: [
+      "Accepts watch-only scan material and public spend material",
+      "Requires a BIP352-capable backend or local scanner selected explicitly",
+      "Needs a scan start height/date, or an acknowledged full-history scan",
+      "No spending, signing, PSBTs, or sender contact book",
     ],
   },
   {
-    id: "lightning",
-    label: "Lightning",
-    items: [
-      { logo: I("phoenix.svg"), title: "Phoenix", desc: "Lightning wallet CSV activity import." },
-      { logo: I("zeus.svg"), treat: "invert", title: "ZEUS", desc: "Lightning node interface.", planned: true },
+    id: "liquid-descriptor", title: "Liquid wallet export", category: "wallets", logo: LQ,
+    description: "Liquid watch-only wallet export or Elements descriptor.",
+    pathLabel: "Watch-only wallet", formatLabel: "Liquid descriptor/export",
+    details: ["Paste one common Liquid wallet export or descriptor", "Requires a configured Liquid backend"],
+  },
+  {
+    id: "samourai", title: "Samourai Wallet", category: "wallets", logo: I("samourai.webp"),
+    description: "Watch-only Samourai and Whirlpool account descriptor/xpub import.",
+    pathLabel: "Watch-only wallet group", formatLabel: "Samourai/Whirlpool descriptors",
+    details: [
+      "Creates child sources for pasted Deposit, Badbank, Premix, and Postmix accounts",
+      "Use Sparrow or another descriptor tool to export public account descriptors/xpubs",
+      "Stores only watch-only sync targets",
+      "Postmix discovery starts with a widened gap limit",
     ],
   },
   {
-    id: "merchant",
-    label: "Merchant",
-    items: [
-      { logo: BTCPAY, title: "BTCPay Server", desc: "Stores, wallet history, and invoice provenance." },
-      { logo: BTCPAY, title: "BTCPay CSV", desc: "Manual export when API sync isn't available." },
+    id: "wasabi", title: "Wasabi Wallet", category: "wallets", logo: I("wasabi.webp"),
+    description: "Paste Wasabi RPC outputs with CoinJoin and anonymity evidence.",
+    pathLabel: "Wallet export", formatLabel: "wasabi_bundle",
+    docs: "https://docs.wasabiwallet.io/using-wasabi/RPC.html",
+    details: [
+      "Load the wallet in Wasabi, then copy local RPC JSON from port 37128",
+      "Use Basic Auth in curl when JsonRpcUser and JsonRpcPassword are set",
+      "Paste gethistory plus listcoins/listunspentcoins for Coins anonymity state",
+      "CoinJoin evidence becomes review warnings, not fabricated provenance",
     ],
   },
   {
-    id: "files",
-    label: "Files",
-    items: [
-      { tile: T_XLS, title: "Generic ledger", desc: "Fill-in spreadsheet for manual transactions." },
-      { tile: T_CSVY, title: "Other exchange or broker", desc: "Any export from a platform not listed yet." },
-      { tile: T_CSV, title: "CSV import", desc: "One-shot import from a local file." },
-      { tile: T_LBL, title: "BIP329 labels", desc: "JSONL wallet label import and export." },
+    id: "sparrow", title: "Sparrow", category: "wallets", logo: I("sparrow.webp"),
+    description: "Descriptor or xpub export.", pathLabel: "Wallet export", formatLabel: "descriptor/xpub",
+    details: [FORWARD],
+  },
+  {
+    id: "specter", title: "Specter Desktop", category: "wallets", tile: tile("SP", "#7c3aed"),
+    description: "Descriptor export.", pathLabel: "Wallet export", formatLabel: "descriptor",
+    details: [FORWARD],
+  },
+  {
+    id: "bluewallet", title: "BlueWallet", category: "wallets", logo: I("bluewallet-38.webp"),
+    description: "Account xpub export.", pathLabel: "Wallet export",
+    details: ["Export the account xpub — never the seed or a private key"],
+  },
+  {
+    id: "blockstream-green", title: "Blockstream Green", category: "wallets", logo: I("blockstream-green.svg"),
+    description: "Bitcoin singlesig xpub export.", pathLabel: "Wallet export", formatLabel: "descriptor/xpub",
+    details: [FORWARD],
+  },
+  {
+    id: "liana", title: "Liana", category: "wallets", logo: I("liana.svg"),
+    description: "Timelock multisig descriptor import.", pathLabel: "Wallet export", formatLabel: "descriptor",
+    details: [FORWARD],
+  },
+  {
+    id: "nunchuk", title: "Nunchuk", category: "wallets", logo: I("nunchuk.svg"),
+    description: "Descriptor or BSMS export.", pathLabel: "Wallet export",
+    details: [FORWARD],
+  },
+  {
+    id: "bitbox", title: "BitBox", category: "wallets", logo: I("bitbox.svg"), invert: true,
+    description: "Account xpub export.", pathLabel: "Wallet export",
+    details: [FORWARD],
+  },
+  {
+    id: "trezor", title: "Trezor", category: "wallets", logo: I("trezor.svg"), invert: true,
+    description: "Account xpub export.", pathLabel: "Wallet export",
+    details: [FORWARD],
+  },
+  {
+    id: "coldcard", title: "Coldcard", category: "wallets", logo: I("coldcard.svg"), invert: true,
+    description: "Descriptor or xpub export.", pathLabel: "Wallet export", formatLabel: "descriptor/xpub",
+    details: [FORWARD],
+  },
+  {
+    id: "ledger", title: "Ledger", category: "wallets", logo: I("ledger.svg"), invert: true,
+    description: "Ledger Live account export.", pathLabel: "CSV import", formatLabel: "ledgerlive_csv",
+    details: [
+      "BTC and Liquid BTC IN/OUT rows become wallet movement",
+      "Ledger countervalues are ignored because the export marks them informational",
     ],
+  },
+  {
+    id: "foundation-passport", title: "Foundation Passport", category: "wallets", logo: I("foundation-passport.svg"), invert: true,
+    description: "Descriptor or xpub export.", pathLabel: "Wallet export",
+    details: [FORWARD],
+  },
+  {
+    id: "bullbitcoin-wallet", title: "Bull Bitcoin Wallet", category: "wallets", logo: I("bullbitcoin-mark.webp"),
+    description: "Unified wallet transaction CSV import.",
+    pathLabel: "Wallet CSV import", formatLabel: "bullbitcoin_wallet_csv",
+    docs: "https://github.com/SatoshiPortal/bullbitcoin-mobile/issues/1363",
+    details: [
+      "Imports Bitcoin, Liquid, Lightning, payjoin, and swap wallet rows",
+      "Use descriptor wallets instead when they are your source of truth",
+      "Bull order CSV remains available under Exchanges for exact fiat pricing",
+    ],
+  },
+  {
+    id: "bitcoin-core", title: "Bitcoin Core", category: "nodes", logo: BTC,
+    description: "Your own full node over JSON-RPC for descriptor, xpub, and address sync.",
+    pathLabel: "Node backend", formatLabel: "bitcoinrpc",
+    details: [
+      "Detects a local node when the default cookie is available",
+      "Imports watch-only descriptors into a Kassiber Core wallet",
+    ],
+  },
+  {
+    id: "electrum", title: "Electrum server", category: "nodes", tile: tile("EL", "#2563eb"),
+    description: "Electrum protocol over TCP/SSL (e.g. Fulcrum, ElectrumX). Sync-only — no transaction links.",
+    pathLabel: "Index backend", formatLabel: "electrum",
+    details: [
+      "Configured in Settings with ssl://host:50002 or tcp://host:50001",
+      "Works for Bitcoin and Liquid descriptor refresh when the backend matches the chain",
+    ],
+  },
+  {
+    id: "esplora", title: "Esplora / mempool", category: "nodes", logo: I("mempool-space.svg"),
+    description: "Esplora / mempool.space-type HTTP REST API. Syncs and provides clickable transaction links.",
+    pathLabel: "Index backend", formatLabel: "esplora",
+    details: [
+      "Kassiber ships with a built-in Esplora/mempool-API Bitcoin backend",
+      "Use Settings to add a self-hosted Esplora endpoint",
+    ],
+  },
+  {
+    id: "zeus", title: "ZEUS", category: "lightning", logo: I("zeus.svg"), invert: true, planned: true,
+    description: "Lightning node interface.", pathLabel: "Lightning app",
+    details: ["Add the underlying LND or Core Lightning node"],
+  },
+  {
+    id: "phoenix", title: "Phoenix", category: "lightning", logo: I("phoenix.svg"),
+    description: "Lightning wallet CSV activity import.", pathLabel: "CSV import", formatLabel: "phoenix_csv",
+    details: ["Signed msat amounts drive direction", "Phoenix type is preserved as a tag"],
+  },
+  {
+    id: "btcpay", title: "BTCPay Server", category: "merchant", logo: BTCPAY, fit: 0.68,
+    description: "Invoices, payments, refunds, and payouts for every store, through a read-only API key.",
+    pathLabel: "Greenfield API", formatLabel: "stores, invoices & payouts",
+    docs: "https://docs.btcpayserver.org/Development/GreenFieldExample/",
+    details: [
+      "Create a least-privilege key with one click",
+      "Check what the key can read, store by store",
+      "Recognise wallets you already track and stores that share one",
+      "Book Lightning, LNURL, and plugin payments from BTCPay when Kassiber cannot watch them",
+      "Use BTCPay CSV when API access is not available",
+    ],
+  },
+  {
+    id: "btcpay-csv", title: "BTCPay CSV", category: "merchant", logo: BTCPAY, fit: 0.68,
+    description: "Manual BTCPay wallet export import when API sync is not available.",
+    pathLabel: "CSV import", formatLabel: "btcpay_csv",
+    details: [
+      "Imports a local BTCPay wallet transaction CSV export",
+      "Comments become notes and labels become Kassiber tags",
+      "Can create a file-backed source wallet or import into an existing settlement wallet",
+      "Use BTCPay Server for repeatable sync plus invoice and payment-request provenance",
+    ],
+  },
+  {
+    id: "river", title: "River", category: "exchanges", logo: I("river.webp"),
+    description: "Bitcoin Activity or Account Activity CSV import.", pathLabel: "CSV import", formatLabel: "river_csv",
+    docs: "https://support.river.com/hc/en-us/articles/45513824178963-How-do-I-download-my-account-activity",
+    details: ["Account Activity preserves BTC and cash legs", "Buy/sell rows store exact River execution pricing"],
+  },
+  {
+    id: "bullbitcoin", title: "Bull Bitcoin", category: "exchanges", logo: I("bullbitcoin-mark.webp"),
+    description: "Order CSV import for exact buy/sell execution pricing.", pathLabel: "CSV import", formatLabel: "bullbitcoin_csv",
+    docs: "https://www.bullbitcoin.com/",
+    details: [
+      "Completed Bitcoin, Lightning, and Liquid orders preserve exact fiat proceeds",
+      "Book-wide imports can enrich relevant rows or import the shared export with reconciliation flags",
+    ],
+  },
+  {
+    id: "relai", title: "Relai", category: "exchanges", logo: I("relai.svg"), planned: true,
+    description: "Bitcoin-only app activity import.", pathLabel: "CSV import",
+    docs: "https://support.relai.app/en/articles/194348-how-do-i-export-my-order-history",
+    details: [PARSER_PLANNED],
+  },
+  {
+    id: "pocket-bitcoin", title: "Pocket Bitcoin", category: "exchanges", logo: I("pocket-bitcoin.svg"),
+    description: "Account CSV import for exact buy execution pricing.", pathLabel: "CSV import", formatLabel: "pocketbitcoin_csv",
+    docs: "https://pocketbitcoin.com/",
+    details: [
+      "Account exports preserve exact Pocket Bitcoin execution pricing",
+      "Book-wide imports can enrich relevant wallet rows or keep the full export as reconciliation evidence",
+    ],
+  },
+  {
+    id: "swan-bitcoin", title: "Swan Bitcoin", category: "exchanges", logo: I("swan-bitcoin.svg"), planned: true,
+    description: "Bitcoin-only savings and broker activity import.", pathLabel: "CSV import",
+    details: [PARSER_PLANNED],
+  },
+  {
+    id: "strike", title: "Strike", category: "exchanges", logo: I("strike.webp"),
+    description: "Custodial Bitcoin wallet and exchange import.", pathLabel: "Custodial platform", formatLabel: "strike_csv",
+    docs: "https://strike.me/",
+    details: [
+      "BTC buys, sells, Lightning, and on-chain rows become active platform activity",
+      "Fiat-only funding and reversal rows are skipped",
+      "Rows use Strike BTC Price as exact CSV pricing when present",
+    ],
+  },
+  {
+    id: "21bitcoin", title: "21bitcoin", category: "exchanges", logo: I("21bitcoin.webp"),
+    description: "Custodial platform ledger import with exact trade pricing.", pathLabel: "CSV import", formatLabel: "21bitcoin_csv",
+    docs: "https://21bitcoin.app/",
+    details: [
+      "BTC trade rows become active custodial balance activity",
+      "Buy/sell rows store exact 21bitcoin execution pricing from the CSV",
+      "Deposits and withdrawals without txids become reviewed custody-transfer candidates",
+    ],
+  },
+  {
+    id: "coinfinity", title: "Coinfinity", category: "exchanges", logo: I("coinfinity-mark.svg"),
+    description: "Order CSV import for exact buy/sell execution pricing.", pathLabel: "CSV import", formatLabel: "coinfinity_csv",
+    docs: "https://coinfinity.co/",
+    details: [
+      "BTC/EUR order rows preserve exact Coinfinity execution pricing",
+      "Book-wide imports can enrich relevant rows or import the shared export with reconciliation flags",
+    ],
+  },
+  {
+    id: "bitpanda", title: "Bitpanda", category: "exchanges", logo: I("bitpanda.svg"), frame: "#103e36", planned: true,
+    description: "Bitpanda history export.", pathLabel: "CSV import",
+    docs: "https://support.bitpanda.com/hc/en-us/articles/360000122759-How-can-I-download-the-history-of-my-Bitpanda-account",
+    details: ["Dedicated BTC parser is planned"],
+  },
+  {
+    id: "kraken", title: "Kraken", category: "exchanges", logo: I("kraken.svg"), planned: true,
+    description: "Kraken private API history.", pathLabel: "API import",
+    docs: "https://support.kraken.com/articles/360001169383-how-to-interpret-ledger-history-fields",
+    details: ["CLI API import is available; desktop setup is planned"],
+  },
+  {
+    id: "coinbase", title: "Coinbase", category: "exchanges", logo: I("coinbase.svg"), planned: true,
+    description: "Coinbase API history.", pathLabel: "API import",
+    details: ["CDP API authentication is planned"],
+  },
+  {
+    id: "binance", title: "Binance", category: "exchanges", logo: I("binance.svg"),
+    description: "BTC supplemental rows from Binance exports.", pathLabel: "Supplemental CSV", formatLabel: "binance_supplemental_csv",
+    details: [
+      "BTC autoinvest rows funded by fiat preserve exact execution value",
+      "BTC dividend/mining rows import as income without guessing fiat price",
+    ],
+  },
+  {
+    id: "prior-tax-report", title: "Prior tax report", category: "files", tile: tile("DOC", "#7f1d1d"),
+    description: "Preserve a CoinTracking, Blockpit, or other prior report as evidence.",
+    pathLabel: "Evidence archive", formatLabel: "Report file",
+    details: [
+      "Copies the original report into Kassiber's managed attachment store",
+      "Records the provider and tax year without trusting imported totals",
+      "Use the transaction-history migration cards to rebuild auditable Kassiber reports",
+    ],
+  },
+  {
+    id: "cointracking", title: "CoinTracking", category: "files", tile: tile("CT", "#2f78c4"),
+    description: "Move your Bitcoin transaction history into Kassiber.",
+    pathLabel: "Tax-platform migration", formatLabel: "CoinTracking transaction CSV",
+    docs: "https://cointracking.freshdesk.com/en/support/solutions/articles/29000031008-create-backup-restore-or-export-your-account-data",
+    details: [
+      "Use the complete English-header CSV from Transactions → Export → CSV",
+      "Add the CSV and descriptor wallets in either order; sync reconciles overlaps",
+      "With a chain ID, exact matches are excluded; ID-less collisions stay in review",
+    ],
+  },
+  {
+    id: "blockpit", title: "Blockpit", category: "files", tile: tile("BP", "#111827"),
+    description: "Move your Bitcoin transaction history into Kassiber.",
+    pathLabel: "Tax-platform migration", formatLabel: "Blockpit transaction CSV",
+    docs: "https://intercom.help/blockpit/en/articles/12137149-how-to-export-my-blockpit-transactions-as-a-csv-file",
+    details: [
+      "Use the complete Transactions CSV with filters cleared; excluded Blockpit rows are absent",
+      "Add the CSV and descriptor wallets in either order; sync reconciles overlaps",
+      "With a chain ID, exact matches are excluded; ID-less collisions stay in review",
+    ],
+  },
+  {
+    id: "generic-ledger", title: "Generic ledger", category: "files", tile: tile("XLS", "#f2a900", "#1a1a1a"),
+    description: "Fill-in spreadsheet import for manual transactions.",
+    pathLabel: "Spreadsheet import", formatLabel: "Excel (.xlsx) or CSV",
+    details: [
+      "Download the template, fill in your transactions, import the file",
+      "One Bitcoin leg per row; Buy/Sell/Income/Mining/Gift and more",
+      "Amounts in BTC (or SATS); fiat columns in your book's currency",
+    ],
+  },
+  {
+    id: "custom-import", title: "Other exchange or broker", category: "files", tile: tile("CSV", "#f2a900", "#1a1a1a"),
+    description: "Import an export from a platform Kassiber doesn't list yet.",
+    pathLabel: "Custom import", formatLabel: "CSV, TSV or Excel export",
+    details: [
+      "Kassiber reads the file's own column names — no reshaping needed",
+      "Unrecognized columns? Map them yourself, or let the assistant propose a mapping",
+      "Every import is recorded as a run you can roll back if the mapping was wrong",
+    ],
+  },
+  {
+    id: "csv", title: "CSV import", category: "files", tile: tile("CSV", "#64748b"),
+    description: "One-shot import from a local file.", pathLabel: "CSV/JSON import", formatLabel: "generic csv/json",
+    details: ["Use Kassiber's generic transaction columns", "Specific parsers are preferred when available"],
+  },
+  {
+    id: "bip329", title: "BIP329 labels", category: "files", tile: tile("LBL", "#475569"),
+    description: "JSONL wallet label import and export.", pathLabel: "Label import", formatLabel: "bip329 JSONL",
+    docs: "https://bips.xyz/329",
+    details: ["Labels are stored locally and bridged to matching transactions"],
   },
 ];
 
+const FIRST = "descriptor";
 ---
 
-<div class="conn-mock" data-tab="wallets">
+<!-- The dialog floats over the Overview it opens from, under the palette's
+     faint wash, so its frosted sheet has something to frost. -->
+<div class="conn-scene">
+<div class="conn-backdrop" aria-hidden="true">
+  <HeroOverviewMock decorative id="conn-ov" />
+</div>
+<div class="conn-mock" data-conn-mock data-tab="wallets">
   <div class="conn-head">
     <div class="conn-title">Add connection</div>
-    <div class="conn-sub">Watch-only wallets, your node, merchant tools, files.</div>
+    <div class="conn-sub">Choose a watch-only wallet, node, exchange, or local file source.</div>
+    <span class="conn-close" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
+    </span>
   </div>
 
   <div class="conn-body">
     <nav class="conn-rail" aria-label="Source categories">
-      {TABS.map((tab, i) => (
-        <button
-          class="conn-tab"
-          type="button"
-          data-tab-btn={tab.id}
-          aria-pressed={i === 0 ? "true" : "false"}
-        >
-          <span>{tab.label}</span>
-          <span class="conn-tab-count">{tab.items.length}</span>
+      {CATEGORIES.map((category, index) => (
+        <button class="conn-cat" type="button" data-cat-btn={category.id} aria-pressed={index === 0 ? "true" : "false"}>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" set:html={category.icon} />
+          <span>{category.label}</span>
         </button>
       ))}
     </nav>
 
-    <!-- All lists share one grid cell and scroll inside it, so the panel keeps
-         one height and the page never reflows when you switch tabs. -->
-    <div class="conn-stack">
-      {TABS.map((tab) => (
-        <ul class="conn-list" data-list={tab.id}>
-          {tab.items.map((item, i) => (
-            <li class:list={["conn-item", { "conn-item--active": i === 0 }]}>
-              <span
-                class:list={["conn-item-mark", {
-                  "conn-item-mark--plate": item.treat === "plate",
-                  "conn-item-mark--tile": !!item.tile,
-                }]}
-                style={item.tile ? `background:${item.tile.bg};color:${item.tile.fg}` : undefined}
-              >
-                {item.logo
-                  ? <img src={item.logo} alt="" class:list={{ "is-inverted": item.treat === "invert" }} />
-                  : <span class="conn-item-letter">{item.tile?.label}</span>}
-              </span>
-              <span class="conn-item-copy">
-                <span class="conn-item-title">
-                  {item.title}
-                  {item.planned && <span class="conn-item-planned">Planned</span>}
-                </span>
-                <span class="conn-item-desc">{item.desc}</span>
-              </span>
-            </li>
-          ))}
-        </ul>
+    <div class="conn-main">
+      <label class="conn-search">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21 21-4.34-4.34" /><circle cx="11" cy="11" r="8" /></svg>
+        <input
+          type="search"
+          data-conn-search
+          placeholder="Search sources (e.g. river, descriptor, btcpay)…"
+          aria-label="Search sources (e.g. river, descriptor, btcpay)…"
+          autocomplete="off"
+          spellcheck="false"
+        />
+      </label>
+
+      <div class="conn-list" data-conn-list>
+        {SOURCES.map((source) => (
+          <button
+            class="conn-row"
+            type="button"
+            data-source={source.id}
+            data-category={source.category}
+            data-haystack={`${source.title} ${source.description} ${source.id}`.toLowerCase()}
+            aria-pressed={source.id === FIRST ? "true" : "false"}
+            title={source.description}
+            hidden={source.category !== "wallets"}
+          >
+            <span
+              class:list={["conn-art", { "conn-art--tile": !!source.tile }]}
+              style={source.frame ? `background:${source.frame}` : undefined}
+              aria-hidden="true"
+            >
+              {source.logo ? (
+                <img src={source.logo} alt="" class:list={{ "is-inverted": source.invert }} style={source.fit ? `--fit:${source.fit}` : undefined} loading="lazy" decoding="async" />
+              ) : (
+                <span class="conn-tile" style={`background:${source.tile?.bg};color:${source.tile?.fg}`}>{source.tile?.label}</span>
+              )}
+            </span>
+            <span class="conn-row-title">{source.title}</span>
+            {source.planned && <span class="conn-badge">Planned</span>}
+            <span class="conn-row-format">{source.formatLabel ?? source.pathLabel}</span>
+          </button>
+        ))}
+        <p class="conn-empty" data-conn-empty hidden>No sources match that search.</p>
+      </div>
+    </div>
+
+    <div class="conn-detail" aria-live="polite">
+      {SOURCES.map((source) => (
+        <div class="conn-pane" data-pane={source.id} hidden={source.id !== FIRST}>
+          <div class="conn-pane-head">
+            <span
+              class:list={["conn-art", "conn-art--lg", { "conn-art--tile": !!source.tile }]}
+              style={source.frame ? `background:${source.frame}` : undefined}
+              aria-hidden="true"
+            >
+              {source.logo ? (
+                <img src={source.logo} alt="" class:list={{ "is-inverted": source.invert }} style={source.fit ? `--fit:${source.fit}` : undefined} loading="lazy" decoding="async" />
+              ) : (
+                <span class="conn-tile" style={`background:${source.tile?.bg};color:${source.tile?.fg}`}>{source.tile?.label}</span>
+              )}
+            </span>
+            <span class="conn-pane-id">
+              <span class="conn-pane-title">{source.title}</span>
+              <span class="conn-pane-path">{source.pathLabel}{source.formatLabel ? ` · ${source.formatLabel}` : ""}</span>
+            </span>
+          </div>
+          {(source.planned || source.docs) && (
+            <div class="conn-pane-badges">
+              {source.planned && <span class="conn-badge">Planned</span>}
+              {source.docs && <a class="conn-docs" href={source.docs} target="_blank" rel="noopener noreferrer">Docs</a>}
+            </div>
+          )}
+          <p class="conn-pane-desc">{source.description}</p>
+          <ul class="conn-pane-details">
+            {source.details.map((detail) => <li>{detail}</li>)}
+          </ul>
+          <p class="conn-pane-note">Third-party marks belong to their owners; shown to identify sources, with no affiliation implied.</p>
+        </div>
       ))}
-      <div class="conn-fade" aria-hidden="true"></div>
     </div>
   </div>
 
+  <!-- Illustration, not a control surface: nothing here takes a click. -->
   <div class="conn-foot" aria-hidden="true">
-    <span class="conn-foot-note">Third-party brands and logos belong to their respective owners.</span>
-    <span class="conn-btn conn-btn--ghost">Cancel</span>
-    <span class="conn-btn conn-btn--go">Continue</span>
+    <span class="conn-btn">Cancel</span>
+    <span class="conn-btn">Continue</span>
   </div>
 </div>
 
+</div>
 <script>
-  for (const mock of document.querySelectorAll<HTMLElement>(".conn-mock")) {
-    for (const btn of mock.querySelectorAll<HTMLButtonElement>("[data-tab-btn]")) {
-      btn.addEventListener("click", () => {
-        mock.dataset.tab = btn.dataset.tabBtn;
-        for (const b of mock.querySelectorAll<HTMLButtonElement>("[data-tab-btn]")) {
-          b.setAttribute("aria-pressed", String(b === btn));
-        }
-        // Each tab starts at the top, like reopening the dialog on that category.
-        mock.querySelector<HTMLElement>(`[data-list="${btn.dataset.tabBtn}"]`)?.scrollTo(0, 0);
+  for (const mock of document.querySelectorAll<HTMLElement>("[data-conn-mock]")) {
+    const categories = [...mock.querySelectorAll<HTMLButtonElement>("[data-cat-btn]")];
+    const rows = [...mock.querySelectorAll<HTMLButtonElement>("[data-source]")];
+    const panes = [...mock.querySelectorAll<HTMLElement>("[data-pane]")];
+    const list = mock.querySelector<HTMLElement>("[data-conn-list]");
+    const search = mock.querySelector<HTMLInputElement>("[data-conn-search]");
+    const empty = mock.querySelector<HTMLElement>("[data-conn-empty]");
+    let category = "wallets";
+
+    const select = (id: string) => {
+      for (const row of rows) row.setAttribute("aria-pressed", String(row.dataset.source === id));
+      for (const pane of panes) pane.hidden = pane.dataset.pane !== id;
+    };
+
+    // As in the app: a query searches every category, and the rail shows no
+    // current category while it does.
+    const render = () => {
+      const query = search?.value.trim().toLowerCase() ?? "";
+      let shown = 0;
+      for (const row of rows) {
+        const match = query ? (row.dataset.haystack ?? "").includes(query) : row.dataset.category === category;
+        row.hidden = !match;
+        if (match) shown += 1;
+      }
+      if (empty) empty.hidden = shown > 0;
+      for (const button of categories) {
+        button.setAttribute("aria-pressed", String(!query && button.dataset.catBtn === category));
+      }
+    };
+
+    for (const button of categories) {
+      button.addEventListener("click", () => {
+        category = button.dataset.catBtn ?? "wallets";
+        if (search) search.value = "";
+        render();
+        // The category's first listed source, like reopening the dialog on it.
+        const first = rows.find((row) => !row.hidden);
+        if (first) select(first.dataset.source ?? "");
+        list?.scrollTo(0, 0);
       });
     }
+
+    for (const row of rows) {
+      row.addEventListener("click", () => select(row.dataset.source ?? ""));
+    }
+
+    search?.addEventListener("input", () => {
+      render();
+      list?.scrollTo(0, 0);
+    });
   }
 </script>
 
 <style>
-  /* App dark-theme values copied literally, so the panel reads as the app. */
+  /* App dark-theme values copied literally, so the panel reads as the app:
+     the command palette's frosted --background sheet, --accent oklch(0.269 0 0)
+     for the current row, --muted-foreground oklch(0.708 0 0). */
   .conn-mock {
-    --conn-bg: #0f0f11;
+    --cm-surface: #0c0c0e;
+    --cm-line: rgba(255, 255, 255, 0.1);
+    --cm-accent: #262626;
+    --cm-muted-fg: #a1a1a1;
 
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    background: var(--conn-bg);
-    box-shadow: 0 24px 56px -28px rgba(0, 0, 0, 0.75);
-    padding: 22px 22px 18px;
+    position: relative;
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    border: 1px solid rgb(255 255 255 / 0.08);
+    border-radius: 16px;
+    background: var(--cm-surface);
+    box-shadow:
+      inset 0 1px rgb(255 255 255 / 0.04),
+      0 24px 72px -20px rgb(0 0 0 / 0.9);
+    overflow: hidden;
+  }
+
+  /* ── Scene: the dialog over the Overview ──────────────── */
+  /* Below the wide layout the dialog stacks taller than any window around it,
+     so it stands alone on the section. */
+  .conn-backdrop {
+    display: none;
+  }
+
+  @media (min-width: 1100px) {
+    /* The window behind is the hero's Overview at the same app scale: one app
+       rem per 1cqw of this scene. */
+    .conn-scene {
+      position: relative;
+      container-type: inline-size;
+      aspect-ratio: 1440 / 949;
+    }
+
+    .conn-backdrop {
+      display: block;
+      position: absolute;
+      inset: 0;
+      border-radius: calc(1cqw / 14.4 * 12);
+      box-shadow: 0 28px 64px -28px rgb(0 0 0 / 0.75);
+    }
+
+    /* kb-glass-backdrop: a faint, unblurred wash, so the page stays legible. */
+    .conn-backdrop::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      background: rgb(0 0 0 / 0.22);
+    }
+
+    /* kb-glass-dialog: a --background tint at the glass opacity over a backdrop
+       blur, a white 8% edge, the top edge catching light, and a deep drop. */
+    .conn-scene .conn-mock {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: min(1040px, calc(100% - 96px));
+      transform: translate(-50%, -50%);
+      background: color-mix(in srgb, #0a0a0a 80%, transparent);
+      -webkit-backdrop-filter: blur(16px) saturate(1.08);
+      backdrop-filter: blur(16px) saturate(1.08);
+    }
+
+    @supports not (backdrop-filter: blur(1px)) {
+      .conn-scene .conn-mock {
+        background: #171717;
+      }
+    }
   }
 
   .conn-head {
-    margin-bottom: 18px;
+    position: relative;
+    padding: 20px 52px 16px 22px;
   }
 
   .conn-title {
-    font-size: 16px;
-    font-weight: 650;
+    font-size: 17px;
+    font-weight: 600;
+    line-height: 1;
     letter-spacing: -0.015em;
-    margin-bottom: 4px;
   }
 
   .conn-sub {
-    font-size: 12.5px;
-    color: var(--fg-dim);
+    margin-top: 9px;
+    font-size: 13px;
+    color: var(--cm-muted-fg);
   }
 
+  .conn-close {
+    position: absolute;
+    top: 13px;
+    right: 13px;
+    display: grid;
+    place-items: center;
+    width: 28px;
+    height: 28px;
+    color: var(--cm-muted-fg);
+  }
+
+  .conn-close svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  /* Hairlines between the columns and no box inside the dialog: the palette's
+     treatment. Each column scrolls on its own. */
   .conn-body {
     display: grid;
-    grid-template-columns: 148px 1fr;
-    gap: 18px;
-    align-items: start;
+    grid-template-columns: 190px minmax(0, 1fr) 340px;
+    height: 452px;
+    border-top: 1px solid var(--cm-line);
   }
 
   /* ── Category rail ────────────────────────────────────── */
   .conn-rail {
     display: flex;
     flex-direction: column;
-    gap: 3px;
-    border-right: 1px solid rgba(255, 255, 255, 0.06);
-    padding-right: 14px;
-    align-self: stretch;
+    gap: 2px;
+    padding: 8px;
+    border-right: 1px solid var(--cm-line);
+    overflow-y: auto;
   }
 
-  .conn-tab {
+  .conn-cat {
     display: flex;
     align-items: center;
-    justify-content: space-between;
     gap: 10px;
-    text-align: left;
-    font-size: 13px;
-    font-weight: 500;
-    letter-spacing: -0.01em;
-    color: var(--fg-muted);
-    padding: 8px 11px;
+    min-height: 32px;
+    padding: 6px 10px;
     border-radius: 8px;
-    cursor: pointer;
-    transition: color 0.15s ease, background 0.15s ease;
+    font-size: 13.5px;
+    color: var(--cm-muted-fg);
+    text-align: left;
+    transition: background-color 0.15s ease, color 0.15s ease;
   }
 
-  /* Hover moves the text only. The selected tab owns the filled surface, so
-     the two never read as one state. */
-  .conn-tab:hover {
+  .conn-cat svg {
+    width: 16px;
+    height: 16px;
+    flex: none;
+  }
+
+  .conn-cat:hover {
+    background: rgb(38 38 38 / 0.6);
     color: var(--fg);
   }
 
-  .conn-tab[aria-pressed="true"] {
+  .conn-cat[aria-pressed="true"] {
+    background: var(--cm-accent);
     color: var(--fg);
-    font-weight: 600;
-    background: rgba(255, 255, 255, 0.08);
-    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06);
   }
 
-  .conn-tab-count {
-    font-family: var(--font-mono);
-    font-size: 10.5px;
-    color: var(--fg-faint);
+  /* ── Search and list ──────────────────────────────────── */
+  .conn-main {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    border-right: 1px solid var(--cm-line);
   }
 
-  .conn-tab[aria-pressed="true"] .conn-tab-count {
-    color: var(--fg-muted);
+  .conn-search {
+    flex: none;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    height: 48px;
+    padding: 0 16px;
+    border-bottom: 1px solid var(--cm-line);
+    cursor: text;
   }
 
-  /* ── Source list ──────────────────────────────────────── */
-  .conn-stack {
-    position: relative;
-    display: grid;
+  .conn-search svg {
+    width: 16px;
+    height: 16px;
+    flex: none;
+    color: var(--cm-muted-fg);
+  }
+
+  .conn-search input {
+    flex: 1;
     min-width: 0;
+    border: 0;
+    outline: none;
+    background: transparent;
+    color: var(--fg);
+    font: inherit;
+    font-size: 14.5px;
+  }
+
+  .conn-search input::placeholder {
+    color: rgb(161 161 161 / 0.8);
+  }
+
+  .conn-search input::-webkit-search-cancel-button {
+    filter: invert(1) opacity(0.5);
   }
 
   .conn-list {
-    grid-area: 1 / 1;
-    list-style: none;
+    flex: 1;
+    min-height: 0;
     display: flex;
     flex-direction: column;
-    gap: 8px;
-    /* The long rosters scroll in place, as the dialog does. */
-    max-height: 396px;
+    gap: 2px;
+    padding: 8px;
     overflow-y: auto;
     overscroll-behavior: contain;
-    padding-right: 8px;
-    opacity: 0;
-    visibility: hidden;
-    transition: opacity 0.2s ease, visibility 0.2s;
     scrollbar-width: thin;
     scrollbar-color: rgba(255, 255, 255, 0.14) transparent;
   }
 
-  .conn-list::-webkit-scrollbar {
-    width: 6px;
-  }
-
-  .conn-list::-webkit-scrollbar-thumb {
-    border-radius: 999px;
-    background: rgba(255, 255, 255, 0.14);
-  }
-
-  [data-tab="wallets"] .conn-list[data-list="wallets"],
-  [data-tab="nodes"] .conn-list[data-list="nodes"],
-  [data-tab="lightning"] .conn-list[data-list="lightning"],
-  [data-tab="merchant"] .conn-list[data-list="merchant"],
-  [data-tab="exchanges"] .conn-list[data-list="exchanges"],
-  [data-tab="files"] .conn-list[data-list="files"] {
-    opacity: 1;
-    visibility: visible;
-  }
-
-  /* Hints that the roster continues past the fold. */
-  .conn-fade {
-    position: absolute;
-    inset: auto 0 0 0;
-    height: 26px;
-    pointer-events: none;
-    background: linear-gradient(to top, var(--conn-bg) 20%, transparent);
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .conn-list {
-      transition: none;
-    }
-  }
-
-  .conn-item {
-    display: flex;
-    gap: 13px;
-    align-items: center;
-    padding: 12px 15px;
-    border: 1px solid rgba(255, 255, 255, 0.07);
-    border-radius: 10px;
-    background: #121215;
-  }
-
-  .conn-item--active {
-    border-color: rgba(255, 255, 255, 0.3);
-  }
-
-  .conn-item-mark {
+  /* One line per source, as in the command palette; the description lives in
+     the detail pane and the row's tooltip. */
+  .conn-row {
     flex: none;
-    width: 28px;
-    height: 28px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 6px 10px;
+    border-radius: 8px;
+    text-align: left;
+    transition: background-color 0.15s ease;
+  }
+
+  .conn-row[hidden] {
+    display: none;
+  }
+
+  .conn-row:hover {
+    background: rgb(38 38 38 / 0.6);
+  }
+
+  .conn-row[aria-pressed="true"] {
+    background: var(--cm-accent);
+  }
+
+  .conn-row-title {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 13.5px;
+    font-weight: 500;
+  }
+
+  /* The palette's right-aligned detail column. */
+  .conn-row-format {
+    flex-shrink: 1;
+    max-width: 45%;
+    margin-left: auto;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 11.5px;
+    color: var(--cm-muted-fg);
+  }
+
+  .conn-empty {
+    padding: 8px 10px;
+    font-size: 13px;
+    color: var(--cm-muted-fg);
+  }
+
+  /* The app's SourceArtwork frame. */
+  .conn-art {
+    flex: none;
     display: grid;
     place-items: center;
-    border-radius: 8px;
-    background: rgba(255, 255, 255, 0.05);
+    width: 28px;
+    height: 28px;
+    padding: 2px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 6px;
+    background: rgb(38 38 38 / 0.55);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
     overflow: hidden;
   }
 
-  .conn-item-mark img {
-    width: 19px;
-    height: 19px;
+  .conn-art img {
+    max-width: calc(100% * var(--fit, 1));
+    max-height: calc(100% * var(--fit, 1));
     object-fit: contain;
   }
 
-  /* The app's own treatments: hardware-wallet glyphs are near-black, so they
-     are forced to white here; a few dark-ink marks get a light plate instead. */
-  .conn-item-mark img.is-inverted {
+  .conn-art img.is-inverted {
     filter: brightness(0) invert(1);
   }
 
-  .conn-item-mark--plate {
-    background: #e8e8ea;
-  }
-
-  .conn-item-mark--tile {
-    /* Colour comes from the app's generated tile, inline. */
+  .conn-art--tile {
+    padding: 0;
+    border: 0;
     background: none;
+    box-shadow: none;
   }
 
-  .conn-item-letter {
-    font-family: var(--font-sans);
-    font-size: 9.5px;
+  .conn-tile {
+    display: grid;
+    place-items: center;
+    width: 100%;
+    height: 100%;
+    border-radius: 6px;
+    font-size: 8.5px;
     font-weight: 700;
     letter-spacing: -0.01em;
   }
 
-  .conn-item-copy {
-    min-width: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 3px;
+  .conn-art--lg {
+    width: 48px;
+    height: 48px;
+    padding: 4px;
+    border-radius: 9px;
   }
 
-  .conn-item-title {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 13.5px;
-    font-weight: 600;
-    letter-spacing: -0.01em;
-    flex-wrap: wrap;
+  .conn-art--lg.conn-art--tile {
+    padding: 0;
   }
 
-  .conn-item-planned {
+  .conn-art--lg .conn-tile {
+    border-radius: 9px;
+    font-size: 12px;
+  }
+
+  /* Outline badge, pill-shaped as the app's Badge is. */
+  .conn-badge {
     flex: none;
-    font-size: 9.5px;
+    padding: 1px 8px;
+    border: 1px solid var(--cm-line);
+    border-radius: 999px;
+    font-size: 11px;
     font-weight: 500;
-    line-height: 1;
-    padding: 3px 6px;
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    border-radius: 5px;
-    color: var(--fg-dim);
+    line-height: 1.5;
+    color: var(--fg);
     white-space: nowrap;
   }
 
-  .conn-item-desc {
-    font-size: 12px;
+  /* ── Detail pane ──────────────────────────────────────── */
+  .conn-detail {
+    min-height: 0;
+    padding: 16px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.14) transparent;
+  }
+
+  .conn-pane {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .conn-pane[hidden] {
+    display: none;
+  }
+
+  .conn-pane-head {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .conn-pane-id {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+  }
+
+  .conn-pane-title {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 13.5px;
+    font-weight: 500;
+  }
+
+  .conn-pane-path {
+    font-size: 11.5px;
+    color: var(--cm-muted-fg);
+  }
+
+  .conn-pane-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: -8px;
+  }
+
+  .conn-docs {
+    padding: 1px 8px;
+    border: 1px solid var(--cm-line);
+    border-radius: 6px;
+    font-size: 11.5px;
+    color: var(--cm-muted-fg);
+    transition: color 0.15s ease;
+  }
+
+  .conn-docs:hover {
+    color: var(--fg);
+  }
+
+  .conn-pane-desc {
+    font-size: 13.5px;
+    line-height: 1.5;
+  }
+
+  .conn-pane-details {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    list-style: none;
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--cm-muted-fg);
+  }
+
+  .conn-pane-details li {
+    position: relative;
+    padding-left: 12px;
+  }
+
+  .conn-pane-details li::before {
+    content: "";
+    position: absolute;
+    top: 0.62em;
+    left: 0;
+    width: 4px;
+    height: 4px;
+    border-radius: 999px;
+    background: rgb(161 161 161 / 0.6);
+  }
+
+  .conn-pane-note {
+    padding-top: 12px;
+    border-top: 1px solid var(--cm-line);
+    font-size: 11px;
     line-height: 1.45;
-    color: var(--fg-muted);
+    color: var(--cm-muted-fg);
   }
 
   /* ── Footer ───────────────────────────────────────────── */
-  /* Illustration, not a control surface: nothing here takes a click. */
   .conn-foot {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    padding: 12px 20px;
+    border-top: 1px solid var(--cm-line);
     pointer-events: none;
     user-select: none;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-top: 18px;
-    padding-top: 15px;
-    border-top: 1px solid rgba(255, 255, 255, 0.06);
   }
 
-  .conn-foot-note {
-    flex: 1;
-    min-width: 0;
-    font-size: 11px;
-    color: var(--fg-faint);
-  }
-
+  /* Both are inert, so neither should read as a live control: a filled
+     Continue would invite taps it can never answer. */
   .conn-btn {
-    flex: none;
-    font-size: 12.5px;
+    padding: 8px 14px;
+    border: 1px dashed rgba(255, 255, 255, 0.14);
+    border-radius: 8px;
+    font-size: 13px;
     font-weight: 500;
     line-height: 1;
-    padding: 9px 15px;
-    border-radius: 8px;
-  }
-
-  /* Both are inert (the footer has pointer-events: none), so neither should
-     read as a live control — the filled Continue was inviting taps it could
-     never answer. */
-  .conn-btn--ghost,
-  .conn-btn--go {
     color: var(--fg-faint);
-    border: 1px dashed rgba(255, 255, 255, 0.14);
-    background: none;
   }
 
-  /* ── Mobile ───────────────────────────────────────────── */
-  @media (max-width: 450px) {
-    .conn-mock {
-      padding: 18px 16px 14px;
+  @media (prefers-reduced-motion: reduce) {
+    .conn-cat,
+    .conn-row {
+      transition: none;
+    }
+  }
+
+  /* ── Narrower windows ─────────────────────────────────── */
+  /* The app keeps three columns only on wide windows; below that the detail
+     pane gives up its column first and sits under the list. */
+  @media (max-width: 960px) {
+    .conn-body {
+      grid-template-columns: 170px minmax(0, 1fr);
+      grid-template-rows: 380px auto;
+      height: auto;
+    }
+
+    .conn-main {
+      border-right: 0;
+    }
+
+    .conn-detail {
+      grid-column: 1 / -1;
+      border-top: 1px solid var(--cm-line);
+    }
+
+    .conn-pane-note {
+      display: none;
+    }
+  }
+
+  /* Phones: the rail becomes a pill row that scrolls sideways inside itself,
+     so all six categories stay reachable without stealing height. */
+  @media (max-width: 560px) {
+    .conn-head {
+      padding: 16px 48px 14px 16px;
     }
 
     .conn-body {
-      grid-template-columns: 1fr;
-      gap: 14px;
+      grid-template-columns: minmax(0, 1fr);
+      grid-template-rows: auto 330px auto;
     }
 
-    /* The rail becomes a pill row that scrolls sideways inside itself, so all
-       six categories stay reachable without stealing vertical space. */
     .conn-rail {
       flex-direction: row;
       gap: 6px;
+      padding: 10px 12px;
       border-right: 0;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-      padding: 0 0 12px;
+      border-bottom: 1px solid var(--cm-line);
       overflow-x: auto;
       scrollbar-width: none;
     }
@@ -497,28 +1102,32 @@ const TABS: { id: string; label: string; items: Item[] }[] = [
       display: none;
     }
 
-    .conn-tab {
+    .conn-cat {
       flex: none;
       gap: 7px;
-      padding: 7px 11px;
+      min-height: 30px;
+      padding: 5px 11px;
       border: 1px solid rgba(255, 255, 255, 0.08);
       border-radius: 999px;
       white-space: nowrap;
     }
 
-    .conn-list {
-      max-height: 330px;
-      padding-right: 4px;
+    .conn-cat svg {
+      width: 14px;
+      height: 14px;
     }
 
-    /* One tap target per row on a phone: the copy wraps instead of truncating. */
-    .conn-item {
-      padding: 11px 13px;
-      gap: 11px;
+    /* 16px keeps iOS from zooming the page when the field takes focus. */
+    .conn-search input {
+      font-size: 16px;
     }
 
-    .conn-foot-note {
+    .conn-row-format {
       display: none;
+    }
+
+    .conn-foot {
+      padding: 10px 16px;
     }
 
     .conn-btn {
