@@ -1,0 +1,19 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "kassiber-marketing",
+  "compatibility_date": "2026-11-10",
+  // Static-assets-only Worker: no script, Astro's build output is served as-is.
+  "assets": {
+    "directory": "./dist",
+    // Serve dist/404.html with a 404 status for unknown paths (Pages did this implicitly).
+    "not_found_handling": "404-page",
+    // Same /about -> /about/ behaviour Pages had for Astro's directory-style output.
+    "html_handling": "auto-trailing-slash"
+  },
+  // workers.dev must stay on: PR preview URLs are served from it.
+  "workers_dev": true,
+  "preview_urls": true,
+  "observability": {
+    "enabled": true
+  }
+}

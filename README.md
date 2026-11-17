@@ -26,3 +26,18 @@ pnpm run dev
 pnpm run typecheck
 pnpm run build
 ```
+
+## Deployment
+
+The site is a static-assets-only Cloudflare Worker (`wrangler.jsonc`), deployed
+by Workers Builds from the GitHub repo:
+
+- pushes to `main` build and deploy to production (`kassiber.app`)
+- every other branch (including PR branches) uploads a preview version, and
+  Cloudflare comments the preview URL on the PR
+
+To check the production behaviour locally (404 page, trailing slashes):
+
+```sh
+pnpm run preview
+```
